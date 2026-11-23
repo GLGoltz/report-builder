@@ -1,0 +1,34 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report Builder</title><style>{{CSS}}</style></head><body>
+<header class="bar">
+ <div class="brand"><b>Report Builder</b><small id="brand-co">Cyber Hub</small></div>
+ <div class="seg" role="tablist" aria-label="Document">
+  <button role="tab" id="tab-log" data-tab="log" aria-selected="true">Team Log</button>
+  <button role="tab" id="tab-var" data-tab="var" aria-selected="false">VAR</button>
+  <button role="tab" id="tab-ssp" data-tab="ssp" aria-selected="false">SSP</button>
+ </div>
+ <label class="who"><span>Who's typing</span><select id="who"></select></label>
+ <div class="acts">
+  <button id="b-export" class="primary">Export PDF</button>
+  <div class="menu"><button id="b-file" aria-haspopup="true" aria-expanded="false">Team file</button>
+   <div class="menu-list" id="filemenu" hidden>
+    <button id="b-save">Save team file</button>
+    <button id="b-open">Open team file</button>
+    <button id="b-merge">Add from a teammate's file</button>
+    <hr>
+    <button id="b-history">History</button>
+    <button id="b-setup">Set up automatic backup</button>
+    <button id="b-help">How saving works</button>
+   </div></div>
+ </div>
+</header>
+<div class="savebar" id="savebar"><span id="saved" role="status"></span><span id="backup"></span></div>
+<main class="main">
+ <nav class="rail" id="rail" aria-label="Sections"></nav>
+ <section class="work" id="work"></section>
+ <aside class="panel" id="panel" aria-label="Editor" hidden></aside>
+</main>
+<div id="print" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" hidden></div>
+<div class="modal" id="modal" hidden><div class="card" role="dialog" aria-modal="true" aria-labelledby="m-title"><h2 id="m-title"></h2><div id="m-body"></div><div class="m-acts" id="m-acts"></div></div></div>
+<script>{{JS}}</script></body></html>

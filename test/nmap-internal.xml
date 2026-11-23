@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmaprun scanner="nmap" args="nmap -sV -oX internal.xml 10.3.40.0/24" version="7.95">
+<host><status state="up"/><address addr="10.3.40.10" addrtype="ipv4"/><hostnames><hostname name="web" type="PTR"/></hostnames>
+<ports><port protocol="tcp" portid="22"><state state="open"/><service name="ssh" product="OpenSSH" version="9.6p1"/></port>
+<port protocol="tcp" portid="80"><state state="open"/><service name="http" product="Apache httpd" version="2.4.58"/></port>
+<port protocol="tcp" portid="443"><state state="closed"/></port></ports></host>
+<host><status state="up"/><address addr="10.3.40.11" addrtype="ipv4"/>
+<ports><port protocol="tcp" portid="21"><state state="open"/><service name="ftp" product="vsftpd" version="3.0.5"/></port>
+<port protocol="tcp" portid="22"><state state="open"/><service name="ssh" product="OpenSSH"/></port></ports></host>
+<host><status state="down"/><address addr="10.3.40.12" addrtype="ipv4"/></host>
+</nmaprun>
