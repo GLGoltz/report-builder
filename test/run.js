@@ -20,6 +20,10 @@ const fs = require('fs');
   await p.click('[data-tab=var]'); await p.click('[data-tab=log]');
   const opts = await p.$$eval('#who option', o => o.map(x => x.textContent)); if (!opts.includes('Jay Lee')) errs.push('who list missing roster'); else t('who list');
   await p.selectOption('#who', 'Jay Lee');
+  // rack sheet fills from the rack number
+  await p.fill('input[placeholder="1 to 8"]', '4'); await p.click('.step:has-text("Rack sheet")');
+  const rs = await p.evaluate(() => [...document.querySelectorAll('table.edit tbody tr')].map(r => r.lastElementChild.previousElementSibling.textContent));
+  if (rs[1] !== '10.4.200.2' || rs[16] !== '10.4.20.100 to .199' || rs[0] !== '4') errs.push('rack sheet ' + rs.slice(0,2)); else t('rack sheet autofill');
   // hub 05
   await p.click('text=05 Switch Ports and DHCP');
   await p.click('text=+ Add session');

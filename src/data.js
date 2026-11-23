@@ -3,9 +3,11 @@
 // LABS is generated from the course pages by tools/labs.py and injected by build.mjs.
 const LABS = /*LABS*/[];
 
+// The rack sheet fills itself in from the rack number on the cover (Gabriel's call: no busy work).
+// These patterns are the same ones Reference: Rack Schema and VLAN Plan shows students.
 const RACK_ROWS = [
   ["rack", "Rack number", "R"], ["wan", "Firewall WAN (wan1)", "10.R.200.2"], ["gw", "Provider gateway", "10.R.200.1"],
-  ["dns", "Lab DNS and time server", "203.0.113.10"], ["fwint", "Firewall internal", "10.R.100.1"],
+  ["dns", "Lab DNS, time and repository", "203.0.113.10"], ["fwint", "Firewall internal", "10.R.100.1"],
   ["fwdmz", "Firewall DMZ", "10.R.40.1"], ["fwguest", "Firewall guest Wi-Fi", "10.R.50.1"],
   ["svi", "Switch Transit SVI", "10.R.100.254"], ["mgmtgw", "Management gateway", "10.R.10.254"],
   ["datagw", "Data gateway", "10.R.20.254"], ["storgw", "Storage gateway", "10.R.30.254"],

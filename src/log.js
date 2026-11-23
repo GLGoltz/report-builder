@@ -12,9 +12,11 @@ function coverStatus() {
   if (doc.meta.company && c.rack && c.roster.some((r) => r.name)) return doc.log.agreement.agreed.trim() ? "done" : "part";
   return doc.meta.company ? "part" : "";
 }
+const rackNum = () => { const r = String(doc.log.cover.rack || "").trim(); return /^[1-8]$/.test(r) ? r : ""; };
+const rackValue = (pat) => rackNum() ? pat.replace(/\bR\b/g, rackNum()) : "";
 function rackStatus() {
-  const n = RACK_ROWS.filter(([k]) => (doc.log.rack.values[k] || "").trim()).length;
-  return n === RACK_ROWS.length ? "done" : n ? "part" : "";
+  if (!rackNum()) return "";
+  return doc.log.rack.checkedTeammate.trim() ? "done" : "part";
 }
 
 function railLog() {
@@ -46,7 +48,7 @@ function logCover() {
       h("div", { class: "grid2" },
         field("Company name", doc.meta, "company", { req: true, oninput: () => ($("brand-co").textContent = doc.meta.company || "Cyber Hub") }),
         field("Tagline", doc.meta, "tagline", { placeholder: "One line that says what your company does" }),
-        field("Rack number", c, "rack", { req: true, placeholder: "1 to 8" }),
+        field("Rack number", c, "rack", { req: true, placeholder: "1 to 8", hint: "Your rack sheet fills in from this.", oninput: () => renderRail() }),
         field("Semester", c, "semester", { placeholder: "Spring 2027" }),
         field("Network diagram share link", c, "diagramLink", { wide: true, hint: "In the Network Diagram app, choose Copy share link and paste it here. Replace it whenever you update the diagram." }),
         field("How we communicate", c, "chat", { wide: true, placeholder: "Two methods, for example a group chat and email" })),
@@ -72,11 +74,13 @@ function logoWell() {
 
 function logRack() {
   const r = doc.log.rack;
-  const rows = RACK_ROWS.map(([k, label, pat]) => ({ k, label, pat, get value() { return r.values[k] || ""; }, set value(v) { r.values[k] = v; } }));
+  const rows = RACK_ROWS.map(([k, label, pat]) => ({ label, pat, value: rackValue(pat) }));
   return [
     h("h2", {}, "Rack sheet"),
-    h("p", { class: "sub" }, "Replace every R with your rack number, using Reference: Rack Schema and VLAN Plan. From now on, work from this sheet instead of working addresses out mid-lab."),
-    rowsTable(rows, [["label", "Device or network", { fixed: true, w: "36%" }], ["pat", "Pattern", { fixed: true, cls: "pattern", w: "24%" }], ["value", "Your rack", { cls: "mono" }]], { fixedRows: true }),
+    h("p", { class: "sub" }, "Every address for your rack, from the rack number on the cover. Work from this sheet instead of working addresses out mid-lab. A teammate checks it against Reference: Rack Schema and VLAN Plan."),
+    rackNum() ? null : h("p", { class: "note warn" }, "Type your rack number (1 to 8) on the cover, and this sheet fills in.",
+      " ", h("a", { href: "#", onclick: (e) => { e.preventDefault(); state.log = "cover"; renderAll(); } }, "Go to the cover")),
+    rowsTable(rows, [["label", "Device or network", { fixed: true, w: "36%" }], ["pat", "Pattern", { fixed: true, cls: "pattern", w: "24%" }], ["value", "Your rack", { fixed: true, cls: "mono" }]], { fixedRows: true }),
     h("div", { class: "card grid2" }, field("Checked by (teammate)", r, "checkedTeammate"), field("Checked by (instructor)", r, "checkedInstructor")),
   ];
 }

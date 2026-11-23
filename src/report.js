@@ -21,7 +21,7 @@ function logCoverHTML() {
     + `<h1 class="s">Team</h1>${tbl(["Team member", "Email"], c.roster.filter((x) => x.name || x.email).map((x) => [x.name, x.email]))}`
     + (c.diagramLink ? `<p><b>Network diagram:</b> <span style="word-break:break-all">${esc(c.diagramLink)}</span></p>` : "")
     + `<h2 class="s">Team agreement</h2>${form([["How we make decisions", a.decisions], ["If someone misses a lab", a.missed], ["How fast we reply between labs", a.reply], ["Agreed by", a.agreed]])}`
-    + `<h1 class="s" style="break-before:page">Rack sheet</h1>${tbl(["Device or network", "Pattern", "Your rack"], RACK_ROWS.map(([k, l, p]) => [l, mono(p), mono(r.values[k])]))}`
+    + `<h1 class="s" style="break-before:page">Rack sheet</h1>${tbl(["Device or network", "Pattern", "Your rack"], RACK_ROWS.map(([k, l, p]) => [l, mono(p), mono(rackValue(p))]))}`
     + form([["Checked by (teammate)", r.checkedTeammate], ["Checked by (instructor)", r.checkedInstructor]]);
 }
 function hubHTML(l) {

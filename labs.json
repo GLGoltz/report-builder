@@ -33,12 +33,12 @@
     "instr": "Your completed rack sheet, in the same Cyber Hub 00 export.",
     "checks": [
      [
-      "Complete",
-      "Every row filled in"
+      "Rack",
+      "The rack number you were assigned"
      ],
      [
-      "Correct",
-      "No placeholder letters left, and the instructor has checked it"
+      "Checked",
+      "Signed off by a teammate and the instructor"
      ]
     ]
    },
