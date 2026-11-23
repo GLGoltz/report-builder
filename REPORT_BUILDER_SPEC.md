@@ -154,9 +154,9 @@ Same family as the diagram app: navy `#003366`, slate neutrals, system fonts, wh
 colors: Critical `#7f1d1d`, High `#b91c1c`, Medium `#b45309`, Low `#1d4ed8`. Light theme only, like the diagram app.
 Works at phone width, though students will mostly use laptops.
 
-## 9. Course page changes (after a working build)
+## 9. Course page changes
 
-Not made until the app has been tried on a real lab day.
+Made in course release 0.11.0 (November 23, 2026):
 
 - Cyber Hub 00 Part 4: open the Report Builder instead of copying the Team Log template; fill in the cover; Set up
   backup; save the team file to the team's Drive folder.
@@ -166,6 +166,6 @@ Not made until the app has been tried on a real lab day.
 
 ## 10. Open questions
 
-- Which browser the lab laptops use (Chrome and Edge get automatic backups).
-- Whether Google Drive for desktop is installed on them.
+- Which browsers students use is unknown, so the app assumes a mix: Chrome and Edge get automatic backups, every
+  browser gets Back up now. Every student has Google Workspace and plenty of Drive space, so team files live there.
 - Whether to allow starting a finding's CVSS from Greenbone's vector, or require students to score from scratch.
