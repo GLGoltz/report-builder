@@ -200,7 +200,7 @@ async function setupBackup() {
     await kvSet("backupHandle", backupHandle).catch(() => {});
     backupState = "on"; await writeBackup(true);
     toast("Automatic backup is on. The app keeps that file up to date.");
-  } catch (e) { if (e.name !== "AbortError") toast("Backup couldn't be set up: " + e.message, true); }
+  } catch (e) { if (e.name !== "AbortError") toast(e.name === "SecurityError" ? "Backup can't be set up inside another page. Open glgoltz.github.io/report-builder on its own." : "Backup couldn't be set up: " + e.message, true); }
   renderSaveBar();
 }
 async function resumeBackup() {

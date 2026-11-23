@@ -525,7 +525,7 @@ async function setupBackup() {
     await kvSet("backupHandle", backupHandle).catch(() => {});
     backupState = "on"; await writeBackup(true);
     toast("Automatic backup is on. The app keeps that file up to date.");
-  } catch (e) { if (e.name !== "AbortError") toast("Backup couldn't be set up: " + e.message, true); }
+  } catch (e) { if (e.name !== "AbortError") toast(e.name === "SecurityError" ? "Backup can't be set up inside another page. Open glgoltz.github.io/report-builder on its own." : "Backup couldn't be set up: " + e.message, true); }
   renderSaveBar();
 }
 async function resumeBackup() {
@@ -1535,7 +1535,9 @@ $("b-merge").addEventListener("click", async () => {
 });
 $("b-history").addEventListener("click", showHistory);
 $("b-setup").addEventListener("click", () => {
-  if (!canAutoBackup()) return ask("Automatic backup isn't available here", [h("p", {}, "This browser can't write a backup file by itself. Chrome and Edge can."), h("p", {}, "Use Back up now in the save bar at the end of each session, and upload the file to your team's Google Drive folder.")], [["OK", null, "primary"]]);
+  const framed = (() => { try { return window.self !== window.top; } catch { return true; } })();
+  if (framed) return ask("Open the app on its own page", [h("p", {}, "Automatic backup can't run inside another page, such as a preview. Open the Report Builder at its own address, then set it up there:"), h("p", {}, h("code", {}, "https://glgoltz.github.io/report-builder/"))], [["OK", null, "primary"]]);
+  if (!canAutoBackup()) return ask("Automatic backup isn't available here", [h("p", {}, "This browser can't write a backup file by itself. Chrome and Edge on a Windows, Mac or Chromebook laptop can; phones, tablets, Firefox, Safari and Brave can't."), h("p", {}, "Use Back up now in the save bar at the end of each session, and upload the file to your team's Google Drive folder.")], [["OK", null, "primary"]]);
   ask("Set up automatic backup", [h("p", {}, "Pick where the backup file goes. The app rewrites that one file every few minutes while you work, and when you leave the page."),
     h("p", {}, "If this laptop has Google Drive for desktop, pick your team's Drive folder and the backup reaches Drive by itself. Otherwise pick Documents, and upload the file to Drive at the end of the session.")],
     [["Cancel"], ["Choose the file", setupBackup, "primary"]]);
