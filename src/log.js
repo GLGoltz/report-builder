@@ -124,7 +124,7 @@ function logHub(l) {
         h("p", {}, x.instr),
         x.checks.length ? h("ul", { class: "checks" }, x.checks.map(([k, v]) => h("li", {}, h("b", {}, k + ": "), v))) : null,
         sep ? (sep[0] === "link" ? field("Link", dv, "link", { placeholder: "https://" }) : h("p", { class: "note" + (sep[0] === "none" ? " warn" : "") }, sep[1]))
-            : [imageWell(dv.images, { prompt: x.kind === "Photo" ? "Add the photo" : "Add the screenshot", label: x.title }), field("Caption (optional)", dv, "note", { placeholder: "What it shows" })])));
+            : [imageWell(dv.images, { prompt: x.kind === "Photo" ? "Add the photo" : "Add the screenshot", label: x.title })])));
   }
   out.push(h("div", { class: "tools" }, h("button", { class: "primary", onclick: () => exportDoc("log-hub", l.num) }, `Export Cyber Hub ${l.num} as PDF`)));
   return out;

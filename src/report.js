@@ -38,7 +38,7 @@ function hubHTML(l) {
     const sep = SEPARATE[`${l.num}-${x.n}`], dv = d.deliv[x.n] || { images: [], note: "", link: "" };
     s += `<h3 class="s">Deliverable ${x.n}: ${esc(x.title)}</h3>`;
     if (sep) s += sep[0] === "link" ? `<p>${T(dv.link)}</p>` : `<p class="blank">${esc(sep[1])}</p>`;
-    else s += dv.images.length ? dv.images.map((id, i) => img(id, `Cyber Hub ${l.num}, deliverable ${x.n}${dv.images.length > 1 ? ` (${i + 1})` : ""}${dv.note ? ": " + dv.note : ""}`)).join("") : `<p class="blank">No ${x.kind.toLowerCase()} added yet.</p>`;
+    else s += dv.images.length ? dv.images.map((id, i) => img(id, `Cyber Hub ${l.num}, deliverable ${x.n}${dv.images.length > 1 ? ` (${i + 1})` : ""}`)).join("") : `<p class="blank">No ${x.kind.toLowerCase()} added yet.</p>`;
   }
   return s;
 }
