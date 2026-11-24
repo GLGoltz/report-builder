@@ -78,6 +78,17 @@ const fs = require('fs');
   // summary + screenshot of findings view
   await p.click('.step:has-text("Findings")'); await p.locator('.flist .frow').first().click();
   await p.screenshot({ path: 'var.png' });
+  // VAR to SSP: the findings file makes the full trip into the client's POA&M
+  await p.evaluate(() => { doc.var.findings[0].fix = 'Set anonymous_enable=NO'; commit(); state.tab = 'var'; state.var = 'review'; renderAll(); });
+  const [dl] = await Promise.all([p.waitForEvent('download'), p.click('button:has-text("Send findings to the client")')]);
+  const fpath = 'findings.cyberhub-findings'; await dl.saveAs(fpath);
+  await p.click('[data-tab=ssp]'); await p.click('.step:has-text("POA&M")');
+  [fc] = await Promise.all([p.waitForEvent('filechooser'), p.click('text=Import the VAR findings')]);
+  await fc.setFiles(fpath); await p.waitForTimeout(200);
+  const pm = await p.evaluate(() => doc.ssp.poam.map(r => [r.source, r.rec, r.fix, r.response].join('|')));
+  if (pm.length !== 1 || pm[0] !== 'VAR F-01|Set anonymous_enable=NO||') errs.push('poam import ' + pm); else t('findings file into POA&M, plan left blank');
+  const shown = await p.isVisible('td.ref-col >> text=Set anonymous_enable=NO'); if (!shown) errs.push('recommendation not shown'); else t('recommendation shown for reference');
+  require('fs').unlinkSync(fpath);
   // SSP inventory from diagram
   await p.click('[data-tab=ssp]'); await p.click('.step:has-text("Inventory")');
   await p.click('text=Start from my diagram'); await p.click('text=Copy from my diagram');

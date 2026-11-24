@@ -23,7 +23,7 @@ function sspStatus(k) {
     case "ports": return s.ports.length && s.ports.every((r) => r.why) ? "done" : s.ports.length ? "part" : "";
     case "controls": { const n = CONTROLS.filter(([id]) => (s.controls[id]?.how || "").trim()).length; return n === CONTROLS.length ? "done" : n ? "part" : ""; }
     case "risks": return s.risks.length >= 3 && s.risks.every((r) => r.by && r.date) ? "done" : s.risks.some((r) => r.by) ? "part" : "";
-    case "poam": return s.poam.length && s.poam.every((r) => r.fix && r.status) ? "done" : s.poam.length ? "part" : "";
+    case "poam": return s.poam.length && s.poam.every((r) => r.response && (r.fix || "").trim() && r.status) ? "done" : s.poam.length ? "part" : "";
     case "history": return s.history.every((r) => r.date && r.result) ? "done" : s.history.some((r) => r.date) ? "part" : "";
     case "approval": return s.approval.owner && s.approval.signature && s.approval.date ? "done" : "";
     default: return "";
@@ -111,10 +111,11 @@ function sspRisks() {
 function sspPoam() {
   const s = S();
   const cols = [["pid", "ID", { w: "60px" }], ["weakness", "Weakness", { area: true }], ["source", "Source"], ["severity", "Severity", { options: ["", "Critical", "High", "Medium", "Low"] }],
-    ["fix", "Planned fix", { area: true }], ["owner", "Owner"], ["date", "Target date", { type: "date" }], ["status", "Status", { options: ["Open", "Closed"] }], ["verified", "How the fix was verified", { area: true }]];
-  return [h("h2", {}, "Plan of Action and Milestones (POA&M)"), h("p", { class: "sub" }, "One row for every finding in the VAR you received and every weakness on your answer key. Closed rows say how the fix was verified."),
+    ["rec", "Assessors' recommendation", { fixed: true, cls: "ref-col" }], ["response", "Response", { options: RESPONSES, label: "Response" }],
+    ["fix", "Your plan", { area: true, placeholder: "What you'll do, or why you accept it" }], ["owner", "Owner"], ["date", "Target date", { type: "date" }], ["status", "Status", { options: ["Open", "Closed"] }], ["verified", "How the fix was verified", { area: true }]];
+  return [h("h2", {}, "Plan of Action and Milestones (POA&M)"), h("p", { class: "sub" }, "One row for every finding in the VAR you received and every weakness on your answer key. For each, choose a response and write your own plan: the assessors' recommendation is there for reference, not to copy. Rows you accept also go in Accepted risks. Closed rows say how the fix was verified."),
     h("div", { class: "tools" }, h("button", { class: "primary", onclick: importFindings }, "Import the VAR findings"), h("span", { class: "hintline" }, "Uses the findings file the assessing team sent you.")),
-    rowsTable(s.poam, cols, { addLabel: "Add row", blank: () => ({ pid: "P-" + String(s.poam.length + 1).padStart(2, "0"), weakness: "", source: "", severity: "", fix: "", owner: "", date: "", status: "Open", verified: "" }) })];
+    rowsTable(s.poam, cols, { addLabel: "Add row", blank: () => ({ pid: "P-" + String(s.poam.length + 1).padStart(2, "0"), weakness: "", source: "", severity: "", rec: "", response: "", fix: "", owner: "", date: "", status: "Open", verified: "" }) })];
 }
 async function importFindings() {
   const f = await pickFile(".cyberhub-findings,application/json"); if (!f) return;
@@ -126,10 +127,10 @@ async function importFindings() {
     if (fd.status === "False positive") continue;
     const src = `VAR ${fd.id}`;
     if (s.poam.some((r) => r.source === src)) continue;
-    s.poam.push({ pid: "P-" + String(s.poam.length + 1).padStart(2, "0"), weakness: `${fd.title} (${(fd.hosts || []).join(", ")})`, source: src, severity: fd.severity || "", fix: fd.fix || "", owner: "", date: "", status: "Open", verified: "" });
+    s.poam.push({ pid: "P-" + String(s.poam.length + 1).padStart(2, "0"), weakness: `${fd.title} (${(fd.hosts || []).join(", ")})`, source: src, severity: fd.severity || "", rec: fd.fix || "", response: "", fix: "", owner: "", date: "", status: "Open", verified: "" });
     n++;
   }
-  commit(); renderAll(); toast(n ? `Added ${n} row${n === 1 ? "" : "s"} from ${x.from || "the assessors"}'s VAR. Plan your own fix for each.` : "Those findings are already in your POA&M.");
+  commit(); renderAll(); toast(n ? `Added ${n} row${n === 1 ? "" : "s"} from ${x.from || "the assessors"}'s VAR. Choose a response and write your plan for each.` : "Those findings are already in your POA&M.");
 }
 function sspHistory() {
   return [h("h2", {}, "Assessment history"), h("p", { class: "sub" }, "Every scan and assessment of your system, with its result."),

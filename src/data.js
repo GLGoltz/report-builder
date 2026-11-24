@@ -60,3 +60,5 @@ const CVSS_METRICS = [
 const VALIDATION = [["confirmed", "Confirmed"], ["not-verified", "Not verified"], ["false-positive", "False positive"]];
 const VIEWS = [["internal", "Internal"], ["external", "External"], ["both", "Both"]];
 const EFFORT = ["Low", "Medium", "High"];
+// How the system owner responds to each POA&M weakness (NIST risk responses, as the SSP uses them).
+const RESPONSES = ["", "Remediate", "Mitigate", "Accept risk"];

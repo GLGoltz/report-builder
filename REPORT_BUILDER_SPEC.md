@@ -72,7 +72,10 @@ The team file is one JSON file, extension `.cyberhub`, holding the whole workspa
 - **Who's typing** (a name picked from the roster, remembered per browser) is recorded on Team Log entries and in the
   file as `savedBy`.
 - **Send findings to the client** (VAR) downloads a small `.cyberhub-findings` file with the findings and fix order
-  only. The client team imports it into its SSP's POA&M in Cyber Hub 13.
+  only. The assessors share it and the PDF through Google Drive with only the client team's members, never "anyone
+  with the link", because a vulnerability report is confidential. The client imports it into its SSP's POA&M in
+  Cyber Hub 13. There is deliberately no link-based handoff: real assessors deliver reports through controlled
+  channels, and a link in a chat teaches the opposite.
 
 ## 6. Documents
 
@@ -146,8 +149,10 @@ table and a short "Ruled out" list, not as full findings.
    risk).
 7. **Accepted risks:** risk, why it remains, what limits it, accepted by, date. Starts with the shared class
    password row.
-8. **POA&M:** ID, weakness, source, severity, planned fix, owner, target date, status, how the fix was verified.
-   **Import the VAR findings** reads the assessors' `.cyberhub-findings` file and adds one row per finding.
+8. **POA&M:** ID, weakness, source, severity, the assessors' recommendation (read-only), response (Remediate,
+   Mitigate or Accept risk), the team's own plan, owner, target date, status, how the fix was verified.
+   **Import the VAR findings** reads the assessors' `.cyberhub-findings` file and adds one row per finding with the
+   plan left blank: the learning is the client deciding its response, not copying the assessors' fix.
 9. **Assessment history:** the three template rows.
 10. **Approval:** system owner, date, and a typed signature.
 

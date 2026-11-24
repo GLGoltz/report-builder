@@ -757,8 +757,12 @@
     "title": "Vulnerability Assessment Report",
     "role": "Target team",
     "kind": "Document",
-    "instr": "Export the VAR as a PDF from the Report Builder and submit it before Cyber Hub 13. Give the target team the PDF and your findings file (Send findings to the client), which they import into their POA&M.",
+    "instr": "Export the VAR as a PDF from the Report Builder and submit it before Cyber Hub 13. Then choose Send findings to the client. In Google Drive, share the PDF and the findings file with each member of the target team by name, with general access set to Restricted. They import the findings file into their POA&M.",
     "checks": [
+     [
+      "Delivered",
+      "Shared with the target team's members only"
+     ],
      [
       "Scope",
       "Hosts and subnets assessed, the external and internal views, and the rules of engagement"

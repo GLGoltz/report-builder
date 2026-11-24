@@ -85,7 +85,7 @@ function sspHTML() {
   o += `<h1 class="s" style="break-before:page">6. Security controls</h1>`;
   for (const [id, name, req] of CONTROLS) { const c = s.controls[id] || {}; o += `<h2 class="s">${id} ${esc(name)}</h2>${form([["Requirement", req], ["How we meet it", c.how], ["Status", c.status]])}`; }
   o += `<h1 class="s">7. Accepted risks</h1>${tbl(["Risk", "Why it remains", "What limits it", "Accepted by", "Date"], s.risks.map((r) => [r.risk, r.why, r.limits, r.by, r.date]))}`;
-  o += `<h1 class="s">8. Plan of Action and Milestones (POA&amp;M)</h1>${tbl(["ID", "Weakness", "Source", "Severity", "Planned fix", "Owner", "Target date", "Status", "Verified by"], s.poam.map((r) => [r.pid, r.weakness, r.source, r.severity, r.fix, r.owner, r.date, r.status, r.verified]))}`;
+  o += `<h1 class="s">8. Plan of Action and Milestones (POA&amp;M)</h1>${tbl(["ID", "Weakness", "Source", "Severity", "Response", "Plan", "Owner", "Target date", "Status", "Verified by"], s.poam.map((r) => [r.pid, r.weakness, r.source, r.severity, r.response, r.fix, r.owner, r.date, r.status, r.verified]))}`;
   o += `<h1 class="s">9. Assessment history</h1>${tbl(["Date", "Activity", "Performed by", "Result"], s.history.map((r) => [r.date, r.activity, r.by, r.result]))}`;
   o += `<h1 class="s">10. Approval</h1><p>By signing, the system owner confirms this plan describes the system as built and accepts the risks in Section 7.</p>${form([["System owner", s.approval.owner], ["Signature", s.approval.signature ? `<span class="sig">${esc(s.approval.signature)}</span>` : T(""), true], ["Date", s.approval.date]])}`;
   return o;
