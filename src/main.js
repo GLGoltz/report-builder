@@ -115,7 +115,7 @@ function welcomeBody() {
       h("li", {}, h("b", {}, "Diagram: "), "the network you've built, updated whenever a page says so, with the addressing plan for your rack beside it. Every Cyber Hub export includes it."),
       h("li", {}, h("b", {}, "VAR: "), "the vulnerability assessment you write about another team's rack in Cyber Hub 12."),
       h("li", {}, h("b", {}, "SSP: "), "your own system security plan, in Cyber Hub 13."))),
-    callout("caution", "Saving: read this", h("ul", {},
+    callout("caution", "Saving your work", h("ul", {},
       h("li", {}, "Your work saves as you type, but only in this browser on this laptop."),
       h("li", {}, h("b", {}, "Back up at the end of every session: "), "Save and export, then Save team file. Put the file in your team's Google Drive folder. That file is your real copy."),
       h("li", {}, "At the start of a session on a different laptop, open the newest team file with Open team file."),
