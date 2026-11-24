@@ -33,6 +33,7 @@ const fs = require('fs');
   // roster
   const rosterInputs = p.locator('table.edit').first().locator('input');
   await rosterInputs.nth(0).fill('Ana Ramos'); await rosterInputs.nth(2).fill('Jay Lee');
+  await p.waitForTimeout(700); if (!(await p.isVisible('input.signin[placeholder="Jay Lee"]'))) errs.push('signature line should appear as the name is typed'); else t('signature lines follow the roster');
   await p.click('[data-tab=var]'); await p.click('[data-tab=log]');
   // signatures: typing the roster name signs and dates it
   const sig = p.locator('input.signin[placeholder="Jay Lee"]'); await sig.fill('jay lee');
@@ -98,6 +99,10 @@ const fs = require('fs');
   await p.click('text=05 Switch Ports and DHCP');
   await p.click('text=+ Add session');
   await p.click('text=+ Open a ticket'); await p.locator('.pcard textarea').first().fill('Ping to the gateway failed');
+  await p.click('.pcard >> text=+ Add entry'); await p.locator('.wl-entry textarea').first().fill('Wrong VLAN on XG10'); await p.selectOption('.wl-entry select', 'Ruled out');
+  await p.click('.pcard >> text=+ Add entry'); await p.locator('.wl-entry').nth(1).locator('textarea').first().fill('DHCP pool exhausted');
+  const wl = await p.evaluate(() => hubData('05').problems[0].log.map((e) => e.hypothesis + ':' + e.outcome).join('|'));
+  if (wl !== 'Wrong VLAN on XG10:Ruled out|DHCP pool exhausted:Untested') errs.push('work log ' + wl); else t('ticket work log keeps ruled-out hypotheses');
   const pc = await p.evaluate(() => [hubData('05').problems.length, Array.isArray(hubData('05').problems[0].images), Array.isArray(hubData('05').shots)]);
   if (pc.join() !== '1,true,true') errs.push('problem card ' + pc); else t('problem card with screenshots');
   if (!(await p.isVisible('text=Connectivity checkpoint'))) errs.push('checkpoint missing'); else t('checkpoint table');

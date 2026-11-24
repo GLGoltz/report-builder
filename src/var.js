@@ -15,13 +15,13 @@ function sortedFindings() { return [...V().findings].sort((a, b) => (a.status ==
 
 const VAR_STEPS = [
   ["cover", "Cover", "Companies, dates, team"],
-  ["scope", "Scope and rules", "What you may test"],
-  ["method", "Method", "Tools, in order"],
-  ["hosts", "Hosts found", "From your Nmap scans"],
-  ["triage", "Triage", "Greenbone results to sort"],
-  ["findings", "Findings", "One card per issue"],
-  ["recs", "Fix priority", "Order for the client"],
-  ["summary", "Summary", "For the client's leaders"],
+  ["scope", "Scope and rules", "Targets and limits"],
+  ["method", "Method", "Tools and settings"],
+  ["hosts", "Hosts found", "Nmap results"],
+  ["triage", "Triage", "Scanner results"],
+  ["findings", "Findings", "Weaknesses"],
+  ["recs", "Fix priority", "Remediation order"],
+  ["summary", "Summary", "Executive audience"],
   ["review", "Review and export", "Check and submit"],
 ];
 function varStatus(k) {
@@ -64,7 +64,7 @@ function varCover() {
       h("div", { class: "field" }, h("label", {}, "Logo"), doc.meta.logo ? h("img", { src: doc.meta.logo, alt: "", style: "max-height:40px" }) : h("span", { class: "hintline" }, "Upload it on the Team Log cover.")),
       field("Client company", c, "client", { req: true }), field("Client's rack", c, "clientRack", { placeholder: "1 to 8", hint: "The scope's addresses fill in from this.", oninput: () => { fillScope(); commit(); } }),
       field("Assessment dates", c, "dates", { placeholder: "Nov 16 to Nov 20, 2026" }), field("Report version", c, "version", { hint: "1.0 for the copy you give the client." }),
-      field("Assessment team", c, "team", { wide: true, area: true, req: true, placeholder: "Names and roles, for example: Jordan Lee, lead assessor" }),
+      field("Assessment team", c, "team", { wide: true, area: true, req: true, placeholder: "Name, role" }),
       field("Client contact", c, "contact", { wide: true, placeholder: "Name", hint: "The client team member who agreed to the rules of engagement." }))];
 }
 // The standard scope fills in from the client's rack: the same three targets every assessment covers.
@@ -86,11 +86,11 @@ function varScope() {
   return [h("h2", {}, "Scope and rules of engagement"), h("p", { class: "sub" }, "Exactly what you were allowed to test. The three standard targets fill in from the client's rack on the cover. Check them against the rules of engagement you agreed, and add anything else you agreed to test."),
     h("h3", {}, "In scope"),
     rowsTable(v.scope, [["target", "Target"], ["range", "Address or range", { cls: "mono", placeholder: "10.R.20.0/24" }], ["notes", "Notes"]], { addLabel: "Add target" }),
-    h("h3", {}, "Out of scope"), field("", v, "outScope", { area: true, placeholder: "What you agreed not to touch, such as the Management, Storage and Transit VLANs, other racks and campus networks" }),
+    h("h3", {}, "Out of scope"), field("", v, "outScope", { area: true, placeholder: "Excluded networks and systems" }),
     h("h3", {}, "Rules of engagement"), h("div", { class: "card grid2" },
-      field("Agreed on", v.roe, "agreedOn", { type: "date" }), field("Agreed by", v.roe, "agreedBy", { placeholder: "One name from each team" }),
+      field("Agreed on", v.roe, "agreedOn", { type: "date" }), field("Agreed by", v.roe, "agreedBy", { placeholder: "One name per team" }),
       field("Assessment window", v.roe, "window", { placeholder: "Start and end times" }),
-      field("Restrictions", v.roe, "restrictions", { wide: true, area: true, placeholder: "For example: no changes to the target, no password guessing, no denial of service" }))];
+      field("Restrictions", v.roe, "restrictions", { wide: true, area: true, placeholder: "Prohibited activities" }))];
 }
 function varMethod() {
   return [h("h2", {}, "Method"), h("p", { class: "sub" }, "What you did, in order, so another assessor could repeat it. Give the exact options you used."),
@@ -102,8 +102,8 @@ function varHosts() {
   const v = V();
   return [h("h2", {}, "Hosts found"), h("p", { class: "sub" }, "Every live host from your internal and external views. Save each Nmap scan as XML by adding -oX to the command, for example nmap -sV -oX internal.xml 10.3.20.0/24, then import it here."),
     h("div", { class: "tools" }, h("button", { class: "primary", onclick: importNmap }, "Import Nmap results")),
-    rowsTable(v.hosts, [["ip", "Address", { cls: "mono", w: "130px" }], ["role", "Role (your best judgment)"], ["ports", "Open ports", { cls: "mono" }],
-      ["view", "Seen from", { options: ["Internal", "External", "Both"], w: "110px" }], ["notes", "Notes", { area: true }]], { addLabel: "Add host", blank: () => ({ ip: "", role: "", ports: "", view: "Internal", notes: "" }) }),
+    rowsTable(v.hosts, [["ip", "Address", { cls: "mono", w: "130px" }], ["role", "Role"], ["ports", "Open ports", { cls: "mono" }],
+      ["view", "View", { options: ["Internal", "External", "Both"], w: "110px" }], ["notes", "Notes", { area: true }]], { addLabel: "Add host", blank: () => ({ ip: "", role: "", ports: "", view: "Internal", notes: "" }) }),
     h("h3", {}, "Comparing the two views"),
     field("", v, "compare", { area: true, rows: 4, placeholder: "Which services can anyone on the internet reach through the WAN address, and which only an insider on the Data VLAN? Which group should the client fix first, and why?" })];
 }
@@ -179,7 +179,7 @@ function triagePanel(t) {
         h("div", { class: "tools" }, h("select", { id: "joinsel" }, fs.map((f) => h("option", { value: f.id }, fid(f) + " " + (f.title || "Untitled")))),
           h("button", { onclick: () => joinFinding(t, $("joinsel").value) }, "Add"))) : null,
       h("div", { class: "field" }, h("label", { for: "dismiss" }, "Or dismiss it"),
-        h("div", { class: "tools" }, h("input", { id: "dismiss", placeholder: "Why it doesn't belong in the report" }),
+        h("div", { class: "tools" }, h("input", { id: "dismiss", placeholder: "Reason" }),
           h("button", { onclick: () => { const r = $("dismiss").value.trim(); if (!r) return toast("Give a reason, so the team knows why it was dropped.", true); t.state = "dismissed"; t.reason = r; commit(); nextTriage(); } }, "Dismiss")))]
       : [h("p", { class: "note" }, t.state === "dismissed" ? "Dismissed: " + t.reason : "Part of a finding."), h("button", { onclick: () => { t.state = "new"; if (t.finding) { const f = fs.find((x) => x.id === t.finding); if (f) f.sources = (f.sources || []).filter((s) => s !== t.id); } t.finding = null; commit(); renderAll(); } }, "Undo the decision")]];
 }
@@ -266,13 +266,13 @@ function findingPanel(f) {
   return [h("h2", {}, `Finding ${fid(f)}`, h("span", {},
       h("button", { class: "small ghost", onclick: () => ask("Delete this finding?", [h("p", {}, f.title || "Untitled finding")], [["Cancel"], ["Delete", async () => { await snapshot("Before deleting a finding"); V().findings = V().findings.filter((x) => x !== f); V().recs.forEach((r) => (r.findings = r.findings.filter((x) => x !== f.id))); V().triage.forEach((t) => { if (t.finding === f.id) { t.finding = null; t.state = "new"; } }); state.sel = null; commit(); renderAll(); }, "danger"]]) }, "Delete"),
       h("button", { class: "small ghost", onclick: () => { state.sel = null; renderAll(); } }, "Close"))),
-    field("Title", f, "title", { id: "f-title", req: true, placeholder: "What's wrong, in a few words", hint: "Name the weakness, not the scanner's alert: \"Anonymous FTP login allowed\".", oninput: refreshList }),
+    field("Title", f, "title", { id: "f-title", req: true, placeholder: "Short title", hint: "Name the weakness, not the scanner's alert: \"Anonymous FTP login allowed\".", oninput: refreshList }),
     h("div", { class: "field" }, h("label", {}, "Affected hosts"), hostIps.length ? h("div", { class: "chips" }, hostIps.map((ip) => {
       const host = V().hosts.find((x) => x.ip === ip);
       return h("button", { class: "chip", "aria-pressed": String(f.hosts.includes(ip)), onclick: () => { f.hosts = f.hosts.includes(ip) ? f.hosts.filter((x) => x !== ip) : [...f.hosts, ip]; commit(); renderAll(); } }, host?.role ? host.role + " " : "", h("code", {}, ip));
     })) : h("p", { class: "hintline" }, "Add hosts in Hosts found first.")),
     h("div", { class: "grid2" }, field("Port and protocol", f, "port", { placeholder: "TCP 21" }),
-      h("div", { class: "field" }, h("label", {}, "Seen from"), seg(VIEWS, f.view, (x) => { f.view = x; commit(); renderAll(); }))),
+      h("div", { class: "field" }, h("label", {}, "View"), seg(VIEWS, f.view, (x) => { f.view = x; commit(); renderAll(); }))),
     h("div", { class: "field" }, h("label", {}, "Severity (CVSS 3.1 base score)"), h("div", { class: "cvss" },
       h("div", { class: "cvss-head" }, sevBadge(s), h("code", {}, vector(f.v))),
       CVSS_METRICS.map(metric),
@@ -281,12 +281,12 @@ function findingPanel(f) {
         " Score it for this client's network: can it be reached from outside, and what's really at risk?") : null)),
     h("div", { class: "field" }, h("label", {}, "Validation"), seg(VALIDATION, f.status, (x) => { f.status = x; commit(); renderAll(); }),
       f.status === "confirmed" && !f.confirm.trim() ? h("p", { class: "hintline", style: "color:var(--err)" }, "Say how you confirmed it below, or it can't count as confirmed.") : h("p", { class: "hintline" }, "Check the three most serious findings by hand, without changing anything on the target.")),
-    field("What it is", f, "what", { area: true, req: true, placeholder: "Plain language, for someone who wasn't in the room" }),
-    field("Why it matters", f, "why", { area: true, placeholder: "What an attacker could do, for this client" }),
+    field("Description", f, "what", { area: true, req: true, placeholder: "Plain-language description" }),
+    field("Impact", f, "why", { area: true, placeholder: "Attacker capability against this client" }),
     field("Evidence", f, "evidence", { area: true, req: true, hint: "The scanner result, command or output, so the client can see it for themselves." }),
     h("div", { class: "field" }, h("label", {}, "Screenshots"), imageWell(f.images, { label: "Evidence screenshots" })),
-    field("How we confirmed it", f, "confirm", { area: true, placeholder: "The read-only check you ran, or why you couldn't", oninput: refreshList }),
-    field("Recommended fix", f, "fix", { area: true, req: true, placeholder: "Specific enough for this client to act on" })];
+    field("Validation", f, "confirm", { area: true, placeholder: "Check performed, or why none was possible", oninput: refreshList }),
+    field("Remediation", f, "fix", { area: true, req: true, placeholder: "Specific steps for this client" })];
 }
 function refreshList() { const l = document.querySelector(".work .flist"); if (!l || state.tab !== "var" || state.var !== "findings") return; const w = $("work"); const y = w.scrollTop; w.replaceChildren(...varFindings().flat()); w.scrollTop = y; renderRail(); }
 
@@ -304,7 +304,7 @@ function varRecs() {
           h("button", { class: "small ghost", onclick: () => { v.recs.splice(i, 1); commit(); renderAll(); } }, "Remove"))),
       h("div", { class: "field" }, h("label", {}, "Findings it fixes"), h("div", { class: "chips" }, fs.map((f) => h("button", { class: "chip", "aria-pressed": String(r.findings.includes(f.id)),
         onclick: () => { r.findings = r.findings.includes(f.id) ? r.findings.filter((x) => x !== f.id) : [...r.findings, f.id]; commit(); renderAll(); } }, fid(f), " ", h("span", { style: "font-weight:400" }, (f.title || "").slice(0, 40)))))),
-      h("div", { class: "grid2" }, field("Recommended action", r, "action", { area: true, wide: false }), field("Effort", r, "effort", { options: EFFORT })))))
+      h("div", { class: "grid2" }, field("Remediation", r, "action", { area: true, wide: false }), field("Effort", r, "effort", { options: EFFORT })))))
       : h("p", { class: "empty" }, "No recommendations yet.")];
 }
 
@@ -312,7 +312,7 @@ function varSummary() {
   const v = V(), n = tally(), top = v.recs.slice(0, 3);
   return [h("h2", {}, "Executive summary"), h("p", { class: "sub" }, "Three to five sentences for the client's leaders: what you assessed, the overall risk, and what to fix first. Leave out tool names and port numbers."),
     h("div", { class: "tally" }, [["crit", "Critical"], ["high", "High"], ["med", "Medium"], ["low", "Low"]].map(([c, t]) => h("span", {}, h("i", { style: `background:var(--${c})` }), `${n[c]} ${t}`))),
-    field("", v, "summary", { area: true, rows: 6, req: true }),
+    field("", v, "summary", { area: true, rows: 6, req: true, aria: "Executive summary" }),
     h("h3", {}, "Top three priorities"), top.length ? h("ol", {}, top.map((r) => h("li", {}, r.action || h("span", { class: "hintline" }, "No action written yet")))) : h("p", { class: "hintline" }, "These come from Fix priority.")];
 }
 

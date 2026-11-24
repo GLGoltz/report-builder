@@ -18,3 +18,5 @@ Live at https://glgoltz.github.io/report-builder/
   placeholders, overlapping text), `test/audit-diagram.js` (labels inside their boxes, no covered ×),
   `test/audit-print.js <folder>` (PDF exports) and `test/audit-pages.js <files>` (course pages and guides). Run them
   after layout changes.
+- **Accessibility:** `test/audit-a11y.js` (every Report Builder view and the diagram) and `test/audit-a11y-pages.js <files>`
+  run axe-core's WCAG 2.1 AA rules. Install axe-core anywhere and pass its path: `AXE=.../axe.min.js node test/audit-a11y.js`.

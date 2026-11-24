@@ -389,7 +389,9 @@ const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<
 function field(label, obj, key, o = {}) {
   const id = o.id || newId("f");
   const tag = o.area ? "textarea" : o.options ? "select" : "input";
+  // A field without a visible label still needs a name for screen readers.
   const inp = h(tag, { id, placeholder: o.placeholder || "", rows: o.area ? (o.rows || 3) : null, type: o.type || null,
+    "aria-label": label ? null : (o.aria || o.placeholder || null),
     oninput: (e) => { obj[key] = e.target.value; commit(); o.oninput && o.oninput(e); },
     onchange: o.options ? (e) => { obj[key] = e.target.value; commit(); o.onchange && o.onchange(e); } : null });
   if (o.options) for (const op of o.options) { const [v, t] = Array.isArray(op) ? op : [op, op]; inp.append(h("option", { value: v }, t)); }
@@ -421,7 +423,8 @@ function rowsTable(rows, cols, o = {}) {
   };
   draw();
   const add = o.fixedRows ? null : h("button", { class: "small", onclick: () => { rows.push(o.blank ? o.blank() : Object.fromEntries(cols.map(([k]) => [k, ""]))); commit(); draw(); const last = body.lastElementChild?.querySelector("input,textarea,select"); last && last.focus(); o.onchange && o.onchange(); } }, "+ " + (o.addLabel || "Add row"));
-  return h("div", { class: "tablewrap" }, h("div", { class: "tbox" }, h("table", { class: "edit" },
+  // A table that can scroll sideways is a keyboard stop of its own when it's labeled (wide tables like the POA&M).
+  return h("div", { class: "tablewrap" }, h("div", { class: "tbox", ...(o.label ? { tabindex: "0", role: "region", "aria-label": o.label } : {}) }, h("table", { class: "edit" },
     h("thead", {}, h("tr", {}, cols.map(([, l, co = {}]) => h("th", { style: co.w ? `width:${co.w}` : null }, l)), h("th", { class: "rowacts" }))), body)), add);
 }
 function cellInput(r, k, co) {
@@ -430,7 +433,7 @@ function cellInput(r, k, co) {
     s.value = r[k] || co.options[0]; if (!r[k]) r[k] = s.value; return s;
   }
   const t = h(co.area ? "textarea" : "input", { "aria-label": co.label || k, placeholder: co.placeholder || "", type: co.type || null, rows: co.area ? 1 : null,
-    oninput: (e) => { r[k] = e.target.value; commit(); } });
+    oninput: (e) => { r[k] = e.target.value; commit(); co.oninput && co.oninput(e); } });
   t.value = r[k] ?? ""; if (co.area) autosize(t); return t;
 }
 

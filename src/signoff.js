@@ -7,7 +7,7 @@
 // half of the derived bits never leaves the instructor's browser: it keys an HMAC of the record, shown as the
 // sign-off code. A student can't make a valid code, and an instructor can check any code with Check a sign-off.
 // If the record changes after signing, the app says so. To change the password: node tools/signoff-hash.mjs.
-const SIGNOFF = { salt: "583fbb2b27993641dd08101c21351f15", iter: 600000, check: "08845da5db17d7f9d1e1ba3937f3f59f55367f04119756acc7eead904a3563fb" };
+const SIGNOFF = { salt: "4a0f3c38c2e47c05bca82d13991b02a0", iter: 600000, check: "dc83abbb7a6782d980462b7e8f126f4a0d790228ebb822dc928f202eb44e160a" };
 
 const hex = (buf) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 const normPw = (s) => String(s).normalize("NFKC").toLowerCase().replace(/[\s\-_.]+/g, "");
@@ -60,13 +60,13 @@ function restoreSection() {
     onchange: (e) => { row[key] = e.target.checked; commit(); refresh(); } }));
   const txt = (row, key, ph, label) => { const t = h("textarea", { rows: 1, placeholder: ph, "aria-label": label, oninput: (e) => { row[key] = e.target.value; commit(); } }); t.value = row[key]; autosize(t); return t; };
   const resetTable = h("div", { class: "tablewrap" }, h("div", { class: "tbox" }, h("table", { class: "edit restore" },
-    h("thead", {}, h("tr", {}, h("th", { style: "width:17%" }, "Device"), h("th", { style: "width:24%" }, "Reset"), h("th", { style: "width:8%" }, "Done"), h("th", {}, "How you checked"), h("th", { style: "width:16%" }, "Who"))),
+    h("thead", {}, h("tr", {}, h("th", { style: "width:17%" }, "Device"), h("th", { style: "width:24%" }, "Reset method"), h("th", { style: "width:8%" }, "Complete"), h("th", {}, "Proof"), h("th", { style: "width:16%" }, "Performed by"))),
     h("tbody", {}, r.resets.map((x) => h("tr", {}, h("td", {}, h("span", { class: "fixed" }, x.device)), h("td", {}, h("span", { class: "fixed" }, x.how)), h("td", { class: "ctr" }, tick(x, "done")),
-      h("td", {}, txt(x, "checked", "What you saw that proves it", x.device + ": how you checked")), h("td", {}, txt(x, "who", "Name", x.device + ": who did it"))))))));
+      h("td", {}, txt(x, "checked", "Proof", x.device + ": proof")), h("td", {}, txt(x, "who", "Name", x.device + ": performed by"))))))));
   const drawerTable = h("div", { class: "tablewrap" }, h("div", { class: "tbox" }, h("table", { class: "edit restore" },
-    h("thead", {}, h("tr", {}, h("th", { style: "width:41%" }, "Item"), h("th", { style: "width:12%" }, "In the drawer"), h("th", {}, "Notes"))),
+    h("thead", {}, h("tr", {}, h("th", { style: "width:41%" }, "Item"), h("th", { style: "width:12%" }, "Present"), h("th", {}, "Notes"))),
     h("tbody", {}, r.drawer.map((x) => h("tr", {}, h("td", {}, h("span", { class: "fixed" }, x.item)), h("td", { class: "ctr" }, tick(x, "present")),
-      h("td", {}, txt(x, "note", "Anything missing or damaged", x.item + ": notes"))))))));
+      h("td", {}, txt(x, "note", "Missing or damaged", x.item + ": notes"))))))));
 
   function drawSign() {
     const done = restoreComplete(r);
@@ -96,16 +96,16 @@ function restoreSection() {
     };
     pw.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
     signBox.replaceChildren(
-      done ? h("p", {}, "Every row is ticked. Ask the instructor to check the rack and the drawer, then sign here.")
-           : h("p", { class: "note" }, "Tick every reset and every drawer item first. The instructor checks the rack and the drawer before signing."),
+      done ? h("p", {}, "Record complete. The instructor checks the rack and the drawer, then signs here.")
+           : h("p", { class: "note" }, "Complete every row first. The instructor checks the rack and the drawer before signing."),
       h("div", { class: "grid2" }, h("div", { class: "field" }, h("label", { for: "so-name" }, "Instructor"), name), h("div", { class: "field" }, h("label", { for: "so-pw" }, "Password"), pw)),
       h("div", { class: "tools" }, h("button", { class: "primary", disabled: done ? null : "", onclick: go }, "Sign off")), msg);
   }
   drawSign();
   return [h("h3", {}, "Reset record"),
-    h("p", { class: "sub" }, "One row per device. Tick it once the reset is done and you've checked it worked, and say what you saw."), resetTable,
+    h("p", { class: "sub" }, "Tick each device once it is reset and verified, and record the proof."), resetTable,
     h("h3", {}, "Utility drawer"),
-    h("p", { class: "sub" }, "Tick each item as it goes back in the drawer. Note anything missing or damaged, so it can be replaced before the next class."), drawerTable,
+    h("p", { class: "sub" }, "Tick each item as it goes back in the drawer. Note anything missing or damaged."), drawerTable,
     h("h3", {}, "Instructor sign-off"), signBox];
 }
 function checkDialog(r) {

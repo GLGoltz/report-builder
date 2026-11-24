@@ -57,7 +57,7 @@ const full = () => {
       for (const t of svg.querySelectorAll('text')) {
         if (!t.textContent.trim()) continue;
         let g = t.parentElement, shape = null;
-        while (g && g !== svg) { shape = [...g.children].find((c) => c.tagName === 'rect'); if (shape) break; g = g.parentElement; }
+        while (g && g !== svg) { shape = g.querySelector(':scope > rect.d-box, :scope > .hvfocus > rect.d-box') || [...g.children].find((c) => c.tagName === 'rect'); if (shape) break; g = g.parentElement; }
         if (!shape || t.closest('.legend')) continue;
         if (!inside(box(t), box(shape))) bad.push(`text "${t.textContent}" spills out of its ${shape.getAttribute('class') || 'box'}`);
       }

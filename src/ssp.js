@@ -3,14 +3,14 @@ const S = () => doc.ssp;
 const SSP_STEPS = [
   ["ident", "System identification", "Name, purpose, users"],
   ["desc", "System description", "Parts and traffic flow"],
-  ["diagram", "Network diagram", "Exported from the app"],
+  ["diagram", "Network diagram", "From the Diagram tab"],
   ["inventory", "Inventory", "Hardware and software"],
-  ["ports", "Ports and services", "What listens, and why"],
+  ["ports", "Ports and services", "Listening services"],
   ["controls", "Security controls", "Twelve NIST controls"],
-  ["risks", "Accepted risks", "What remains, and why"],
-  ["poam", "POA&M", "Every weakness and its fix"],
+  ["risks", "Accepted risks", "Risk acceptance"],
+  ["poam", "POA&M", "Remediation plan"],
   ["history", "Assessment history", "Scans and assessments"],
-  ["approval", "Approval", "System owner signs"],
+  ["approval", "Approval", "Owner signature"],
   ["review", "Review and export", "Check and submit"],
 ];
 function sspStatus(k) {
@@ -41,14 +41,14 @@ function sspIdent() {
   return [h("h2", {}, "System identification"), h("p", { class: "sub" }, "Describe only what is actually configured on your rack. An auditor should be able to check every sentence of this plan."),
     h("div", { class: "card grid2" },
       field("System name", i, "name", { req: true }), field("Location", i, "location", { req: true }),
-      field("Purpose", i, "purpose", { wide: true, area: true, req: true, placeholder: "What the network does for the company, in one or two sentences" }),
+      field("Purpose", i, "purpose", { wide: true, area: true, req: true, placeholder: "Business function, one or two sentences" }),
       field("Operational status", i, "status", { options: ["Operational", "Under development", "Under major change"] }),
-      field("Users", i, "users", { wide: true, area: true, req: true, placeholder: "Staff on the Data VLAN, guests, public visitors to the website" }),
-      field("Internet connection", i, "internet", { wide: true, area: true, req: true, placeholder: "The uplink to your provider, the instructor rack, and that the lab has no connection to the real internet" }))];
+      field("Users", i, "users", { wide: true, area: true, req: true, placeholder: "Staff, guests, public" }),
+      field("Internet connection", i, "internet", { wide: true, area: true, req: true, placeholder: "Uplink, provider and isolation from the real internet" }))];
 }
 function sspDesc() {
   return [h("h2", {}, "System description"), h("p", { class: "sub" }, "Two or three paragraphs: the main parts of the network, what each is for, and how traffic moves between them. Name the VLANs and which device routes each one."),
-    field("", S(), "description", { area: true, rows: 12 })];
+    field("", S(), "description", { area: true, rows: 12, aria: "System description" })];
 }
 function sspDiagram() {
   const s = S();
@@ -85,12 +85,12 @@ function sspInventory() {
     h("h3", {}, "Addressing table"),
     h("p", { class: "sub" }, s.addressingFrom ? `From your Diagram tab, ${s.addressingFrom}. It isn't edited here: fix the diagram, then update.` : "Copied from your Diagram tab, so the plan and the diagram can't disagree."),
     h("div", { class: "tools" }, h("button", { onclick: () => { if (!rows.length) return toast("Your Diagram tab has no addresses yet. Fill it in first.", true); s.addressing = rows; s.addressingFrom = fmtTime(Date.now()); commit(); renderAll(); } }, s.addressing.length ? "Update from diagram" : "Copy from my diagram")),
-    s.addressing.length ? h("div", { class: "tbox" }, h("table", { class: "edit" }, h("thead", {}, h("tr", {}, ["Device", "Hostname", "Interface", "VLAN", "IP address", "Mask", "Gateway"].map((t) => h("th", {}, t)))),
+    s.addressing.length ? h("div", { class: "tbox", tabindex: "0", role: "region", "aria-label": "Addressing table" }, h("table", { class: "edit" }, h("thead", {}, h("tr", {}, ["Device", "Hostname", "Interface", "VLAN", "IP address", "Mask", "Gateway"].map((t) => h("th", {}, t)))),
       h("tbody", {}, s.addressing.map((r) => h("tr", {}, [r.device, r.hostname, r.iface, r.vlan, r.address, r.mask, r.gateway].map((x, i) => h("td", { class: i >= 4 ? "mono" : "" }, h("span", { class: "fixed" }, x || ""))))))) ) : null];
 }
 function sspPorts() {
   return [h("h2", {}, "Ports, protocols and services"), h("p", { class: "sub" }, "Every listening service in use. Anything without a reason belongs under CM-7 Least functionality."),
-    rowsTable(S().ports, [["host", "Host", { cls: "mono" }], ["port", "Port and protocol", { placeholder: "TCP 80" }], ["service", "Service"], ["who", "Who can reach it", { area: true }], ["why", "Why it's needed", { area: true }]], { addLabel: "Add service" })];
+    rowsTable(S().ports, [["host", "Host", { cls: "mono" }], ["port", "Port and protocol", { placeholder: "TCP 80" }], ["service", "Service"], ["who", "Exposure", { area: true }], ["why", "Business need", { area: true }]], { addLabel: "Add service" })];
 }
 function sspControls() {
   const s = S();
@@ -99,23 +99,23 @@ function sspControls() {
       if (!s.controls[id]) s.controls[id] = { how: "", status: "" };
       const c = s.controls[id];
       return h("div", { class: "ctrl" }, h("h3", {}, `${id} ${name}`), h("p", { class: "rq" }, req),
-        field("How we meet it", c, "how", { area: true, rows: 3, placeholder: guide, oninput: () => renderRail() }),
+        field("Implementation", c, "how", { area: true, rows: 3, placeholder: guide, oninput: () => renderRail() }),
         h("div", { class: "field" }, h("label", {}, "Status"), seg(CONTROL_STATUS.map((x) => [x, x]), c.status, (x) => { c.status = x; commit(); renderAll(); })));
     })];
 }
 function sspRisks() {
   return [h("h2", {}, "Accepted risks"), h("p", { class: "sub" }, "Weaknesses you're choosing to keep, with the reason and what limits the damage. Keep the example row and add at least two of your own."),
-    rowsTable(S().risks, [["risk", "Risk", { area: true }], ["why", "Why it remains", { area: true }], ["limits", "What limits it", { area: true }], ["by", "Accepted by"], ["date", "Date", { type: "date", w: "140px" }]],
+    rowsTable(S().risks, [["risk", "Risk", { area: true }], ["why", "Justification", { area: true }], ["limits", "Mitigating factors", { area: true }], ["by", "Accepted by"], ["date", "Date", { type: "date", w: "140px" }]],
       { addLabel: "Add risk", blank: () => ({ id: newId("r"), risk: "", why: "", limits: "", by: "", date: "" }) })];
 }
 function sspPoam() {
   const s = S();
   const cols = [["pid", "ID", { w: "60px" }], ["weakness", "Weakness", { area: true }], ["source", "Source"], ["severity", "Severity", { options: ["", "Critical", "High", "Medium", "Low"] }],
-    ["rec", "Assessors' recommendation", { fixed: true, cls: "ref-col" }], ["response", "Response", { options: RESPONSES, label: "Response" }],
-    ["fix", "Your plan", { area: true, placeholder: "What you'll do, or why you accept it" }], ["owner", "Owner"], ["date", "Target date", { type: "date" }], ["status", "Status", { options: ["Open", "Closed"] }], ["verified", "How the fix was verified", { area: true }]];
+    ["rec", "Assessor recommendation", { fixed: true, cls: "ref-col" }], ["response", "Response", { options: RESPONSES, label: "Response" }],
+    ["fix", "Planned action", { area: true, placeholder: "Action, or acceptance rationale" }], ["owner", "Owner"], ["date", "Target date", { type: "date" }], ["status", "Status", { options: ["Open", "Closed"] }], ["verified", "Verification", { area: true }]];
   return [h("h2", {}, "Plan of Action and Milestones (POA&M)"), h("p", { class: "sub" }, "One row for every finding in the VAR you received and every weakness on your answer key. For each, choose a response and write your own plan: the assessors' recommendation is there for reference, not to copy. Rows you accept also go in Accepted risks. Closed rows say how the fix was verified."),
     h("div", { class: "tools" }, h("button", { class: "primary", onclick: importFindings }, "Import the VAR findings"), h("span", { class: "hintline" }, "Uses the findings file the assessing team sent you.")),
-    rowsTable(s.poam, cols, { addLabel: "Add row", blank: () => ({ pid: "P-" + String(s.poam.length + 1).padStart(2, "0"), weakness: "", source: "", severity: "", rec: "", response: "", fix: "", owner: "", date: "", status: "Open", verified: "" }) })];
+    rowsTable(s.poam, cols, { label: "POA&M", addLabel: "Add row", blank: () => ({ pid: "P-" + String(s.poam.length + 1).padStart(2, "0"), weakness: "", source: "", severity: "", rec: "", response: "", fix: "", owner: "", date: "", status: "Open", verified: "" }) })];
 }
 async function importFindings() {
   const f = await pickFile(".cyberhub-findings,application/json"); if (!f) return;
@@ -134,14 +134,14 @@ async function importFindings() {
 }
 function sspHistory() {
   return [h("h2", {}, "Assessment history"), h("p", { class: "sub" }, "Every scan and assessment of your system, with its result."),
-    rowsTable(S().history, [["date", "Date", { type: "date", w: "140px" }], ["activity", "Activity", { area: true }], ["by", "Performed by"], ["result", "Result", { area: true, placeholder: "Number of findings by severity, findings closed and still open" }]],
+    rowsTable(S().history, [["date", "Date", { type: "date", w: "140px" }], ["activity", "Activity", { area: true }], ["by", "Performed by"], ["result", "Result", { area: true, placeholder: "Findings by severity; closed and open" }]],
       { addLabel: "Add activity", blank: () => ({ id: newId("a"), date: "", activity: "", by: "", result: "" }) })];
 }
 function sspApproval() {
   const a = S().approval;
   return [h("h2", {}, "Approval"), h("p", { class: "sub" }, "By signing, the system owner confirms this plan describes the system as built and accepts the risks in it."),
     h("div", { class: "card grid2" }, field("System owner", a, "owner", { placeholder: "Name and role", req: true }), field("Date", a, "date", { type: "date", req: true }),
-      field("Signature", a, "signature", { wide: true, placeholder: "The owner types their full name", req: true }))];
+      field("Signature", a, "signature", { wide: true, placeholder: "Full name", req: true }))];
 }
 function sspMissing() {
   const m = [];

@@ -290,14 +290,19 @@ function tabRect(d, name) {
   return null;
 }
 
+// Rows are spaced for a typical finished rack, not for what has been typed so far, so the drawing keeps the same
+// size while a team fills it in: no jumping boxes, and a scroll bar either always or never at a given window size.
+const ROOM = { isp: 80, firewall: 66 + 4 * 19, switch: 46 + 7 * 19 };
+const roomOf = (d) => Math.max(boxSize(d).h, ROOM[d.kind] || 0);
+const LANES = 6;   // cable lanes kept free between the switch and the hosts
 function layout() {
   const SWX = 60, put = (id, x, y) => { const d = dev(id); if (d) { d.x = x; d.y = y; } };
   const isp = dev("isp"), fw = dev("fw"), sw = dev("sw");
   put("isp", SWX - 12, 30);
-  put("fw", SWX - 12, isp.y + boxSize(isp).h + 80);
+  put("fw", SWX - 12, isp.y + roomOf(isp) + 80);
   const besides = (id, ref) => { const d = dev(id); d.x = ref.x + boxSize(ref).w + 190; d.y = ref.y + (boxSize(ref).h - boxSize(d).h) / 2; };
   besides("isplap", isp); besides("guest", fw);
-  put("sw", SWX, fw.y + boxSize(fw).h + 90);
+  put("sw", SWX, fw.y + roomOf(fw) + 90);
   HOSTS.forEach((id, i) => put(id, SWX + i * HOST_PITCH, 0));
   routeAll();
 }
@@ -404,10 +409,12 @@ function routeAll() {
     const k = over.length ? Math.max(...over.map((u) => u.lane)) + 1 : 0;
     (used[k] ||= []).push(c); c.lane = k;
   }
-  const laneY = (k) => swR.y + swR.h + STUB + 10 + k * 20;
-  const hostY = laneY(Math.max(0, used.length - 1)) + 44;
+  const laneY = (k) => swR.y + roomOf(sw) + STUB + 10 + k * 20;
+  const hostY = laneY(Math.max(LANES - 1, used.length - 1)) + 44;
   HOSTS.forEach((id) => { dev(id).y = hostY; });
-  const bottom = Math.max(...doc.devices.filter((d) => d.kind !== "vm").map((d) => d.y + boxSize(d).h));
+  // The tallest host is the hypervisor with its three VMs and three lines of settings.
+  const hvFull = 42 + 3 * 19 + 8 + vmsOf("hv").length * (VM_H + 6) + 6;
+  const bottom = Math.max(hostY + hvFull, ...doc.devices.filter((d) => d.kind !== "vm").map((d) => d.y + boxSize(d).h));
   VB.w = SWX_END(); VB.h = bottom + 40;
   // 2. Route every cable.
   const B = blocks();
@@ -481,9 +488,13 @@ function drawInto(root, ui) {
   for (const d of doc.devices) {
     if (d.kind === "vm") continue;
     const { w, h } = boxSize(d);
+    // The hypervisor holds its VMs, which are buttons of their own, so its keyboard target is its box alone:
+    // a button inside a button can't be reached properly by screen readers.
+    const nests = d.kind === "hypervisor";
+    const a11y = ui ? { tabindex: 0, role: "button", "aria-label": `${d.name}, ${KINDS[d.kind]}` } : {};
     const g = el("g", { class: "dev k-" + d.kind + (ui && sel?.type === "dev" && sel.id === d.id ? " sel" : ""), "data-dev": d.id,
-      transform: `translate(${d.x},${d.y})`, ...(ui ? { tabindex: 0, role: "button", "aria-label": `${d.name}, ${KINDS[d.kind]}` } : {}) }, gd);
-    el("rect", { width: w, height: h, rx: 10, class: "d-box" + (d.kind === "isp" ? " fixed" : "") }, g);
+      transform: `translate(${d.x},${d.y})`, ...(nests ? {} : a11y) }, gd);
+    el("rect", { width: w, height: h, rx: 10, class: "d-box" + (d.kind === "isp" ? " fixed" : "") }, nests && ui ? el("g", { class: "hvfocus", ...a11y }, g) : g);
     const lines = valueLines(d);
     if (d.kind === "switch") {
       const tx = w - SW_TEXT_W + 6;
@@ -676,7 +687,8 @@ svg.addEventListener("keydown", (e) => {
   if (!g || (e.key !== "Enter" && e.key !== " ")) return;
   const id = g.dataset.vm || g.dataset.dev;
   e.preventDefault(); select({ type: "dev", id });
-  svg.querySelector(g.dataset.vm ? `[data-vm="${id}"]` : `[data-dev="${id}"]`)?.focus();
+  const t = svg.querySelector(g.dataset.vm ? `[data-vm="${id}"]` : `[data-dev="${id}"]`);
+  (t?.hasAttribute("tabindex") ? t : t?.querySelector(".hvfocus"))?.focus();
 });
 // A port, or a device with a single network port, holds one cable. A new cable replaces the old one.
 function occupied(end, except) {
@@ -786,7 +798,7 @@ function editor(d) {
   const out = [];
   if (ENDPOINT.has(d.kind)) {
     out.push(field("Hostname", inp(d, "hostname", { ph: "hostname", label: "Hostname" })), addrRow(d), field("Gateway", inp(d, "gateway", { kind: "ip", ph: "a.b.c.d", label: "Gateway" })));
-    if (d.kind === "vm") out.push(field("VLAN tag (blank if untagged)", inp(d, "vlanTag", { kind: "num", ph: "none", label: "VLAN tag" })));
+    if (d.kind === "vm") out.push(field("VLAN tag", inp(d, "vlanTag", { kind: "num", ph: "none", label: "VLAN tag" })));
     out.push(chk(d, "dhcp", "Gets its address by DHCP"));
     if (d.kind === "hypervisor") out.push(h("p", { class: "muted" }, "Select a virtual machine inside the hypervisor to fill in its settings."));
   }

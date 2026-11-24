@@ -92,8 +92,9 @@ One log for the semester. Sections, in order:
 - **Team agreement:** how we communicate, what happens when someone misses a lab, and each member's signature (their
   roster name typed in full, dated automatically).
 - **One section per Cyber Hub, 00 to 15**, generated from `labs.json` (taken from the course pages):
-  sessions (date, who did what), commands and settings (not in 00), troubleshooting tickets (issue, probable cause,
-  tests and results, resolution, verification, status, screenshots; not in 00 or 14), other screenshots and notes,
+  sessions (date, contributions), configuration changes (not in 00), troubleshooting tickets (issue, a work log of
+  every hypothesis with its test, result and outcome, resolution, verification, status, screenshots; not in 00 or
+  14), additional evidence,
   each Before you continue question with an answer box, and each deliverable with its instruction and a place
   for its screenshots or photo. Cyber Hub 05 adds the connectivity checkpoint table; Cyber Hub 12 adds the rules of
   engagement; Cyber Hub 15 adds the restoration record (`src/signoff.js`): a reset record per device, the Utility
@@ -192,3 +193,10 @@ Made in course release 0.11.0 (November 23, 2026):
 - Which browsers students use is unknown, so the app assumes a mix: Chrome and Edge get automatic backups, every
   browser gets Back up now. Every student has Google Workspace and plenty of Drive space, so team files live there.
 - Whether to allow starting a finding's CVSS from Greenbone's vector, or require students to score from scratch.
+
+## Language
+
+Labels are short professional nouns, the way a ticketing system, assessment report or audit form names a field:
+Proof, Contributions, Validation, Impact, Remediation, Mitigating factors, Justification. Not descriptions written
+as half-sentences ("What you saw that proves it", "Who did what"). Placeholders give the format, not instructions.
+Explanations go in the line under a heading, kept to one sentence where possible.

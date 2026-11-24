@@ -22,7 +22,7 @@ const SEPARATE = {
   "11-2": ["none", "Don't put the answer key in this app or anywhere the other team might see it. Submit it privately to the instructor."],
   "12-5": ["var", "The VAR is its own document, in the VAR tab. Submit it separately and give the client a copy."],
   "13-2": ["ssp", "The SSP is its own document, in the SSP tab. Submit it separately."],
-  "14-1": ["link", "Paste the link to your slides."],
+  "14-1": ["link", "Slides link."],
   "15-3": ["restore", "Your restoration record is above, in this section, with the instructor's sign-off. It exports with Cyber Hub 15."],
 };
 

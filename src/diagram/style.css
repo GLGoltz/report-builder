@@ -219,3 +219,4 @@ table.topo .differs{background:#fef3c7;border:1px solid #d97706;border-radius:4p
 .tableview .plannote.warn{border-left-color:#d97706;background:#fffbeb;color:#7c2d12}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 table.topo td{position:relative}
+.hvfocus{outline:none}.hvfocus:focus-visible .d-box{stroke:var(--sel);stroke-width:2.5}
