@@ -262,9 +262,14 @@ button.big{padding:8px 14px;font-weight:600}
 .pcard-h{display:flex;justify-content:space-between;align-items:center;background:var(--navy);color:#fff;padding:6px 12px}
 .pcard-h .ghost{color:#fff}
 .pcard-h .ghost:hover{background:rgba(255,255,255,.15)}
-.pcard > .grid2,.pcard > label,.pcard > .well{margin-left:12px;margin-right:12px}
+.pcard > .grid2,.pcard-f{margin-left:12px;margin-right:12px}
 .pcard > .grid2{margin-top:10px}
-.pcard > .well{margin-bottom:12px}
+.pcard-f{margin-bottom:12px}
+.pcard-f .well{margin-bottom:10px}
+.pcard-h b{margin-right:auto}
+.tstat{font-size:11px;font-weight:700;background:#fff;color:var(--warn);border-radius:4px;padding:1px 7px;margin-right:8px}
+.pcard.resolved .tstat{color:var(--ok)}
+.pcard.resolved .pcard-h{background:#1f5f3a}
 /* backup reminder: the style guide's caution callout */
 #backup{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
 .bkwarn{display:inline-flex;align-items:center;gap:10px;border-left:4px solid #ea580c;background:#fff7ed;color:#c2410c;padding:4px 10px;border-radius:0 6px 6px 0;font-weight:600}

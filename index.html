@@ -263,9 +263,14 @@ button.big{padding:8px 14px;font-weight:600}
 .pcard-h{display:flex;justify-content:space-between;align-items:center;background:var(--navy);color:#fff;padding:6px 12px}
 .pcard-h .ghost{color:#fff}
 .pcard-h .ghost:hover{background:rgba(255,255,255,.15)}
-.pcard > .grid2,.pcard > label,.pcard > .well{margin-left:12px;margin-right:12px}
+.pcard > .grid2,.pcard-f{margin-left:12px;margin-right:12px}
 .pcard > .grid2{margin-top:10px}
-.pcard > .well{margin-bottom:12px}
+.pcard-f{margin-bottom:12px}
+.pcard-f .well{margin-bottom:10px}
+.pcard-h b{margin-right:auto}
+.tstat{font-size:11px;font-weight:700;background:#fff;color:var(--warn);border-radius:4px;padding:1px 7px;margin-right:8px}
+.pcard.resolved .tstat{color:var(--ok)}
+.pcard.resolved .pcard-h{background:#1f5f3a}
 /* backup reminder: the style guide's caution callout */
 #backup{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
 .bkwarn{display:inline-flex;align-items:center;gap:10px;border-left:4px solid #ea580c;background:#fff7ed;color:#c2410c;padding:4px 10px;border-radius:0 6px 6px 0;font-weight:600}
@@ -902,7 +907,7 @@ function logHub(l) {
       field("Scope", r, "scope", { wide: true, placeholder: "Subnets and addresses agreed" }),
       field("Session", r, "session", { placeholder: "Date and times" }), field("Agreed by", r, "agreed", { placeholder: "One name from each team" })));
   }
-  out.push(h("h3", {}, "Problems and fixes"), h("p", { class: "sub" }, "Your own troubleshooting record. When something like it breaks again, this is where you'll look first."), problemList(d.problems));
+  out.push(h("h3", {}, "Troubleshooting tickets"), h("p", { class: "sub" }, "One ticket per problem, following the method on Reference: Troubleshooting. It's your team's record: when something like it breaks again, this is where you'll look first."), problemList(d.problems, l.num));
   if (!d.shots) d.shots = [];
   out.push(h("h3", {}, "Other screenshots and notes"), h("p", { class: "sub" }, "Anything worth keeping that isn't a deliverable: a settings page, an error, a before-and-after."),
     imageWell(d.shots, { prompt: "Add a screenshot", label: "Other screenshots" }), field("", d, "notes", { area: true, placeholder: "Notes for your team" }));
@@ -927,17 +932,26 @@ function logHub(l) {
   return out;
 }
 
-// Problems are cards, so each can carry its own screenshots.
-function problemList(list) {
+// Troubleshooting tickets: the course's method (Reference: Troubleshooting) in a help-desk ticket's shape.
+// Older entries used broke/checked/fixed; those keys still hold the issue, tests and resolution.
+const TICKET_STATUS = [["open", "Open"], ["resolved", "Resolved"]];
+function ticketId(num, i) { return `T-${num}-${String(i + 1).padStart(2, "0")}`; }
+function problemList(list, num) {
   const box = h("div", { class: "plist" });
   const draw = () => box.replaceChildren(
-    ...list.map((p, i) => { if (!p.images) p.images = [];
-      return h("div", { class: "pcard" },
-        h("div", { class: "pcard-h" }, h("b", {}, `Problem ${i + 1}`), h("button", { class: "small ghost", onclick: () => ask("Remove this problem?", [h("p", {}, p.broke || "Untitled problem")], [["Cancel"], ["Remove", () => { list.splice(i, 1); commit(); draw(); }, "danger"]]) }, "Remove")),
-        h("div", { class: "grid2" }, field("What broke", p, "broke", { area: true, wide: true, placeholder: "What you saw, and when" }),
-          field("What you checked", p, "checked", { area: true }), field("What fixed it", p, "fixed", { area: true })),
-        h("label", {}, "Screenshots"), imageWell(p.images, { prompt: "Add a screenshot", label: "Problem screenshots" })); }),
-    h("button", { class: "small", onclick: () => { list.push({ broke: "", checked: "", fixed: "", images: [] }); commit(); draw(); box.querySelectorAll("textarea")[box.querySelectorAll("textarea").length - 3]?.focus(); } }, "+ Add problem"));
+    ...list.map((p, i) => { if (!p.images) p.images = []; if (!p.status) p.status = "open";
+      return h("div", { class: "pcard" + (p.status === "resolved" ? " resolved" : "") },
+        h("div", { class: "pcard-h" }, h("b", {}, `Ticket ${ticketId(num, i)}`), h("span", { class: "tstat" }, p.status === "resolved" ? "Resolved" : "Open"),
+          h("button", { class: "small ghost", onclick: () => ask("Delete this ticket?", [h("p", {}, p.broke || "Untitled ticket")], [["Cancel"], ["Delete", () => { list.splice(i, 1); commit(); draw(); }, "danger"]]) }, "Delete")),
+        h("div", { class: "grid2" },
+          field("Issue", p, "broke", { area: true, wide: true, placeholder: "The exact symptom: what fails, where, and since when" }),
+          field("Probable cause", p, "theory", { area: true, placeholder: "Your best theory, and why" }),
+          field("Tests and results", p, "checked", { area: true, placeholder: "Each test you ran, bottom layer first, and what it showed" }),
+          field("Resolution", p, "fixed", { area: true, placeholder: "The one change that fixed it" }),
+          field("Verification", p, "verify", { area: true, placeholder: "The test that proved it's fixed" })),
+        h("div", { class: "pcard-f" }, h("label", {}, "Screenshots"), imageWell(p.images, { prompt: "Add a screenshot", label: "Ticket screenshots" }),
+          h("div", { class: "field" }, h("label", {}, "Status"), seg(TICKET_STATUS, p.status, (x) => { p.status = x; commit(); draw(); renderRail(); })))); }),
+    h("button", { class: "small", onclick: () => { list.push({ broke: "", theory: "", checked: "", fixed: "", verify: "", status: "open", images: [] }); commit(); draw(); box.querySelectorAll(".pcard")[list.length - 1]?.querySelector("textarea")?.focus(); } }, "+ Open a ticket"));
   draw(); return box;
 }
 
@@ -1472,7 +1486,7 @@ function hubHTML(l) {
   s += `<h2 class="s">Commands and settings</h2><p>${T(d.commands)}</p>`;
   if (d.extra.checkpoint) s += `<h2 class="s">Connectivity checkpoint</h2>${tbl(["From your laptop, try", "Expected", "Result"], d.extra.checkpoint.map((x) => [x.test, x.expected, x.result]))}`;
   if (d.extra.roe) { const r = d.extra.roe; s += `<h2 class="s">Rules of engagement</h2>${form([["Target team", r.target], ["Assessing team", r.assessing], ["Scope", r.scope], ["Session", r.session], ["Agreed by", r.agreed]])}`; }
-  s += `<h2 class="s">Problems and fixes</h2>` + (d.problems.length ? d.problems.map((x, i) => `<div class="card"><div class="ch"><b>Problem ${i + 1}</b></div>${form([["What broke", x.broke], ["What you checked", x.checked], ["What fixed it", x.fixed]])}${(x.images || []).map((id) => img(id, "")).join("")}</div>`).join("") : `<p class="blank">None recorded.</p>`);
+  s += `<h2 class="s">Troubleshooting tickets</h2>` + (d.problems.length ? d.problems.map((x, i) => `<div class="card"><div class="ch"><b>Ticket ${ticketId(l.num, i)}</b><span class="tag">${x.status === "resolved" ? "Resolved" : "Open"}</span></div>${form([["Issue", x.broke], ["Probable cause", x.theory], ["Tests and results", x.checked], ["Resolution", x.fixed], ["Verification", x.verify]])}${(x.images || []).map((id) => img(id, "")).join("")}</div>`).join("") : `<p class="blank">No tickets.</p>`);
   if ((d.shots || []).length || (d.notes || "").trim()) s += `<h2 class="s">Other screenshots and notes</h2>${(d.notes || "").trim() ? `<p>${esc(d.notes)}</p>` : ""}${(d.shots || []).map((id) => img(id, "")).join("")}`;
   if (l.questions.length) s += `<h2 class="s">Before you continue</h2>` + l.questions.map((q, i) => `<p><b>${esc(q)}</b></p><p>${T(d.answers[i])}</p>`).join("");
   if (l.deliverables.length) s += `<h2 class="s">Deliverables</h2>`;

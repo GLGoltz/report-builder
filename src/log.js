@@ -120,7 +120,7 @@ function logHub(l) {
       field("Scope", r, "scope", { wide: true, placeholder: "Subnets and addresses agreed" }),
       field("Session", r, "session", { placeholder: "Date and times" }), field("Agreed by", r, "agreed", { placeholder: "One name from each team" })));
   }
-  out.push(h("h3", {}, "Problems and fixes"), h("p", { class: "sub" }, "Your own troubleshooting record. When something like it breaks again, this is where you'll look first."), problemList(d.problems));
+  out.push(h("h3", {}, "Troubleshooting tickets"), h("p", { class: "sub" }, "One ticket per problem, following the method on Reference: Troubleshooting. It's your team's record: when something like it breaks again, this is where you'll look first."), problemList(d.problems, l.num));
   if (!d.shots) d.shots = [];
   out.push(h("h3", {}, "Other screenshots and notes"), h("p", { class: "sub" }, "Anything worth keeping that isn't a deliverable: a settings page, an error, a before-and-after."),
     imageWell(d.shots, { prompt: "Add a screenshot", label: "Other screenshots" }), field("", d, "notes", { area: true, placeholder: "Notes for your team" }));
@@ -145,16 +145,25 @@ function logHub(l) {
   return out;
 }
 
-// Problems are cards, so each can carry its own screenshots.
-function problemList(list) {
+// Troubleshooting tickets: the course's method (Reference: Troubleshooting) in a help-desk ticket's shape.
+// Older entries used broke/checked/fixed; those keys still hold the issue, tests and resolution.
+const TICKET_STATUS = [["open", "Open"], ["resolved", "Resolved"]];
+function ticketId(num, i) { return `T-${num}-${String(i + 1).padStart(2, "0")}`; }
+function problemList(list, num) {
   const box = h("div", { class: "plist" });
   const draw = () => box.replaceChildren(
-    ...list.map((p, i) => { if (!p.images) p.images = [];
-      return h("div", { class: "pcard" },
-        h("div", { class: "pcard-h" }, h("b", {}, `Problem ${i + 1}`), h("button", { class: "small ghost", onclick: () => ask("Remove this problem?", [h("p", {}, p.broke || "Untitled problem")], [["Cancel"], ["Remove", () => { list.splice(i, 1); commit(); draw(); }, "danger"]]) }, "Remove")),
-        h("div", { class: "grid2" }, field("What broke", p, "broke", { area: true, wide: true, placeholder: "What you saw, and when" }),
-          field("What you checked", p, "checked", { area: true }), field("What fixed it", p, "fixed", { area: true })),
-        h("label", {}, "Screenshots"), imageWell(p.images, { prompt: "Add a screenshot", label: "Problem screenshots" })); }),
-    h("button", { class: "small", onclick: () => { list.push({ broke: "", checked: "", fixed: "", images: [] }); commit(); draw(); box.querySelectorAll("textarea")[box.querySelectorAll("textarea").length - 3]?.focus(); } }, "+ Add problem"));
+    ...list.map((p, i) => { if (!p.images) p.images = []; if (!p.status) p.status = "open";
+      return h("div", { class: "pcard" + (p.status === "resolved" ? " resolved" : "") },
+        h("div", { class: "pcard-h" }, h("b", {}, `Ticket ${ticketId(num, i)}`), h("span", { class: "tstat" }, p.status === "resolved" ? "Resolved" : "Open"),
+          h("button", { class: "small ghost", onclick: () => ask("Delete this ticket?", [h("p", {}, p.broke || "Untitled ticket")], [["Cancel"], ["Delete", () => { list.splice(i, 1); commit(); draw(); }, "danger"]]) }, "Delete")),
+        h("div", { class: "grid2" },
+          field("Issue", p, "broke", { area: true, wide: true, placeholder: "The exact symptom: what fails, where, and since when" }),
+          field("Probable cause", p, "theory", { area: true, placeholder: "Your best theory, and why" }),
+          field("Tests and results", p, "checked", { area: true, placeholder: "Each test you ran, bottom layer first, and what it showed" }),
+          field("Resolution", p, "fixed", { area: true, placeholder: "The one change that fixed it" }),
+          field("Verification", p, "verify", { area: true, placeholder: "The test that proved it's fixed" })),
+        h("div", { class: "pcard-f" }, h("label", {}, "Screenshots"), imageWell(p.images, { prompt: "Add a screenshot", label: "Ticket screenshots" }),
+          h("div", { class: "field" }, h("label", {}, "Status"), seg(TICKET_STATUS, p.status, (x) => { p.status = x; commit(); draw(); renderRail(); })))); }),
+    h("button", { class: "small", onclick: () => { list.push({ broke: "", theory: "", checked: "", fixed: "", verify: "", status: "open", images: [] }); commit(); draw(); box.querySelectorAll(".pcard")[list.length - 1]?.querySelector("textarea")?.focus(); } }, "+ Open a ticket"));
   draw(); return box;
 }

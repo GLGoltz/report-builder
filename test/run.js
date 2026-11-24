@@ -43,7 +43,7 @@ const fs = require('fs');
   // hub 05
   await p.click('text=05 Switch Ports and DHCP');
   await p.click('text=+ Add session');
-  await p.click('text=+ Add problem'); await p.locator('.pcard textarea').first().fill('Ping to the gateway failed');
+  await p.click('text=+ Open a ticket'); await p.locator('.pcard textarea').first().fill('Ping to the gateway failed');
   const pc = await p.evaluate(() => [hubData('05').problems.length, Array.isArray(hubData('05').problems[0].images), Array.isArray(hubData('05').shots)]);
   if (pc.join() !== '1,true,true') errs.push('problem card ' + pc); else t('problem card with screenshots');
   if (!(await p.isVisible('text=Connectivity checkpoint'))) errs.push('checkpoint missing'); else t('checkpoint table');
