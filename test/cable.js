@@ -3,7 +3,7 @@ const { chromium } = require('playwright');
 (async () => { const b = await chromium.launch(); let bad = 0;
  for (const rm of ['no-preference', 'reduce']) {
   const p = await b.newPage({ viewport: { width: 1500, height: 1000 }, reducedMotion: rm });
-  await p.goto('http://localhost:8765/index.html#diagram'); await p.waitForTimeout(1200);
+  await p.goto('http://localhost:8765/index.html#diagram'); await p.waitForTimeout(1200); await p.click('#m-acts >> text=I understand');
   const f = p.frames().find(x => x.url().includes('diagram.html'));
   const port = await f.locator('[data-port="wan1"]').first().boundingBox();
   const dst = await f.locator('[data-dev="isp"]').first().boundingBox();

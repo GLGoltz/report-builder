@@ -99,12 +99,33 @@ $("b-setup").addEventListener("click", () => {
     h("p", {}, "If this laptop has Google Drive for desktop, pick your team's Drive folder and the backup reaches Drive by itself. Otherwise pick Documents, and upload the file to Drive at the end of the session.")],
     [["Cancel"], ["Choose the file", setupBackup, "primary"]]);
 });
-$("b-help").addEventListener("click", () => ask("How saving works", [
-  h("p", {}, h("b", {}, "In this browser: "), "everything saves as you type, on this laptop only."),
-  h("p", {}, h("b", {}, "History: "), "a copy every few minutes, kept for two weeks. Use it to undo a big mistake."),
-  h("p", {}, h("b", {}, "The team file: "), "Save team file downloads everything, screenshots included, as one file. Keep it in your team's Google Drive folder. Whoever types next time opens it with Open team file."),
-  h("p", {}, h("b", {}, "Working in parallel: "), "each person can draft on their own laptop. The scribe then uses Add from a teammate's file to bring in their findings, sessions and screenshots."),
-  h("p", {}, h("b", {}, "Automatic backup: "), "in Chrome or Edge, Set up automatic backup keeps a file up to date for you.")], [["OK", null, "primary"]]));
+// ---- welcome: shown once per browser (and again when WELCOME_V changes), and from the menu
+const WELCOME_KEY = "cyberhub-reports-welcome", WELCOME_V = "1";
+function welcomeBody() {
+  const sec = (t, ...kids) => h("div", { class: "wsec" }, h("h3", {}, t), ...kids);
+  return [
+    h("p", { class: "wlead" }, "This is where your team keeps its whole project: the Team Log, your network diagram, and the two reports you write for a client. You fill in the forms; the app lays out every PDF you submit."),
+    sec("Why it works this way", h("p", {}, "Security teams don't format reports by hand. Assessors fill in finding cards in a reporting platform, compliance teams answer control by control, and the tool produces the document. You'll work the same way.")),
+    sec("What's in each tab", h("ul", {},
+      h("li", {}, h("b", {}, "Team Log: "), "your cover, signed team agreement, rack sheet, and a section for every Cyber Hub: sessions, commands, troubleshooting tickets, answers and deliverables. It's your team's record as much as something you hand in."),
+      h("li", {}, h("b", {}, "Diagram: "), "the network you've built, updated whenever a page says so. Every Cyber Hub export includes it."),
+      h("li", {}, h("b", {}, "VAR: "), "the vulnerability assessment you write about another team's rack in Cyber Hub 12."),
+      h("li", {}, h("b", {}, "SSP: "), "your own system security plan, in Cyber Hub 13."))),
+    sec("Saving: read this", h("ul", {},
+      h("li", {}, "Your work saves as you type, but only in this browser on this laptop."),
+      h("li", {}, h("b", {}, "Back up at the end of every session: "), "Save and export, then Save team file. Put the file in your team's Google Drive folder. That file is your real copy."),
+      h("li", {}, "At the start of a session on a different laptop, open the newest team file with Open team file."),
+      h("li", {}, "In Chrome or Edge, Set up automatic backup keeps a file up to date for you. A red warning at the top means you haven't backed up."),
+      h("li", {}, "One person types each session. Teammates can draft on their own laptops and the typist adds their work with Add from a teammate's file."))),
+    sec("Handle it like real client work", h("p", {}, "Your VAR describes how to break into another team's network. Share it only with that team's members, never with \"anyone with the link\".")),
+  ];
+}
+function showWelcome(first) {
+  ask(first ? "Welcome to the Report Builder" : "About the Report Builder", welcomeBody(),
+    first ? [["I understand", () => { try { localStorage.setItem(WELCOME_KEY, WELCOME_V); } catch {} }, "primary"]] : [["Close", null, "primary"]]);
+  $("modal").querySelector(".card").classList.add("wide");
+}
+$("b-help").addEventListener("click", () => showWelcome(false));
 
 // ---- history
 async function showHistory() {
@@ -157,4 +178,6 @@ const sessionStart = Date.now();
   // The Diagram tab's page loads once the document is here, and stays loaded (off screen) so exports can draw it.
   document.querySelector(".main").prepend(h("iframe", { id: "dframe", src: "diagram.html", title: "Network diagram", class: "offstage" }));
   renderAll();
+  let seen = ""; try { seen = localStorage.getItem(WELCOME_KEY) || ""; } catch {}
+  if (seen !== WELCOME_V) showWelcome(true);
 })();

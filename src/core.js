@@ -397,9 +397,9 @@ function ask(title, body, acts) {
   $("m-title").textContent = title;
   $("m-body").replaceChildren(...[].concat(body));
   $("m-acts").replaceChildren(...acts.map(([t, fn, cls]) => h("button", { class: cls || "", onclick: () => { closeModal(); fn && fn(); } }, t)));
-  $("modal").hidden = false; ($("m-acts").lastElementChild || $("m-acts")).focus();
+  $("modal").hidden = false; $("modal").querySelector(".card").scrollTop = 0; ($("m-acts").lastElementChild || $("m-acts")).focus({ preventScroll: true });
 }
-function closeModal() { $("modal").hidden = true; }
+function closeModal() { $("modal").hidden = true; $("modal").querySelector(".card").classList.remove("wide"); }
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("modal").hidden) closeModal(); });
 
 function pickFile(accept) {

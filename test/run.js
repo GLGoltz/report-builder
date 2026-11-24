@@ -9,6 +9,8 @@ const fs = require('fs');
   await p.goto(U);
   await p.waitForTimeout(500);
   const t = async (label) => console.log('✓', label);
+  if (!(await p.isVisible('#m-acts >> text=I understand'))) errs.push('no welcome'); else t('welcome on first open');
+  await p.click('#m-acts >> text=I understand');
   await p.getByLabel('Company name').fill('Northwind Security');
   if ((await p.textContent('#brand-co')) !== 'Northwind Security') errs.push('company'); else t('company');
   // seed the Diagram tab through the Report Builder's own hook
@@ -103,6 +105,7 @@ const fs = require('fs');
   await p.click('.step:has-text("Security controls")'); await p.screenshot({ path: 'ssp.png' });
   // persistence
   await p.waitForTimeout(900); await p.reload(); await p.waitForTimeout(500);
+  if (await p.isVisible('#modal')) errs.push('welcome shown twice'); else t('welcome only once');
   const per = await p.evaluate(() => [doc.var.findings.length, doc.var.triage.filter(x => x.state !== 'new').length, doc.log.cover.roster[1].name]);
   if (per.join() !== '1,2,Jay Lee') errs.push('persist ' + per); else t('persist ' + per);
   // team file round trip + findings file

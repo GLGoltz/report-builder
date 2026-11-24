@@ -281,3 +281,10 @@ button.big{padding:8px 14px;font-weight:600}
  .bkwarn{animation:bkpulse 2.4s ease-in-out infinite}
  @keyframes bkpulse{0%,100%{background:#fef2f2;box-shadow:0 0 0 0 rgba(185,28,28,0)}50%{background:#fecaca;box-shadow:0 0 0 4px rgba(185,28,28,.18)}}
 }
+
+/* welcome */
+.modal .card.wide{max-width:680px}
+.wlead{font-size:15px;color:var(--ink)}
+.wsec h3{font-size:13px;color:var(--navy);margin:14px 0 4px;text-transform:uppercase;letter-spacing:.05em}
+.wsec ul{margin:0;padding-left:18px}
+.wsec li{margin:0 0 5px}
