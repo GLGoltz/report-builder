@@ -304,6 +304,14 @@ table.edit.restore td.ctr{text-align:center;vertical-align:middle}
 .logoprev{padding:6px;border:1px solid var(--border);border-radius:6px;background:#fff conic-gradient(#eef2f7 25%,#fff 0 50%,#eef2f7 0 75%,#fff 0) 0 0/14px 14px}
 .logoprev img{display:block;max-height:72px;max-width:240px}
 .logowell .tools{margin:0}
+/* Callouts, as in the Canvas style guide */
+.callout{border-left:4px solid var(--c);background:var(--cb);border-radius:0 6px 6px 0;padding:10px 14px;margin:14px 0 4px}
+.callout .ct{margin:0 0 4px;font-weight:700;color:var(--ct)}
+.callout ul{margin:0;padding-left:18px}.callout li{margin:0 0 5px}.callout p:last-child{margin-bottom:0}
+.callout.caution{--c:#ea580c;--cb:#fff7ed;--ct:#c2410c}
+.callout.danger{--c:#b91c1c;--cb:#fef2f2;--ct:#991b1b}
+.callout.note{--c:#003366;--cb:#f1f5f9;--ct:#003366}
+button.ghostbtn{background:#fff;color:var(--navy);border:1px solid var(--border)}
 </style></head><body>
 <header class="bar">
  <div class="brand"><b>Report Builder</b><small id="brand-co">Cyber Hub</small></div>
@@ -314,6 +322,7 @@ table.edit.restore td.ctr{text-align:center;vertical-align:middle}
   <button role="tab" id="tab-ssp" data-tab="ssp" aria-selected="false">SSP</button>
  </div>
  <div class="acts">
+  <button id="b-helpbar" class="big ghostbtn" title="What each tab is for and how saving works">Help</button>
   <div class="menu"><button id="b-file" class="primary big" aria-haspopup="true" aria-expanded="false">Save and export <span aria-hidden="true">▾</span></button>
    <div class="menu-list" id="filemenu" hidden>
     <p class="mh">Export</p>
@@ -1940,6 +1949,8 @@ $("b-setup").addEventListener("click", () => {
 });
 // ---- welcome: shown once per browser (and again when WELCOME_V changes), and from the menu
 const WELCOME_KEY = "cyberhub-reports-welcome", WELCOME_V = "1";
+// The Canvas style guide's callout box: colored left rule, tinted background, colored title.
+const callout = (kind, title, ...kids) => h("div", { class: "callout " + kind, role: kind === "danger" ? "note" : null }, h("p", { class: "ct" }, title), ...kids);
 function welcomeBody() {
   const sec = (t, ...kids) => h("div", { class: "wsec" }, h("h3", {}, t), ...kids);
   return [
@@ -1950,13 +1961,13 @@ function welcomeBody() {
       h("li", {}, h("b", {}, "Diagram: "), "the network you've built, updated whenever a page says so, with the addressing plan for your rack beside it. Every Cyber Hub export includes it."),
       h("li", {}, h("b", {}, "VAR: "), "the vulnerability assessment you write about another team's rack in Cyber Hub 12."),
       h("li", {}, h("b", {}, "SSP: "), "your own system security plan, in Cyber Hub 13."))),
-    sec("Saving: read this", h("ul", {},
+    callout("caution", "Saving: read this", h("ul", {},
       h("li", {}, "Your work saves as you type, but only in this browser on this laptop."),
       h("li", {}, h("b", {}, "Back up at the end of every session: "), "Save and export, then Save team file. Put the file in your team's Google Drive folder. That file is your real copy."),
       h("li", {}, "At the start of a session on a different laptop, open the newest team file with Open team file."),
       h("li", {}, "In Chrome or Edge, Set up automatic backup keeps a file up to date for you. A red warning at the top means you haven't backed up."),
       h("li", {}, "One person types each session. Teammates can draft on their own laptops and the typist adds their work with Add from a teammate's file."))),
-    sec("Handle it like real client work", h("p", {}, "Your VAR describes how to break into another team's network. Share it only with that team's members, never with \"anyone with the link\".")),
+    callout("danger", "Handle it like real client work", h("p", {}, "Your VAR describes how to break into another team's network. Share it only with that team's members, never with \"anyone with the link\".")),
   ];
 }
 function showWelcome(first) {
@@ -1965,6 +1976,7 @@ function showWelcome(first) {
   $("modal").querySelector(".card").classList.add("wide");
 }
 $("b-help").addEventListener("click", () => showWelcome(false));
+$("b-helpbar").addEventListener("click", () => showWelcome(false));
 
 // ---- history
 async function showHistory() {

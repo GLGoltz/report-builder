@@ -303,3 +303,11 @@ table.edit.restore td.ctr{text-align:center;vertical-align:middle}
 .logoprev{padding:6px;border:1px solid var(--border);border-radius:6px;background:#fff conic-gradient(#eef2f7 25%,#fff 0 50%,#eef2f7 0 75%,#fff 0) 0 0/14px 14px}
 .logoprev img{display:block;max-height:72px;max-width:240px}
 .logowell .tools{margin:0}
+/* Callouts, as in the Canvas style guide */
+.callout{border-left:4px solid var(--c);background:var(--cb);border-radius:0 6px 6px 0;padding:10px 14px;margin:14px 0 4px}
+.callout .ct{margin:0 0 4px;font-weight:700;color:var(--ct)}
+.callout ul{margin:0;padding-left:18px}.callout li{margin:0 0 5px}.callout p:last-child{margin-bottom:0}
+.callout.caution{--c:#ea580c;--cb:#fff7ed;--ct:#c2410c}
+.callout.danger{--c:#b91c1c;--cb:#fef2f2;--ct:#991b1b}
+.callout.note{--c:#003366;--cb:#f1f5f9;--ct:#003366}
+button.ghostbtn{background:#fff;color:var(--navy);border:1px solid var(--border)}

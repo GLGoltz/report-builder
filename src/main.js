@@ -101,6 +101,8 @@ $("b-setup").addEventListener("click", () => {
 });
 // ---- welcome: shown once per browser (and again when WELCOME_V changes), and from the menu
 const WELCOME_KEY = "cyberhub-reports-welcome", WELCOME_V = "1";
+// The Canvas style guide's callout box: colored left rule, tinted background, colored title.
+const callout = (kind, title, ...kids) => h("div", { class: "callout " + kind, role: kind === "danger" ? "note" : null }, h("p", { class: "ct" }, title), ...kids);
 function welcomeBody() {
   const sec = (t, ...kids) => h("div", { class: "wsec" }, h("h3", {}, t), ...kids);
   return [
@@ -111,13 +113,13 @@ function welcomeBody() {
       h("li", {}, h("b", {}, "Diagram: "), "the network you've built, updated whenever a page says so, with the addressing plan for your rack beside it. Every Cyber Hub export includes it."),
       h("li", {}, h("b", {}, "VAR: "), "the vulnerability assessment you write about another team's rack in Cyber Hub 12."),
       h("li", {}, h("b", {}, "SSP: "), "your own system security plan, in Cyber Hub 13."))),
-    sec("Saving: read this", h("ul", {},
+    callout("caution", "Saving: read this", h("ul", {},
       h("li", {}, "Your work saves as you type, but only in this browser on this laptop."),
       h("li", {}, h("b", {}, "Back up at the end of every session: "), "Save and export, then Save team file. Put the file in your team's Google Drive folder. That file is your real copy."),
       h("li", {}, "At the start of a session on a different laptop, open the newest team file with Open team file."),
       h("li", {}, "In Chrome or Edge, Set up automatic backup keeps a file up to date for you. A red warning at the top means you haven't backed up."),
       h("li", {}, "One person types each session. Teammates can draft on their own laptops and the typist adds their work with Add from a teammate's file."))),
-    sec("Handle it like real client work", h("p", {}, "Your VAR describes how to break into another team's network. Share it only with that team's members, never with \"anyone with the link\".")),
+    callout("danger", "Handle it like real client work", h("p", {}, "Your VAR describes how to break into another team's network. Share it only with that team's members, never with \"anyone with the link\".")),
   ];
 }
 function showWelcome(first) {
@@ -126,6 +128,7 @@ function showWelcome(first) {
   $("modal").querySelector(".card").classList.add("wide");
 }
 $("b-help").addEventListener("click", () => showWelcome(false));
+$("b-helpbar").addEventListener("click", () => showWelcome(false));
 
 // ---- history
 async function showHistory() {
