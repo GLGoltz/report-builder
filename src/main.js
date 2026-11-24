@@ -26,6 +26,11 @@ function renderPanel() {
 function renderAll() {
   for (const b of document.querySelectorAll("[data-tab]")) b.setAttribute("aria-selected", String(b.dataset.tab === state.tab));
   $("brand-co").textContent = doc.meta.company || "Cyber Hub";
+  const dg = state.tab === "diagram", f = $("dframe");
+  document.querySelector(".main").classList.toggle("diagram", dg);
+  $("rail").hidden = dg; $("work").hidden = dg;
+  if (f) f.classList.toggle("offstage", !dg);
+  if (dg) { $("panel").hidden = true; renderSaveBar(); fillWho(); reloadDiagram(); return; }
   const wy = $("work").scrollTop;
   renderRail(); renderWork(); renderPanel(); renderSaveBar(); fillWho();
   $("work").scrollTop = wy;
@@ -67,6 +72,7 @@ const menu = $("filemenu"), mbtn = $("b-file");
 mbtn.addEventListener("click", (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; mbtn.setAttribute("aria-expanded", String(!menu.hidden)); });
 document.addEventListener("click", () => { menu.hidden = true; mbtn.setAttribute("aria-expanded", "false"); });
 $("b-export").addEventListener("click", () => {
+  if (state.tab === "diagram") return exportDoc("diagram");
   if (state.tab === "var") return exportDoc("var");
   if (state.tab === "ssp") return exportDoc("ssp");
   const l = LABS.find((x) => x.num === state.log);
@@ -129,9 +135,10 @@ async function mergeFile(x) {
     for (const k in b.deliv) { const ad = a.deliv[k] || (a.deliv[k] = { images: [], note: "", link: "" }); for (const id of b.deliv[k].images || []) if (!ad.images.includes(id)) { ad.images.push(id); n.images++; } if (!ad.note && b.deliv[k].note) ad.note = b.deliv[k].note; if (!ad.link && b.deliv[k].link) ad.link = b.deliv[k].link; }
     if (!a.commands.trim() && b.commands) a.commands = b.commands; else if (b.commands && !a.commands.includes(b.commands)) a.commands += "\n\n" + b.commands;
   }
+  if (o.diagram && !doc.diagram) { doc.diagram = o.diagram; n.diagram = 1; }
   for (const r of o.ssp.poam) if (!doc.ssp.poam.some((y) => y.source && y.source === r.source && y.weakness === r.weakness)) { doc.ssp.poam.push(r); n.poam++; }
   commit(); renderAll();
-  const parts = Object.entries({ findings: "findings", hosts: "hosts", triage: "scanner results", sessions: "sessions", problems: "problems", answers: "answers", images: "screenshots", poam: "POA&M rows" }).filter(([k]) => n[k]).map(([k, t]) => `${n[k]} ${t}`);
+  const parts = Object.entries({ findings: "findings", hosts: "hosts", triage: "scanner results", sessions: "sessions", problems: "problems", answers: "answers", images: "screenshots", poam: "POA&M rows", diagram: "diagram" }).filter(([k]) => n[k]).map(([k, t]) => `${n[k]} ${t}`);
   toast(parts.length ? "Added " + parts.join(", ") + "." : "Nothing new in that file.");
 }
 
@@ -146,7 +153,9 @@ const sessionStart = Date.now();
     await restoreBackupHandle();
     try { if (navigator.storage?.persist && !(await navigator.storage.persisted())) await navigator.storage.persist(); } catch {}
   }
-  if (!doc.meta.company) { const dg = readDiagram(); if (dg?.meta?.company) { doc.meta.company = dg.meta.company; if (dg.meta.logo) doc.meta.logo = dg.meta.logo; } }
   dirtySinceBackup = !!doc.meta.updated && doc.meta.updated > lastBackup;
+  if (location.hash === "#diagram") state.tab = "diagram";
+  // The Diagram tab's page loads once the document is here, and stays loaded (off screen) so exports can draw it.
+  document.querySelector(".main").prepend(h("iframe", { id: "dframe", src: "diagram.html", title: "Network diagram", class: "offstage" }));
   renderAll();
 })();

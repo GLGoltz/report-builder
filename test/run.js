@@ -7,13 +7,26 @@ const fs = require('fs');
   const errs = []; p.on('pageerror', e => errs.push('pageerror: ' + e.message)); p.on('console', m => { if (m.type() === 'error') errs.push('console: ' + m.text()); });
   const U = 'http://localhost:8765/index.html';
   await p.goto(U);
-  await p.evaluate(() => localStorage.setItem('cyberhub-diagram', JSON.stringify({ meta: { company: 'Northwind Security' }, devices: [
-    { id: 'fw', kind: 'firewall', name: 'Firewall', hostname: 'nw-fw', interfaces: [{ name: 'wan1', address: '10.4.200.2', mask: '255.255.255.0' }, { name: 'dmz', address: '10.4.40.1', mask: '255.255.255.0' }] },
-    { id: 'sw', kind: 'switch', name: 'Core switch', hostname: 'nw-sw', oob: { address: '192.168.1.254', mask: '255.255.255.0' }, svis: [{ vlan: '20', address: '10.4.20.254', mask: '255.255.255.0' }] },
-    { id: 'vmweb', kind: 'vm', name: 'Web server', hostname: 'web', address: '10.4.40.10', mask: '255.255.255.0', gateway: '10.4.40.1', vlanTag: '40' }] })));
-  await p.reload(); await p.waitForTimeout(400);
+  await p.waitForTimeout(500);
   const t = async (label) => console.log('✓', label);
-  if ((await p.textContent('#brand-co')) !== 'Northwind Security') errs.push('company not pulled from diagram'); else t('company from diagram');
+  await p.getByLabel('Company name').fill('Northwind Security');
+  if ((await p.textContent('#brand-co')) !== 'Northwind Security') errs.push('company'); else t('company');
+  // seed the Diagram tab through the Report Builder's own hook
+  await p.evaluate(() => { doc.diagram = { v: 2, meta: {}, links: [], devices: [
+    { id: 'fw', kind: 'firewall', hostname: 'nw-fw', interfaces: [{ name: 'wan1', address: '10.4.200.2', mask: '24' }, { name: 'dmz', address: '10.4.40.1', mask: '24' }] },
+    { id: 'sw', kind: 'switch', hostname: 'nw-sw', oob: { address: '192.168.1.254', mask: '24' }, svis: [{ vlan: '20', address: '10.4.20.254', mask: '24' }] },
+    { id: 'vmweb', kind: 'vm', hostname: 'web', address: '10.4.40.10', mask: '24', gateway: '10.4.40.1', vlanTag: '40' }] }; commit(); reloadDiagram(); });
+  await p.click('[data-tab=diagram]'); await p.waitForTimeout(500);
+  const fr = p.frameLocator('#dframe');
+  const vis = await p.evaluate(() => { const f = $('dframe'); const r = f.getBoundingClientRect(); return [f.classList.contains('offstage'), Math.round(r.width) > 600, document.getElementById('work').hidden]; });
+  if (vis.join() !== 'false,true,true') errs.push('diagram tab layout ' + vis); else t('diagram tab shows');
+  if (await fr.locator('.brand').isVisible()) errs.push('diagram brand should be hidden'); 
+  const fd = await p.evaluate(() => { const d = readDiagram(); return [d.devices.length, d.meta.company, d.devices.find(x => x.id === 'vmweb').address]; });
+  if (fd[1] !== 'Northwind Security' || fd[2] !== '10.4.40.10' || fd[0] < 10) errs.push('diagram load ' + fd); else t('diagram loads with company ' + fd);
+  // the diagram saving back: undo/redo path via its own save
+  await p.evaluate(() => dframe().rbReload());
+  const png = await p.evaluate(async () => (await diagramPNG()).length); if (png < 20000) errs.push('diagram png ' + png); else t('diagram png ' + png);
+  await p.click('[data-tab=log]');
   // roster
   const rosterInputs = p.locator('table.edit').first().locator('input');
   await rosterInputs.nth(0).fill('Ana Ramos'); await rosterInputs.nth(2).fill('Jay Lee');
@@ -68,6 +81,8 @@ const fs = require('fs');
   // SSP inventory from diagram
   await p.click('[data-tab=ssp]'); await p.click('.step:has-text("Inventory")');
   await p.click('text=Start from my diagram'); await p.click('text=Copy from my diagram');
+  await p.click('.step:has-text("Network diagram")'); await p.click('button:has-text("Add my diagram")'); await p.waitForTimeout(300);
+  const sd = await p.evaluate(() => !!images[doc.ssp.diagram]); if (!sd) errs.push('ssp diagram'); else t('ssp diagram from tab');
   const inv = await p.evaluate(() => [doc.ssp.inventory.length, doc.ssp.addressing.length]); console.log('inventory', inv); if (inv[0] !== 3 || inv[1] !== 5) errs.push('inventory ' + inv);
   await p.click('.step:has-text("Security controls")'); await p.screenshot({ path: 'ssp.png' });
   // persistence
@@ -75,11 +90,12 @@ const fs = require('fs');
   const per = await p.evaluate(() => [doc.var.findings.length, doc.var.triage.filter(x => x.state !== 'new').length, doc.log.cover.roster[1].name, me()]);
   if (per.join() !== '1,2,Jay Lee,Jay Lee') errs.push('persist ' + per); else t('persist ' + per);
   // team file round trip + findings file
-  const rt = await p.evaluate(() => { const f = parseTeamFile(teamFileJSON()); return [f.doc.var.findings[0].title, f.savedBy]; });
-  if (rt.join() !== 'Anonymous FTP login allowed,Jay Lee') errs.push('roundtrip ' + rt); else t('team file round trip');
+  const rt = await p.evaluate(() => { const f = parseTeamFile(teamFileJSON()); return [f.doc.var.findings[0].title, f.savedBy, f.doc.diagram ? 'diagram' : 'nodiagram']; });
+  if (rt.join() !== 'Anonymous FTP login allowed,Jay Lee,diagram') errs.push('roundtrip ' + rt); else t('team file round trip');
   const hist = await p.evaluate(async () => (await historyList()).length); if (!hist) errs.push('no history'); else t('history ' + hist);
   // printed docs to PDF
-  for (const [k, fn] of [['var', 'varHTML()'], ['ssp', 'sspHTML()'], ['log05', 'logCoverHTML()+hubHTML(LABS.find(l=>l.num==="05"))']]) {
+  await p.evaluate(async () => { diagramImg = await diagramPNG(); });
+  for (const [k, fn] of [['var', 'varHTML()'], ['ssp', 'sspHTML()'], ['log05', 'logCoverHTML()+hubHTML(LABS.find(l=>l.num==="05"))+diagramHTML("test")']]) {
     await p.evaluate((fn) => { $('print').innerHTML = '<div class="doc">' + eval(fn) + '</div>'; }, fn);
     await p.emulateMedia({ media: 'print' });
     await p.pdf({ path: k + '.pdf', format: 'Letter', printBackground: true });

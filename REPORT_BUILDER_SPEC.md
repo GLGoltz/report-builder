@@ -1,11 +1,12 @@
 # Report Builder: specification
 
-A web app where each Cyber Hub team keeps its Team Log and writes its Vulnerability Assessment Report (VAR) and
-System Security Plan (SSP) by filling in forms. The app lays out every document, so students never format anything.
+A web app where each Cyber Hub team keeps its Team Log and network diagram and writes its Vulnerability Assessment
+Report (VAR) and System Security Plan (SSP) by filling in forms. The app lays out every document, so students never format anything.
 It replaces the three Google Docs templates.
 
-Live at `https://glgoltz.github.io/report-builder/` once published. Sibling of the Network Diagram app
-(`glgoltz.github.io/network-diagram/`), with the same look, build and hosting.
+Live at `https://glgoltz.github.io/report-builder/`. Four tabs: Team Log, Diagram, VAR and SSP. The Diagram tab is
+the former Network Diagram app (spec in `DIAGRAM_SPEC.md`), built into `diagram.html` and shown in a frame, so one
+link, one save and one team file hold everything. The old `glgoltz.github.io/network-diagram/` address redirects here.
 
 ## 1. Why
 
@@ -32,9 +33,12 @@ so grading is about content.
   is built from `src/` by `node build.mjs`; commit both.
 - About 150 KB. GitHub's limits (1 GB site, 100 GB a month) are not a concern. Student work never goes to GitHub.
 - Students open it from a link on the Canvas pages, on any laptop with a current browser.
-- Both apps live on `glgoltz.github.io`, so they share browser storage on the same laptop. The Report Builder reads
-  the diagram's saved copy (key `cyberhub-diagram` in `localStorage`) for the company name, logo and addressing
-  table. It never writes to it.
+- The diagram is part of the workspace (`doc.diagram`), so it saves, backs up and travels in the team file like
+  everything else. Company name and logo are entered once (`doc.meta`) and handed to the diagram, which uses them in
+  its title and corner. The diagram frame loads `doc.diagram` through `window.parent.rbDiagram` and saves back the
+  same way. Opened on its own with a share link, `diagram.html` is a view-only copy that saves nothing.
+- The diagram still never receives the rack number and never checks entries against the plan, even though the Team
+  Log's rack sheet knows the planned addresses. It shows what the team built.
 
 ## 4. Saving, history and backups
 
@@ -47,7 +51,7 @@ so grading is about content.
 | Back up now | Every browser: downloads a dated team file | The same, where automatic backup isn't available |
 | Backup age in the save bar | Grey under 20 minutes, amber to 60, red after. Leaving the page with no backup for 20 minutes asks first | Forgetting |
 
-- `localStorage` is left to the diagram app. Its 5 MB is shared by every app on `glgoltz.github.io`.
+- `localStorage` holds only the "who's typing" name.
 - Images are shrunk when added: longest side 1600 px, WebP at quality 0.82, JPEG where WebP encoding isn't
   supported. A typical screenshot is 80 to 200 KB.
 - A failed write shows a red save bar: "Couldn't save in this browser. Back up now so nothing is lost." with the
@@ -76,11 +80,11 @@ The team file is one JSON file, extension `.cyberhub`, holding the whole workspa
 
 One log for the semester. Sections, in order:
 
-- **Cover:** company name and tagline (from the diagram if present), logo, rack number, semester, diagram share
-  link, two team communication methods, roster (name, email).
+- **Cover:** company name and tagline, logo (kept under 40 KB, the diagram's limit), rack number, semester, two
+  team communication methods, roster (name, email).
 - **Team agreement:** decisions, missed labs, reply time, and each member's name typed to agree.
-- **Rack sheet:** the 17 rows of the current template (device or network, pattern, your rack), plus Checked by
-  teammate and Checked by instructor.
+- **Rack sheet:** the 17 rows of the Rack Schema page's table, filled in automatically from the cover's rack
+  number (Gabriel's decision: no busy work), plus Checked by teammate and Checked by instructor.
 - **One section per Cyber Hub, 00 to 15**, generated from `labs.json` (taken from the course pages):
   sessions (date, who did what), commands and settings, problems and fixes (what broke, what you checked, what fixed
   it), each Before you continue question with an answer box, and each deliverable with its instruction and a place
@@ -91,7 +95,13 @@ One log for the semester. Sections, in order:
   deliverable has an image).
 
 Exports: one Cyber Hub (what each page asks teams to submit), the cover and rack sheet (Cyber Hub 00), or the whole
-log (final submission).
+log (final submission). Every Team Log export ends with the network diagram as it is at that moment, so each
+Cyber Hub's submission shows the diagram update that page asked for.
+
+### 6.1a Diagram
+
+The Network Diagram, unchanged in what it records (see `DIAGRAM_SPEC.md`), on its own tab. Copy share link still
+makes a view-only link for the instructor. Export PDF on this tab prints the diagram alone.
 
 ### 6.2 VAR (Cyber Hub 12)
 
@@ -126,9 +136,9 @@ table and a short "Ruled out" list, not as full findings.
 
 1. **System identification:** name, purpose, location, status, users, internet connection.
 2. **System description.**
-3. **Network diagram:** an image upload (Export PNG in the diagram app), with a reminder of what it must show.
+3. **Network diagram:** **Add my diagram** takes a picture of the Diagram tab as it is now (or upload an image).
 4. **Inventory:** device, model, role, address, OS or firmware. **Start from my diagram** adds a row for every
-   device with an address in the diagram. The addressing table from the diagram is included below as read-only
+   device with an address on the Diagram tab. The addressing table from the diagram is included below as read-only
    rows, refreshed with **Update from diagram**.
 5. **Ports, protocols and services:** host, port and protocol, service, who can reach it, why it's needed.
 6. **Security controls:** the twelve NIST SP 800-53 controls in the template, each with its requirement, a "How we

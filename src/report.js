@@ -17,9 +17,8 @@ function coverPage(kind, title, sub, rows, conf, clientLogo) {
 // ---- Team Log
 function logCoverHTML() {
   const c = doc.log.cover, a = doc.log.agreement, r = doc.log.rack;
-  return coverPage("Team Log", doc.meta.company || "Team Log", doc.meta.tagline, [["Rack", c.rack], ["Semester", c.semester], ["Communication", c.chat], ["Network diagram", c.diagramLink ? "Link below" : ""]], "Team Log")
+  return coverPage("Team Log", doc.meta.company || "Team Log", doc.meta.tagline, [["Rack", c.rack], ["Semester", c.semester], ["Communication", c.chat]], "Team Log")
     + `<h1 class="s">Team</h1>${tbl(["Team member", "Email"], c.roster.filter((x) => x.name || x.email).map((x) => [x.name, x.email]))}`
-    + (c.diagramLink ? `<p><b>Network diagram:</b> <span style="word-break:break-all">${esc(c.diagramLink)}</span></p>` : "")
     + `<h2 class="s">Team agreement</h2>${form([["How we make decisions", a.decisions], ["If someone misses a lab", a.missed], ["How fast we reply between labs", a.reply], ["Agreed by", a.agreed]])}`
     + `<h1 class="s" style="break-before:page">Rack sheet</h1>${tbl(["Device or network", "Pattern", "Your rack"], RACK_ROWS.map(([k, l, p]) => [l, mono(p), mono(rackValue(p))]))}`
     + form([["Checked by (teammate)", r.checkedTeammate], ["Checked by (instructor)", r.checkedInstructor]]);
@@ -91,23 +90,39 @@ function sspHTML() {
   return o;
 }
 
+// ---- the network diagram, drawn by the Diagram tab
+let diagramImg = "";
+function diagramHTML(note) {
+  return `<h1 class="s" style="break-before:page">Network diagram</h1>` + (diagramImg
+    ? `<figure><img src="${diagramImg}" alt="Network diagram"><figcaption>${esc(note)}</figcaption></figure>`
+    : `<p class="blank">The diagram is empty. Fill it in on the Diagram tab.</p>`);
+}
+
 // ---- export
-function exportDoc(kind, arg) {
+async function exportDoc(kind, arg) {
+  diagramImg = await diagramPNG();
   let html, missing = [], title;
   const co = doc.meta.company || "Team";
   if (kind === "log-hub") {
     const l = LABS.find((x) => x.num === arg);
     title = `${co} Team Log, Cyber Hub ${l.num}`;
-    html = (l.num === "00" ? logCoverHTML() : `<p style="font:700 9pt Arial;letter-spacing:.12em;color:var(--navy);text-transform:uppercase">${esc(co)} · Team Log</p>`) + hubHTML(l).replace('style="break-before:page"', "");
+    html = (l.num === "00" ? logCoverHTML() : `<p style="font:700 9pt Arial;letter-spacing:.12em;color:var(--navy);text-transform:uppercase">${esc(co)} · Team Log</p>`) + hubHTML(l).replace('style="break-before:page"', "")
+      + diagramHTML(`The diagram as of this export, Cyber Hub ${l.num}.`);
+    if (!diagramImg && l.num !== "00") missing.push("Your network diagram (Diagram tab)");
     const d = doc.log.hubs[l.num];
     if (!d || !d.sessions.length) missing.push("A session entry");
     l.questions.forEach((q, i) => { if (!(d?.answers[i] || "").trim()) missing.push("An answer to: " + q.slice(0, 70) + (q.length > 70 ? "…" : "")); });
     l.deliverables.forEach((x) => { if (!SEPARATE[`${l.num}-${x.n}`] && !(d?.deliv[x.n]?.images || []).length) missing.push(`Deliverable ${x.n}: ${x.title}`); });
   } else if (kind === "log") {
     title = `${co} Team Log`;
-    html = logCoverHTML() + LABS.map(hubHTML).join("");
+    html = logCoverHTML() + diagramHTML("The diagram as of this export.") + LABS.map(hubHTML).join("");
     LABS.forEach((l) => { const st = hubStatus(l); if (st !== "done") missing.push(`Cyber Hub ${l.num} is ${st ? "incomplete" : "empty"}`); });
   } else if (kind === "var") { title = `${co} VAR for ${V().cover.client || "client"}`; html = varHTML(); missing = varMissing().map((x) => x[1]); }
+  else if (kind === "diagram") {
+    title = `${co} network diagram`;
+    html = `<p style="font:700 9pt Arial;letter-spacing:.12em;color:var(--navy);text-transform:uppercase">${esc(co)}</p>` + diagramHTML("Exported " + new Date().toLocaleDateString()).replace(' style="break-before:page"', "");
+    if (!diagramImg) missing.push("The diagram itself");
+  }
   else { title = `${co} System Security Plan`; html = sspHTML(); missing = sspMissing().map((x) => x[1]); }
   const go = () => {
     $("print").innerHTML = `<div class="doc">${html}</div>`;

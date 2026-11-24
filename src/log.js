@@ -36,23 +36,18 @@ function viewLog() {
 }
 
 function logCover() {
-  const c = doc.log.cover, a = doc.log.agreement, dg = readDiagram();
-  const fromDiagram = dg && (dg.meta?.company || dg.meta?.logo) ? h("button", { class: "small", onclick: () => {
-    if (dg.meta.company) doc.meta.company = dg.meta.company; if (dg.meta.logo) doc.meta.logo = dg.meta.logo; commit(); renderAll(); toast("Company name and logo copied from your network diagram.");
-  } }, "Use the name and logo from my diagram") : null;
+  const c = doc.log.cover, a = doc.log.agreement;
   return [
     h("h2", {}, "Cover and team agreement"),
     h("p", { class: "sub" }, "The front of your Team Log, and the cover of every report this app makes. Cyber Hub 00 asks for all of it."),
     h("div", { class: "card" },
-      h("div", { class: "tools" }, fromDiagram, h("span", { class: "hintline" }, dg ? "Your diagram was found in this browser." : "Open your Network Diagram in this browser to copy its name and logo here.")),
       h("div", { class: "grid2" },
-        field("Company name", doc.meta, "company", { req: true, oninput: () => ($("brand-co").textContent = doc.meta.company || "Cyber Hub") }),
+        field("Company name", doc.meta, "company", { req: true, oninput: () => ($("brand-co").textContent = doc.meta.company || "Cyber Hub"), hint: "It also titles your network diagram." }),
         field("Tagline", doc.meta, "tagline", { placeholder: "One line that says what your company does" }),
         field("Rack number", c, "rack", { req: true, placeholder: "1 to 8", hint: "Your rack sheet fills in from this.", oninput: () => renderRail() }),
         field("Semester", c, "semester", { placeholder: "Spring 2027" }),
-        field("Network diagram share link", c, "diagramLink", { wide: true, hint: "In the Network Diagram app, choose Copy share link and paste it here. Replace it whenever you update the diagram." }),
         field("How we communicate", c, "chat", { wide: true, placeholder: "Two methods, for example a group chat and email" })),
-      h("label", {}, "Logo"), logoWell()),
+      h("label", {}, "Logo"), logoWell(), h("p", { class: "hintline" }, "It goes on every report and in the corner of your network diagram. You can also add it from the Diagram tab.")),
     h("h3", {}, "Team roster"),
     rowsTable(c.roster, [["name", "Name", { w: "45%" }], ["email", "Email", { type: "email" }]], { addLabel: "Add member", onchange: fillWho }),
     h("h3", {}, "Team agreement"),
@@ -67,8 +62,8 @@ function logoWell() {
   const box = h("div", { class: "tools" });
   const draw = () => box.replaceChildren(
     doc.meta.logo ? h("img", { src: doc.meta.logo, alt: "Company logo", style: "max-height:56px;max-width:200px;border:1px solid var(--border);border-radius:6px;background:#fff;padding:4px" }) : h("span", { class: "hintline" }, "No logo yet."),
-    h("button", { class: "small", onclick: async () => { const f = await pickFile("image/*"); if (!f) return; try { doc.meta.logo = await readImage(f); commit(); draw(); } catch (e) { toast(e.message, true); } } }, doc.meta.logo ? "Change logo" : "Upload logo"),
-    doc.meta.logo ? h("button", { class: "small ghost", onclick: () => { doc.meta.logo = ""; commit(); draw(); } }, "Remove") : null);
+    h("button", { class: "small", onclick: async () => { const f = await pickFile("image/*"); if (!f) return; try { doc.meta.logo = await readLogo(f); commit(); draw(); reloadDiagram(); } catch (e) { toast(e.message, true); } } }, doc.meta.logo ? "Change logo" : "Upload logo"),
+    doc.meta.logo ? h("button", { class: "small ghost", onclick: () => { doc.meta.logo = ""; commit(); draw(); reloadDiagram(); } }, "Remove") : null);
   draw(); return box;
 }
 

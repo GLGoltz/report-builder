@@ -166,6 +166,10 @@ table.edit td.pattern .fixed{font-family:var(--mono);color:var(--muted);font-siz
 .hist li{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid var(--hair);padding:7px 0;font-size:13px}
 
 #print{display:none}
+#dframe{flex:1;border:0;width:100%;min-height:0;background:#fff}
+#dframe.offstage{position:absolute;left:-20000px;top:0;width:1400px;height:900px;visibility:hidden;flex:none}
+.main.diagram{overflow:hidden}
+@media (max-width:900px){.main.diagram{min-height:calc(100vh - 120px)}}
 
 @media (max-width:1150px){.panel{width:400px}}
 @media (max-width:900px){
@@ -233,6 +237,7 @@ table.edit td.pattern .fixed{font-family:var(--mono);color:var(--muted);font-siz
  <div class="brand"><b>Report Builder</b><small id="brand-co">Cyber Hub</small></div>
  <div class="seg" role="tablist" aria-label="Document">
   <button role="tab" id="tab-log" data-tab="log" aria-selected="true">Team Log</button>
+  <button role="tab" id="tab-diagram" data-tab="diagram" aria-selected="false">Diagram</button>
   <button role="tab" id="tab-var" data-tab="var" aria-selected="false">VAR</button>
   <button role="tab" id="tab-ssp" data-tab="ssp" aria-selected="false">SSP</button>
  </div>
@@ -326,7 +331,6 @@ const EFFORT = ["Low", "Medium", "High"];
 // ------------------------------------------------------------------ core: document, storage, files, UI helpers
 const SCHEMA = 1;
 const DB_NAME = "cyberhub-reports";
-const DIAGRAM_KEY = "cyberhub-diagram";      // the Network Diagram app's save; read only
 const ME_KEY = "cyberhub-reports-me";        // who's typing, per browser
 const HISTORY_DAYS = 14, HISTORY_EVERY = 5 * 60e3, BACKUP_EVERY = 3 * 60e3;
 
@@ -339,6 +343,7 @@ function blankDoc() {
   return {
     v: SCHEMA,
     meta: { company: "", tagline: "", logo: "", updated: 0, savedBy: "" },
+    diagram: null,      // the Diagram tab's document (src/diagram), saved here so it travels in the team file
     log: {
       cover: { rack: "", semester: "", diagramLink: "", chat: "", roster: [{ name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }] },
       agreement: { decisions: "", missed: "", reply: "", agreed: "" },
@@ -552,9 +557,44 @@ async function restoreBackupHandle() {
   } catch { backupHandle = null; }
 }
 
-// ---------------------------------------------------------------- the diagram app's saved copy
-function readDiagram() {
-  try { const s = localStorage.getItem(DIAGRAM_KEY); return s ? JSON.parse(s) : null; } catch { return null; }
+// ---------------------------------------------------------------- the Diagram tab
+// The diagram lives in doc.diagram. Company and logo live once, in doc.meta, and are handed to the diagram.
+const LOGO_MAX = 40000;   // the diagram's limit: its share link carries the logo
+window.rbDiagram = {
+  load() { const d = doc.diagram ? JSON.parse(JSON.stringify(doc.diagram)) : null; if (!d) return null;
+    d.meta = { ...(d.meta || {}), company: doc.meta.company || "" }; if (doc.meta.logo) d.meta.logo = doc.meta.logo; else delete d.meta.logo; return d; },
+  save(d) {
+    doc.diagram = d;
+    if (typeof d.meta?.company === "string" && d.meta.company) doc.meta.company = d.meta.company;
+    doc.meta.logo = d.meta?.logo || "";
+    commit(); return !saveFailed;
+  },
+};
+const dframe = () => $("dframe")?.contentWindow;
+function reloadDiagram() { try { dframe()?.rbReload?.(); } catch {} }
+async function diagramPNG() {
+  try { const w = dframe(); if (!w?.rbPNG || !w.rbHasContent?.()) return ""; return await w.rbPNG(); } catch { return ""; }
+}
+function readDiagram() { try { const d = dframe()?.rbDoc?.(); if (d) return d; } catch {} return doc.diagram; }
+// Logos are kept small enough for the diagram's share link.
+function readLogo(file) {
+  return new Promise((res, rej) => {
+    if (!file || !/^image\//.test(file.type)) return rej(new Error("That isn't an image."));
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = () => {
+      URL.revokeObjectURL(url);
+      for (const side of [400, 320, 256, 200, 160, 128]) for (const q of [0.85, 0.7, 0.55]) {
+        const k = Math.min(1, side / Math.max(im.width, im.height));
+        const c = document.createElement("canvas"); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+        let d = c.toDataURL("image/webp", q); if (!d.startsWith("data:image/webp")) d = c.toDataURL("image/png");
+        if (d.length <= LOGO_MAX) return res(d);
+      }
+      rej(new Error("That logo is too detailed to shrink. Try a simpler PNG."));
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); rej(new Error("That image couldn't be read.")); };
+    im.src = url;
+  });
 }
 function diagramAddressing(d) {
   const rows = [];
@@ -735,23 +775,18 @@ function viewLog() {
 }
 
 function logCover() {
-  const c = doc.log.cover, a = doc.log.agreement, dg = readDiagram();
-  const fromDiagram = dg && (dg.meta?.company || dg.meta?.logo) ? h("button", { class: "small", onclick: () => {
-    if (dg.meta.company) doc.meta.company = dg.meta.company; if (dg.meta.logo) doc.meta.logo = dg.meta.logo; commit(); renderAll(); toast("Company name and logo copied from your network diagram.");
-  } }, "Use the name and logo from my diagram") : null;
+  const c = doc.log.cover, a = doc.log.agreement;
   return [
     h("h2", {}, "Cover and team agreement"),
     h("p", { class: "sub" }, "The front of your Team Log, and the cover of every report this app makes. Cyber Hub 00 asks for all of it."),
     h("div", { class: "card" },
-      h("div", { class: "tools" }, fromDiagram, h("span", { class: "hintline" }, dg ? "Your diagram was found in this browser." : "Open your Network Diagram in this browser to copy its name and logo here.")),
       h("div", { class: "grid2" },
-        field("Company name", doc.meta, "company", { req: true, oninput: () => ($("brand-co").textContent = doc.meta.company || "Cyber Hub") }),
+        field("Company name", doc.meta, "company", { req: true, oninput: () => ($("brand-co").textContent = doc.meta.company || "Cyber Hub"), hint: "It also titles your network diagram." }),
         field("Tagline", doc.meta, "tagline", { placeholder: "One line that says what your company does" }),
         field("Rack number", c, "rack", { req: true, placeholder: "1 to 8", hint: "Your rack sheet fills in from this.", oninput: () => renderRail() }),
         field("Semester", c, "semester", { placeholder: "Spring 2027" }),
-        field("Network diagram share link", c, "diagramLink", { wide: true, hint: "In the Network Diagram app, choose Copy share link and paste it here. Replace it whenever you update the diagram." }),
         field("How we communicate", c, "chat", { wide: true, placeholder: "Two methods, for example a group chat and email" })),
-      h("label", {}, "Logo"), logoWell()),
+      h("label", {}, "Logo"), logoWell(), h("p", { class: "hintline" }, "It goes on every report and in the corner of your network diagram. You can also add it from the Diagram tab.")),
     h("h3", {}, "Team roster"),
     rowsTable(c.roster, [["name", "Name", { w: "45%" }], ["email", "Email", { type: "email" }]], { addLabel: "Add member", onchange: fillWho }),
     h("h3", {}, "Team agreement"),
@@ -766,8 +801,8 @@ function logoWell() {
   const box = h("div", { class: "tools" });
   const draw = () => box.replaceChildren(
     doc.meta.logo ? h("img", { src: doc.meta.logo, alt: "Company logo", style: "max-height:56px;max-width:200px;border:1px solid var(--border);border-radius:6px;background:#fff;padding:4px" }) : h("span", { class: "hintline" }, "No logo yet."),
-    h("button", { class: "small", onclick: async () => { const f = await pickFile("image/*"); if (!f) return; try { doc.meta.logo = await readImage(f); commit(); draw(); } catch (e) { toast(e.message, true); } } }, doc.meta.logo ? "Change logo" : "Upload logo"),
-    doc.meta.logo ? h("button", { class: "small ghost", onclick: () => { doc.meta.logo = ""; commit(); draw(); } }, "Remove") : null);
+    h("button", { class: "small", onclick: async () => { const f = await pickFile("image/*"); if (!f) return; try { doc.meta.logo = await readLogo(f); commit(); draw(); reloadDiagram(); } catch (e) { toast(e.message, true); } } }, doc.meta.logo ? "Change logo" : "Upload logo"),
+    doc.meta.logo ? h("button", { class: "small ghost", onclick: () => { doc.meta.logo = ""; commit(); draw(); reloadDiagram(); } }, "Remove") : null);
   draw(); return box;
 }
 
@@ -1225,10 +1260,14 @@ function sspDiagram() {
   const box = h("div");
   const draw = () => box.replaceChildren(
     s.diagram && images[s.diagram] ? h("figure", { class: "card", style: "margin:0 0 10px" }, h("img", { src: images[s.diagram], alt: "Network diagram", style: "max-width:100%;display:block" })) : h("p", { class: "empty" }, "No diagram yet."),
-    h("div", { class: "tools" }, h("button", { class: "primary", onclick: async () => { const f = await pickFile("image/png,image/*"); if (!f) return; try { s.diagram = await addImageFull(f); commit(); draw(); renderRail(); } catch (e) { toast(e.message, true); } } }, s.diagram ? "Replace diagram" : "Add the diagram image"),
+    h("div", { class: "tools" }, h("button", { class: "primary", onclick: async () => {
+        const png = await diagramPNG(); if (!png) return toast("Your diagram is empty. Fill it in on the Diagram tab first.", true);
+        const id = newId("img"); images[id] = png; try { await imgPut(id, png); } catch { saveFailed = true; }
+        s.diagram = id; commit(); draw(); renderRail(); toast("Added your current diagram. Do this again whenever you change it."); } }, s.diagram ? "Update to my current diagram" : "Add my diagram"),
+      h("button", { onclick: async () => { const f = await pickFile("image/png,image/*"); if (!f) return; try { s.diagram = await addImageFull(f); commit(); draw(); renderRail(); } catch (e) { toast(e.message, true); } } }, "Upload an image instead"),
       s.diagram ? h("button", { class: "ghost", onclick: () => { s.diagram = ""; commit(); draw(); renderRail(); } }, "Remove") : null));
   draw();
-  return [h("h2", {}, "Network diagram"), h("p", { class: "sub" }, "In the Network Diagram app choose Export PNG, then add the file here. Before you export, check that every device has its address and hostname and every switch port shows its VLANs."), box];
+  return [h("h2", {}, "Network diagram"), h("p", { class: "sub" }, "Add my diagram takes a picture of your Diagram tab as it is now. Before you add it, check that every device has its address and hostname and every switch port shows its VLANs."), box];
 }
 // The diagram needs more pixels than a screenshot to stay readable when printed.
 async function addImageFull(file) {
@@ -1246,11 +1285,11 @@ function sspInventory() {
       rows.length ? h("button", { onclick: () => { const have = new Set(s.inventory.map((r) => r.device)); const seen = new Set(); let n = 0;
         for (const r of rows) { if (have.has(r.device) || seen.has(r.device)) continue; seen.add(r.device); s.inventory.push({ device: r.device, model: "", role: "", address: r.address, os: "" }); n++; }
         commit(); renderAll(); toast(n ? `Added ${n} device${n === 1 ? "" : "s"} from your diagram. Fill in model, role and OS.` : "Every device in your diagram is already listed."); } }, "Start from my diagram") : null,
-      h("span", { class: "hintline" }, rows.length ? "Your diagram was found in this browser." : "Open your Network Diagram in this browser to fill this in from it.")),
+      h("span", { class: "hintline" }, rows.length ? "Uses the addresses on your Diagram tab." : "Fill in the Diagram tab first, then come back.")),
     rowsTable(s.inventory, [["device", "Device"], ["model", "Model"], ["role", "Role", { area: true }], ["address", "Address", { cls: "mono" }], ["os", "OS or firmware"]], { addLabel: "Add device" }),
     h("h3", {}, "Addressing table"),
-    h("p", { class: "sub" }, s.addressingFrom ? `From your diagram, ${s.addressingFrom}. It isn't edited here: fix the diagram, then update.` : "Copied from your Network Diagram, so the plan and the diagram can't disagree."),
-    h("div", { class: "tools" }, h("button", { onclick: () => { if (!rows.length) return toast("No diagram with addresses was found in this browser. Open the Network Diagram app on this laptop first.", true); s.addressing = rows; s.addressingFrom = fmtTime(Date.now()); commit(); renderAll(); } }, s.addressing.length ? "Update from diagram" : "Copy from my diagram")),
+    h("p", { class: "sub" }, s.addressingFrom ? `From your Diagram tab, ${s.addressingFrom}. It isn't edited here: fix the diagram, then update.` : "Copied from your Diagram tab, so the plan and the diagram can't disagree."),
+    h("div", { class: "tools" }, h("button", { onclick: () => { if (!rows.length) return toast("Your Diagram tab has no addresses yet. Fill it in first.", true); s.addressing = rows; s.addressingFrom = fmtTime(Date.now()); commit(); renderAll(); } }, s.addressing.length ? "Update from diagram" : "Copy from my diagram")),
     s.addressing.length ? h("div", { class: "tbox" }, h("table", { class: "edit" }, h("thead", {}, h("tr", {}, ["Device", "Hostname", "Interface", "VLAN", "IP address", "Mask", "Gateway"].map((t) => h("th", {}, t)))),
       h("tbody", {}, s.addressing.map((r) => h("tr", {}, [r.device, r.hostname, r.iface, r.vlan, r.address, r.mask, r.gateway].map((x, i) => h("td", { class: i >= 4 ? "mono" : "" }, h("span", { class: "fixed" }, x || ""))))))) ) : null];
 }
@@ -1340,9 +1379,8 @@ function coverPage(kind, title, sub, rows, conf, clientLogo) {
 // ---- Team Log
 function logCoverHTML() {
   const c = doc.log.cover, a = doc.log.agreement, r = doc.log.rack;
-  return coverPage("Team Log", doc.meta.company || "Team Log", doc.meta.tagline, [["Rack", c.rack], ["Semester", c.semester], ["Communication", c.chat], ["Network diagram", c.diagramLink ? "Link below" : ""]], "Team Log")
+  return coverPage("Team Log", doc.meta.company || "Team Log", doc.meta.tagline, [["Rack", c.rack], ["Semester", c.semester], ["Communication", c.chat]], "Team Log")
     + `<h1 class="s">Team</h1>${tbl(["Team member", "Email"], c.roster.filter((x) => x.name || x.email).map((x) => [x.name, x.email]))}`
-    + (c.diagramLink ? `<p><b>Network diagram:</b> <span style="word-break:break-all">${esc(c.diagramLink)}</span></p>` : "")
     + `<h2 class="s">Team agreement</h2>${form([["How we make decisions", a.decisions], ["If someone misses a lab", a.missed], ["How fast we reply between labs", a.reply], ["Agreed by", a.agreed]])}`
     + `<h1 class="s" style="break-before:page">Rack sheet</h1>${tbl(["Device or network", "Pattern", "Your rack"], RACK_ROWS.map(([k, l, p]) => [l, mono(p), mono(rackValue(p))]))}`
     + form([["Checked by (teammate)", r.checkedTeammate], ["Checked by (instructor)", r.checkedInstructor]]);
@@ -1414,23 +1452,39 @@ function sspHTML() {
   return o;
 }
 
+// ---- the network diagram, drawn by the Diagram tab
+let diagramImg = "";
+function diagramHTML(note) {
+  return `<h1 class="s" style="break-before:page">Network diagram</h1>` + (diagramImg
+    ? `<figure><img src="${diagramImg}" alt="Network diagram"><figcaption>${esc(note)}</figcaption></figure>`
+    : `<p class="blank">The diagram is empty. Fill it in on the Diagram tab.</p>`);
+}
+
 // ---- export
-function exportDoc(kind, arg) {
+async function exportDoc(kind, arg) {
+  diagramImg = await diagramPNG();
   let html, missing = [], title;
   const co = doc.meta.company || "Team";
   if (kind === "log-hub") {
     const l = LABS.find((x) => x.num === arg);
     title = `${co} Team Log, Cyber Hub ${l.num}`;
-    html = (l.num === "00" ? logCoverHTML() : `<p style="font:700 9pt Arial;letter-spacing:.12em;color:var(--navy);text-transform:uppercase">${esc(co)} · Team Log</p>`) + hubHTML(l).replace('style="break-before:page"', "");
+    html = (l.num === "00" ? logCoverHTML() : `<p style="font:700 9pt Arial;letter-spacing:.12em;color:var(--navy);text-transform:uppercase">${esc(co)} · Team Log</p>`) + hubHTML(l).replace('style="break-before:page"', "")
+      + diagramHTML(`The diagram as of this export, Cyber Hub ${l.num}.`);
+    if (!diagramImg && l.num !== "00") missing.push("Your network diagram (Diagram tab)");
     const d = doc.log.hubs[l.num];
     if (!d || !d.sessions.length) missing.push("A session entry");
     l.questions.forEach((q, i) => { if (!(d?.answers[i] || "").trim()) missing.push("An answer to: " + q.slice(0, 70) + (q.length > 70 ? "…" : "")); });
     l.deliverables.forEach((x) => { if (!SEPARATE[`${l.num}-${x.n}`] && !(d?.deliv[x.n]?.images || []).length) missing.push(`Deliverable ${x.n}: ${x.title}`); });
   } else if (kind === "log") {
     title = `${co} Team Log`;
-    html = logCoverHTML() + LABS.map(hubHTML).join("");
+    html = logCoverHTML() + diagramHTML("The diagram as of this export.") + LABS.map(hubHTML).join("");
     LABS.forEach((l) => { const st = hubStatus(l); if (st !== "done") missing.push(`Cyber Hub ${l.num} is ${st ? "incomplete" : "empty"}`); });
   } else if (kind === "var") { title = `${co} VAR for ${V().cover.client || "client"}`; html = varHTML(); missing = varMissing().map((x) => x[1]); }
+  else if (kind === "diagram") {
+    title = `${co} network diagram`;
+    html = `<p style="font:700 9pt Arial;letter-spacing:.12em;color:var(--navy);text-transform:uppercase">${esc(co)}</p>` + diagramHTML("Exported " + new Date().toLocaleDateString()).replace(' style="break-before:page"', "");
+    if (!diagramImg) missing.push("The diagram itself");
+  }
   else { title = `${co} System Security Plan`; html = sspHTML(); missing = sspMissing().map((x) => x[1]); }
   const go = () => {
     $("print").innerHTML = `<div class="doc">${html}</div>`;
@@ -1473,6 +1527,11 @@ function renderPanel() {
 function renderAll() {
   for (const b of document.querySelectorAll("[data-tab]")) b.setAttribute("aria-selected", String(b.dataset.tab === state.tab));
   $("brand-co").textContent = doc.meta.company || "Cyber Hub";
+  const dg = state.tab === "diagram", f = $("dframe");
+  document.querySelector(".main").classList.toggle("diagram", dg);
+  $("rail").hidden = dg; $("work").hidden = dg;
+  if (f) f.classList.toggle("offstage", !dg);
+  if (dg) { $("panel").hidden = true; renderSaveBar(); fillWho(); reloadDiagram(); return; }
   const wy = $("work").scrollTop;
   renderRail(); renderWork(); renderPanel(); renderSaveBar(); fillWho();
   $("work").scrollTop = wy;
@@ -1514,6 +1573,7 @@ const menu = $("filemenu"), mbtn = $("b-file");
 mbtn.addEventListener("click", (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; mbtn.setAttribute("aria-expanded", String(!menu.hidden)); });
 document.addEventListener("click", () => { menu.hidden = true; mbtn.setAttribute("aria-expanded", "false"); });
 $("b-export").addEventListener("click", () => {
+  if (state.tab === "diagram") return exportDoc("diagram");
   if (state.tab === "var") return exportDoc("var");
   if (state.tab === "ssp") return exportDoc("ssp");
   const l = LABS.find((x) => x.num === state.log);
@@ -1576,9 +1636,10 @@ async function mergeFile(x) {
     for (const k in b.deliv) { const ad = a.deliv[k] || (a.deliv[k] = { images: [], note: "", link: "" }); for (const id of b.deliv[k].images || []) if (!ad.images.includes(id)) { ad.images.push(id); n.images++; } if (!ad.note && b.deliv[k].note) ad.note = b.deliv[k].note; if (!ad.link && b.deliv[k].link) ad.link = b.deliv[k].link; }
     if (!a.commands.trim() && b.commands) a.commands = b.commands; else if (b.commands && !a.commands.includes(b.commands)) a.commands += "\n\n" + b.commands;
   }
+  if (o.diagram && !doc.diagram) { doc.diagram = o.diagram; n.diagram = 1; }
   for (const r of o.ssp.poam) if (!doc.ssp.poam.some((y) => y.source && y.source === r.source && y.weakness === r.weakness)) { doc.ssp.poam.push(r); n.poam++; }
   commit(); renderAll();
-  const parts = Object.entries({ findings: "findings", hosts: "hosts", triage: "scanner results", sessions: "sessions", problems: "problems", answers: "answers", images: "screenshots", poam: "POA&M rows" }).filter(([k]) => n[k]).map(([k, t]) => `${n[k]} ${t}`);
+  const parts = Object.entries({ findings: "findings", hosts: "hosts", triage: "scanner results", sessions: "sessions", problems: "problems", answers: "answers", images: "screenshots", poam: "POA&M rows", diagram: "diagram" }).filter(([k]) => n[k]).map(([k, t]) => `${n[k]} ${t}`);
   toast(parts.length ? "Added " + parts.join(", ") + "." : "Nothing new in that file.");
 }
 
@@ -1593,8 +1654,10 @@ const sessionStart = Date.now();
     await restoreBackupHandle();
     try { if (navigator.storage?.persist && !(await navigator.storage.persisted())) await navigator.storage.persist(); } catch {}
   }
-  if (!doc.meta.company) { const dg = readDiagram(); if (dg?.meta?.company) { doc.meta.company = dg.meta.company; if (dg.meta.logo) doc.meta.logo = dg.meta.logo; } }
   dirtySinceBackup = !!doc.meta.updated && doc.meta.updated > lastBackup;
+  if (location.hash === "#diagram") state.tab = "diagram";
+  // The Diagram tab's page loads once the document is here, and stays loaded (off screen) so exports can draw it.
+  document.querySelector(".main").prepend(h("iframe", { id: "dframe", src: "diagram.html", title: "Network diagram", class: "offstage" }));
   renderAll();
 })();
 </script></body></html>

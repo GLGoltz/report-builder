@@ -55,10 +55,14 @@ function sspDiagram() {
   const box = h("div");
   const draw = () => box.replaceChildren(
     s.diagram && images[s.diagram] ? h("figure", { class: "card", style: "margin:0 0 10px" }, h("img", { src: images[s.diagram], alt: "Network diagram", style: "max-width:100%;display:block" })) : h("p", { class: "empty" }, "No diagram yet."),
-    h("div", { class: "tools" }, h("button", { class: "primary", onclick: async () => { const f = await pickFile("image/png,image/*"); if (!f) return; try { s.diagram = await addImageFull(f); commit(); draw(); renderRail(); } catch (e) { toast(e.message, true); } } }, s.diagram ? "Replace diagram" : "Add the diagram image"),
+    h("div", { class: "tools" }, h("button", { class: "primary", onclick: async () => {
+        const png = await diagramPNG(); if (!png) return toast("Your diagram is empty. Fill it in on the Diagram tab first.", true);
+        const id = newId("img"); images[id] = png; try { await imgPut(id, png); } catch { saveFailed = true; }
+        s.diagram = id; commit(); draw(); renderRail(); toast("Added your current diagram. Do this again whenever you change it."); } }, s.diagram ? "Update to my current diagram" : "Add my diagram"),
+      h("button", { onclick: async () => { const f = await pickFile("image/png,image/*"); if (!f) return; try { s.diagram = await addImageFull(f); commit(); draw(); renderRail(); } catch (e) { toast(e.message, true); } } }, "Upload an image instead"),
       s.diagram ? h("button", { class: "ghost", onclick: () => { s.diagram = ""; commit(); draw(); renderRail(); } }, "Remove") : null));
   draw();
-  return [h("h2", {}, "Network diagram"), h("p", { class: "sub" }, "In the Network Diagram app choose Export PNG, then add the file here. Before you export, check that every device has its address and hostname and every switch port shows its VLANs."), box];
+  return [h("h2", {}, "Network diagram"), h("p", { class: "sub" }, "Add my diagram takes a picture of your Diagram tab as it is now. Before you add it, check that every device has its address and hostname and every switch port shows its VLANs."), box];
 }
 // The diagram needs more pixels than a screenshot to stay readable when printed.
 async function addImageFull(file) {
@@ -76,11 +80,11 @@ function sspInventory() {
       rows.length ? h("button", { onclick: () => { const have = new Set(s.inventory.map((r) => r.device)); const seen = new Set(); let n = 0;
         for (const r of rows) { if (have.has(r.device) || seen.has(r.device)) continue; seen.add(r.device); s.inventory.push({ device: r.device, model: "", role: "", address: r.address, os: "" }); n++; }
         commit(); renderAll(); toast(n ? `Added ${n} device${n === 1 ? "" : "s"} from your diagram. Fill in model, role and OS.` : "Every device in your diagram is already listed."); } }, "Start from my diagram") : null,
-      h("span", { class: "hintline" }, rows.length ? "Your diagram was found in this browser." : "Open your Network Diagram in this browser to fill this in from it.")),
+      h("span", { class: "hintline" }, rows.length ? "Uses the addresses on your Diagram tab." : "Fill in the Diagram tab first, then come back.")),
     rowsTable(s.inventory, [["device", "Device"], ["model", "Model"], ["role", "Role", { area: true }], ["address", "Address", { cls: "mono" }], ["os", "OS or firmware"]], { addLabel: "Add device" }),
     h("h3", {}, "Addressing table"),
-    h("p", { class: "sub" }, s.addressingFrom ? `From your diagram, ${s.addressingFrom}. It isn't edited here: fix the diagram, then update.` : "Copied from your Network Diagram, so the plan and the diagram can't disagree."),
-    h("div", { class: "tools" }, h("button", { onclick: () => { if (!rows.length) return toast("No diagram with addresses was found in this browser. Open the Network Diagram app on this laptop first.", true); s.addressing = rows; s.addressingFrom = fmtTime(Date.now()); commit(); renderAll(); } }, s.addressing.length ? "Update from diagram" : "Copy from my diagram")),
+    h("p", { class: "sub" }, s.addressingFrom ? `From your Diagram tab, ${s.addressingFrom}. It isn't edited here: fix the diagram, then update.` : "Copied from your Diagram tab, so the plan and the diagram can't disagree."),
+    h("div", { class: "tools" }, h("button", { onclick: () => { if (!rows.length) return toast("Your Diagram tab has no addresses yet. Fill it in first.", true); s.addressing = rows; s.addressingFrom = fmtTime(Date.now()); commit(); renderAll(); } }, s.addressing.length ? "Update from diagram" : "Copy from my diagram")),
     s.addressing.length ? h("div", { class: "tbox" }, h("table", { class: "edit" }, h("thead", {}, h("tr", {}, ["Device", "Hostname", "Interface", "VLAN", "IP address", "Mask", "Gateway"].map((t) => h("th", {}, t)))),
       h("tbody", {}, s.addressing.map((r) => h("tr", {}, [r.device, r.hostname, r.iface, r.vlan, r.address, r.mask, r.gateway].map((x, i) => h("td", { class: i >= 4 ? "mono" : "" }, h("span", { class: "fixed" }, x || ""))))))) ) : null];
 }

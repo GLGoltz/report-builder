@@ -165,6 +165,10 @@ table.edit td.pattern .fixed{font-family:var(--mono);color:var(--muted);font-siz
 .hist li{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid var(--hair);padding:7px 0;font-size:13px}
 
 #print{display:none}
+#dframe{flex:1;border:0;width:100%;min-height:0;background:#fff}
+#dframe.offstage{position:absolute;left:-20000px;top:0;width:1400px;height:900px;visibility:hidden;flex:none}
+.main.diagram{overflow:hidden}
+@media (max-width:900px){.main.diagram{min-height:calc(100vh - 120px)}}
 
 @media (max-width:1150px){.panel{width:400px}}
 @media (max-width:900px){

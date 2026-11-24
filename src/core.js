@@ -1,7 +1,6 @@
 // ------------------------------------------------------------------ core: document, storage, files, UI helpers
 const SCHEMA = 1;
 const DB_NAME = "cyberhub-reports";
-const DIAGRAM_KEY = "cyberhub-diagram";      // the Network Diagram app's save; read only
 const ME_KEY = "cyberhub-reports-me";        // who's typing, per browser
 const HISTORY_DAYS = 14, HISTORY_EVERY = 5 * 60e3, BACKUP_EVERY = 3 * 60e3;
 
@@ -14,6 +13,7 @@ function blankDoc() {
   return {
     v: SCHEMA,
     meta: { company: "", tagline: "", logo: "", updated: 0, savedBy: "" },
+    diagram: null,      // the Diagram tab's document (src/diagram), saved here so it travels in the team file
     log: {
       cover: { rack: "", semester: "", diagramLink: "", chat: "", roster: [{ name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }] },
       agreement: { decisions: "", missed: "", reply: "", agreed: "" },
@@ -227,9 +227,44 @@ async function restoreBackupHandle() {
   } catch { backupHandle = null; }
 }
 
-// ---------------------------------------------------------------- the diagram app's saved copy
-function readDiagram() {
-  try { const s = localStorage.getItem(DIAGRAM_KEY); return s ? JSON.parse(s) : null; } catch { return null; }
+// ---------------------------------------------------------------- the Diagram tab
+// The diagram lives in doc.diagram. Company and logo live once, in doc.meta, and are handed to the diagram.
+const LOGO_MAX = 40000;   // the diagram's limit: its share link carries the logo
+window.rbDiagram = {
+  load() { const d = doc.diagram ? JSON.parse(JSON.stringify(doc.diagram)) : null; if (!d) return null;
+    d.meta = { ...(d.meta || {}), company: doc.meta.company || "" }; if (doc.meta.logo) d.meta.logo = doc.meta.logo; else delete d.meta.logo; return d; },
+  save(d) {
+    doc.diagram = d;
+    if (typeof d.meta?.company === "string" && d.meta.company) doc.meta.company = d.meta.company;
+    doc.meta.logo = d.meta?.logo || "";
+    commit(); return !saveFailed;
+  },
+};
+const dframe = () => $("dframe")?.contentWindow;
+function reloadDiagram() { try { dframe()?.rbReload?.(); } catch {} }
+async function diagramPNG() {
+  try { const w = dframe(); if (!w?.rbPNG || !w.rbHasContent?.()) return ""; return await w.rbPNG(); } catch { return ""; }
+}
+function readDiagram() { try { const d = dframe()?.rbDoc?.(); if (d) return d; } catch {} return doc.diagram; }
+// Logos are kept small enough for the diagram's share link.
+function readLogo(file) {
+  return new Promise((res, rej) => {
+    if (!file || !/^image\//.test(file.type)) return rej(new Error("That isn't an image."));
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = () => {
+      URL.revokeObjectURL(url);
+      for (const side of [400, 320, 256, 200, 160, 128]) for (const q of [0.85, 0.7, 0.55]) {
+        const k = Math.min(1, side / Math.max(im.width, im.height));
+        const c = document.createElement("canvas"); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+        let d = c.toDataURL("image/webp", q); if (!d.startsWith("data:image/webp")) d = c.toDataURL("image/png");
+        if (d.length <= LOGO_MAX) return res(d);
+      }
+      rej(new Error("That logo is too detailed to shrink. Try a simpler PNG."));
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); rej(new Error("That image couldn't be read.")); };
+    im.src = url;
+  });
 }
 function diagramAddressing(d) {
   const rows = [];

@@ -1,10 +1,10 @@
 # Report Builder
 
-The Cyber Hub teams' Team Log, Vulnerability Assessment Report (VAR) and System Security Plan (SSP), written as forms.
-The app lays out every PDF, so students never format a document. Sibling of the Network Diagram app.
+The Cyber Hub teams' Team Log, network diagram, Vulnerability Assessment Report (VAR) and System Security Plan (SSP),
+written as forms. The app lays out every PDF, so students never format a document.
 Live at https://glgoltz.github.io/report-builder/
 
-- **Build:** `node build.mjs` writes `index.html` from `src/` and `labs.json`. Commit both.
+- **Build:** `node build.mjs` writes `index.html` and `diagram.html` (the Diagram tab, from `src/diagram/`). Commit them.
 - **Course data:** `labs.json` holds each Cyber Hub's think questions and deliverables. Regenerate it from the course
   pages with `python3 ../report-builder/tools/labs.py`, run from the cyber-hub repo.
 - **Saving:** IndexedDB in the browser, a version history, an optional automatic backup file (Chrome and Edge), and
