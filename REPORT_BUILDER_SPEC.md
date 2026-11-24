@@ -163,7 +163,7 @@ table and a short "Ruled out" list, not as full findings.
    **Import the VAR findings** reads the assessors' `.cyberhub-findings` file and adds one row per finding with the
    plan left blank: the learning is the client deciding its response, not copying the assessors' fix.
 9. **Assessment history:** the three template rows.
-10. **Approval:** system owner, date, and a typed signature.
+10. **Approval:** system owner chosen from the Team Log roster, their role, and Click to sign (dated automatically, with Undo).
 
 ## 7. Exports
 

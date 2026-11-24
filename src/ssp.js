@@ -137,11 +137,23 @@ function sspHistory() {
     rowsTable(S().history, [["date", "Date", { type: "date", w: "140px" }], ["activity", "Activity", { area: true }], ["by", "Performed by"], ["result", "Result", { area: true, placeholder: "Findings by severity; closed and open" }]],
       { addLabel: "Add activity", blank: () => ({ id: newId("a"), date: "", activity: "", by: "", result: "" }) })];
 }
+// The owner is picked from the Team Log roster, so the name is typed once, and signs with one click.
 function sspApproval() {
-  const a = S().approval;
+  const a = S().approval, names = members();
+  if (a.owner && !names.includes(a.owner)) names.unshift(a.owner);   // a name from before the roster changed
+  const sign = (on) => { a.signature = on ? a.owner : ""; a.date = on ? today() : ""; commit(); renderAll(); };
+  const signed = a.signature && a.signature === a.owner && a.date;
   return [h("h2", {}, "Approval"), h("p", { class: "sub" }, "By signing, the system owner confirms this plan describes the system as built and accepts the risks in it."),
-    h("div", { class: "card grid2" }, field("System owner", a, "owner", { placeholder: "Name and role", req: true }), field("Date", a, "date", { type: "date", req: true }),
-      field("Signature", a, "signature", { wide: true, placeholder: "Full name", req: true }))];
+    h("div", { class: "card" },
+      names.length ? h("div", { class: "grid2" },
+        field("System owner", a, "owner", { req: true, options: [["", "Choose a team member"], ...names.map((n) => [n, n])], onchange: () => { if (a.signature && a.signature !== a.owner) { a.signature = ""; a.date = ""; } commit(); renderAll(); } }),
+        field("Role", a, "role", { placeholder: "Team lead" }))
+        : h("p", { class: "note" }, "Add your team to the roster on the Team Log cover first."),
+      h("div", { class: "field" }, h("label", {}, "Signature", h("span", { class: "req" }, " *")),
+        signed ? h("div", { class: "signrow signed" }, h("span", { class: "signname" }, a.owner), h("span", { class: "sigmark" }, a.signature),
+            h("span", { class: "signdate" }, "Signed " + fmtDate(a.date)), h("button", { class: "small ghost", "aria-label": "Undo the owner's signature", onclick: () => sign(false) }, "Undo"))
+          : h("div", { class: "signrow" }, h("span", { class: "signname" }, a.owner || "No owner chosen"),
+            h("button", { class: "small", disabled: a.owner ? null : "", "aria-label": a.owner ? `Sign as ${a.owner}` : "Sign", onclick: () => sign(true) }, "Click to sign"), h("span", {}), h("span", {}))))];
 }
 function sspMissing() {
   const m = [];

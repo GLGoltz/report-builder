@@ -485,7 +485,7 @@ function blankDoc() {
         { id: newId("a"), date: "", activity: "Outside vulnerability assessment", by: "", result: "" },
         { id: newId("a"), date: "", activity: "Re-scan after fixes", by: "", result: "" },
       ],
-      approval: { owner: "", date: "", signature: "" },
+      approval: { owner: "", role: "", date: "", signature: "" },
     },
   };
 }
@@ -1730,11 +1730,23 @@ function sspHistory() {
     rowsTable(S().history, [["date", "Date", { type: "date", w: "140px" }], ["activity", "Activity", { area: true }], ["by", "Performed by"], ["result", "Result", { area: true, placeholder: "Findings by severity; closed and open" }]],
       { addLabel: "Add activity", blank: () => ({ id: newId("a"), date: "", activity: "", by: "", result: "" }) })];
 }
+// The owner is picked from the Team Log roster, so the name is typed once, and signs with one click.
 function sspApproval() {
-  const a = S().approval;
+  const a = S().approval, names = members();
+  if (a.owner && !names.includes(a.owner)) names.unshift(a.owner);   // a name from before the roster changed
+  const sign = (on) => { a.signature = on ? a.owner : ""; a.date = on ? today() : ""; commit(); renderAll(); };
+  const signed = a.signature && a.signature === a.owner && a.date;
   return [h("h2", {}, "Approval"), h("p", { class: "sub" }, "By signing, the system owner confirms this plan describes the system as built and accepts the risks in it."),
-    h("div", { class: "card grid2" }, field("System owner", a, "owner", { placeholder: "Name and role", req: true }), field("Date", a, "date", { type: "date", req: true }),
-      field("Signature", a, "signature", { wide: true, placeholder: "Full name", req: true }))];
+    h("div", { class: "card" },
+      names.length ? h("div", { class: "grid2" },
+        field("System owner", a, "owner", { req: true, options: [["", "Choose a team member"], ...names.map((n) => [n, n])], onchange: () => { if (a.signature && a.signature !== a.owner) { a.signature = ""; a.date = ""; } commit(); renderAll(); } }),
+        field("Role", a, "role", { placeholder: "Team lead" }))
+        : h("p", { class: "note" }, "Add your team to the roster on the Team Log cover first."),
+      h("div", { class: "field" }, h("label", {}, "Signature", h("span", { class: "req" }, " *")),
+        signed ? h("div", { class: "signrow signed" }, h("span", { class: "signname" }, a.owner), h("span", { class: "sigmark" }, a.signature),
+            h("span", { class: "signdate" }, "Signed " + fmtDate(a.date)), h("button", { class: "small ghost", "aria-label": "Undo the owner's signature", onclick: () => sign(false) }, "Undo"))
+          : h("div", { class: "signrow" }, h("span", { class: "signname" }, a.owner || "No owner chosen"),
+            h("button", { class: "small", disabled: a.owner ? null : "", "aria-label": a.owner ? `Sign as ${a.owner}` : "Sign", onclick: () => sign(true) }, "Click to sign"), h("span", {}), h("span", {}))))];
 }
 function sspMissing() {
   const m = [];
@@ -1837,7 +1849,7 @@ function varHTML() {
 // ---- SSP
 function sspHTML() {
   const s = S(), i = s.ident;
-  let o = coverPage("System Security Plan", doc.meta.company || "System Security Plan", i.name, [["System", i.name], ["Location", i.location], ["Status", i.status], ["System owner", s.approval.owner], ["Approved", s.approval.date]], "Confidential: internal use only");
+  let o = coverPage("System Security Plan", doc.meta.company || "System Security Plan", i.name, [["System", i.name], ["Location", i.location], ["Status", i.status], ["System owner", [s.approval.owner, s.approval.role].filter(Boolean).join(", ")], ["Approved", s.approval.date]], "Confidential: internal use only");
   o += `<h1 class="s">1. System identification</h1>${form([["System name", i.name], ["Purpose", i.purpose], ["Location", i.location], ["Operational status", i.status], ["Users", i.users], ["Internet connection", i.internet]])}`;
   o += `<h1 class="s">2. System description</h1><p>${T(s.description)}</p>`;
   o += `<h1 class="s">3. Network diagram</h1>${s.diagram ? img(s.diagram, "Network diagram, exported from the Network Diagram app") : `<p class="blank">No diagram added.</p>`}`;
@@ -1849,7 +1861,7 @@ function sspHTML() {
   o += `<h1 class="s">7. Accepted risks</h1>${tbl(["Risk", "Justification", "Mitigating factors", "Accepted by", "Date"], s.risks.map((r) => [r.risk, r.why, r.limits, r.by, r.date]))}`;
   o += `<h1 class="s">8. Plan of Action and Milestones (POA&amp;M)</h1>${tbl(["ID", "Weakness", "Source", "Severity", "Response", "Plan", "Owner", "Target date", "Status", "Verified by"], s.poam.map((r) => [r.pid, r.weakness, r.source, r.severity, r.response, r.fix, r.owner, r.date, r.status, r.verified]))}`;
   o += `<h1 class="s">9. Assessment history</h1>${tbl(["Date", "Activity", "Performed by", "Result"], s.history.map((r) => [r.date, r.activity, r.by, r.result]))}`;
-  o += `<h1 class="s">10. Approval</h1><p>By signing, the system owner confirms this plan describes the system as built and accepts the risks in Section 7.</p>${form([["System owner", s.approval.owner], ["Signature", s.approval.signature ? `<span class="sig">${esc(s.approval.signature)}</span>` : T(""), true], ["Date", s.approval.date]])}`;
+  o += `<h1 class="s">10. Approval</h1><p>By signing, the system owner confirms this plan describes the system as built and accepts the risks in Section 7.</p>${form([["System owner", [s.approval.owner, s.approval.role].filter(Boolean).join(", ")], ["Signature", s.approval.signature ? `<span class="sig">${esc(s.approval.signature)}</span>` : T(""), true], ["Date", s.approval.date]])}`;
   return o;
 }
 

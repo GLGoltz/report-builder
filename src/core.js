@@ -46,7 +46,7 @@ function blankDoc() {
         { id: newId("a"), date: "", activity: "Outside vulnerability assessment", by: "", result: "" },
         { id: newId("a"), date: "", activity: "Re-scan after fixes", by: "", result: "" },
       ],
-      approval: { owner: "", date: "", signature: "" },
+      approval: { owner: "", role: "", date: "", signature: "" },
     },
   };
 }

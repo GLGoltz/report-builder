@@ -89,6 +89,13 @@ const fs = require('fs');
     const at = (px, py) => d[(py * w + px) * 4 + 3];
     return [r.canvas.width < 220, r.canvas.height < 220, at(0, 0), at(w >> 1, r.canvas.height >> 1) > 200]; });
   if (lg.join() !== 'true,true,0,true') errs.push('logo clean-up ' + lg); else t('logo margin trimmed, background transparent, enclosed shape kept');
+  // SSP approval: owner from the roster, Click to sign
+  await p.click('[data-tab=ssp]'); await p.click('.step:has-text("Approval")');
+  await p.locator('#work select').first().selectOption('Jay Lee');
+  await p.click('button[aria-label="Sign as Jay Lee"]');
+  const ap = await p.evaluate(() => [doc.ssp.approval.owner, doc.ssp.approval.signature, doc.ssp.approval.date === today()].join());
+  if (ap !== 'Jay Lee,Jay Lee,true') errs.push('ssp approval ' + ap); else t('SSP owner from the roster signs with one click');
+  await p.click('[data-tab=log]');
   // VAR scope fills from the client's rack
   await p.click('[data-tab=var]'); await p.click('.step:has-text("Cover")'); await p.fill('input[placeholder="1 to 8"]', '6');
   await p.click('.step:has-text("Scope")');

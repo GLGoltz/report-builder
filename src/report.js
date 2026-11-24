@@ -86,7 +86,7 @@ function varHTML() {
 // ---- SSP
 function sspHTML() {
   const s = S(), i = s.ident;
-  let o = coverPage("System Security Plan", doc.meta.company || "System Security Plan", i.name, [["System", i.name], ["Location", i.location], ["Status", i.status], ["System owner", s.approval.owner], ["Approved", s.approval.date]], "Confidential: internal use only");
+  let o = coverPage("System Security Plan", doc.meta.company || "System Security Plan", i.name, [["System", i.name], ["Location", i.location], ["Status", i.status], ["System owner", [s.approval.owner, s.approval.role].filter(Boolean).join(", ")], ["Approved", s.approval.date]], "Confidential: internal use only");
   o += `<h1 class="s">1. System identification</h1>${form([["System name", i.name], ["Purpose", i.purpose], ["Location", i.location], ["Operational status", i.status], ["Users", i.users], ["Internet connection", i.internet]])}`;
   o += `<h1 class="s">2. System description</h1><p>${T(s.description)}</p>`;
   o += `<h1 class="s">3. Network diagram</h1>${s.diagram ? img(s.diagram, "Network diagram, exported from the Network Diagram app") : `<p class="blank">No diagram added.</p>`}`;
@@ -98,7 +98,7 @@ function sspHTML() {
   o += `<h1 class="s">7. Accepted risks</h1>${tbl(["Risk", "Justification", "Mitigating factors", "Accepted by", "Date"], s.risks.map((r) => [r.risk, r.why, r.limits, r.by, r.date]))}`;
   o += `<h1 class="s">8. Plan of Action and Milestones (POA&amp;M)</h1>${tbl(["ID", "Weakness", "Source", "Severity", "Response", "Plan", "Owner", "Target date", "Status", "Verified by"], s.poam.map((r) => [r.pid, r.weakness, r.source, r.severity, r.response, r.fix, r.owner, r.date, r.status, r.verified]))}`;
   o += `<h1 class="s">9. Assessment history</h1>${tbl(["Date", "Activity", "Performed by", "Result"], s.history.map((r) => [r.date, r.activity, r.by, r.result]))}`;
-  o += `<h1 class="s">10. Approval</h1><p>By signing, the system owner confirms this plan describes the system as built and accepts the risks in Section 7.</p>${form([["System owner", s.approval.owner], ["Signature", s.approval.signature ? `<span class="sig">${esc(s.approval.signature)}</span>` : T(""), true], ["Date", s.approval.date]])}`;
+  o += `<h1 class="s">10. Approval</h1><p>By signing, the system owner confirms this plan describes the system as built and accepts the risks in Section 7.</p>${form([["System owner", [s.approval.owner, s.approval.role].filter(Boolean).join(", ")], ["Signature", s.approval.signature ? `<span class="sig">${esc(s.approval.signature)}</span>` : T(""), true], ["Date", s.approval.date]])}`;
   return o;
 }
 
