@@ -7,7 +7,7 @@ const img = (id, cap) => images[id] ? `<figure><img src="${images[id]}" alt="">$
 const sevTag = (s) => { const [n, c] = sevOf(s); return `<span class="sevtag" style="background:var(--${c})">${n} ${s.toFixed(1)}</span>`; };
 
 function coverPage(kind, title, sub, rows, conf, clientLogo) {
-  return `<section class="page cov">
+  return `<section class="page cov"><div class="band"></div>
     <div class="logos">${doc.meta.logo ? `<img src="${doc.meta.logo}" alt="">` : `<span></span>`}${clientLogo || ""}</div>
     <div class="kick">Cyber Hub 1.0 · ${esc(kind)}</div><h1>${esc(title)}</h1>${sub ? `<p class="for">${esc(sub)}</p>` : ""}
     <dl>${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${T(v)}</dd>`).join("")}</dl>
@@ -35,9 +35,10 @@ function hubHTML(l) {
   if (l.deliverables.length) s += `<h2 class="s">Deliverables</h2>`;
   for (const x of l.deliverables) {
     const sep = SEPARATE[`${l.num}-${x.n}`], dv = d.deliv[x.n] || { images: [], note: "", link: "" };
-    s += `<h3 class="s">Deliverable ${x.n}: ${esc(x.title)}</h3>`;
-    if (sep) s += sep[0] === "link" ? `<p>${T(dv.link)}</p>` : `<p class="blank">${esc(sep[1])}</p>`;
-    else s += dv.images.length ? dv.images.map((id, i) => img(id, `Cyber Hub ${l.num}, deliverable ${x.n}${dv.images.length > 1 ? ` (${i + 1})` : ""}`)).join("") : `<p class="blank">No ${x.kind.toLowerCase()} added yet.</p>`;
+    let body;
+    if (sep) body = sep[0] === "link" ? `<p>${T(dv.link)}</p>` : `<p class="blank">${esc(sep[1])}</p>`;
+    else body = dv.images.length ? dv.images.map((id, i) => img(id, `Cyber Hub ${l.num}, deliverable ${x.n}${dv.images.length > 1 ? ` (${i + 1})` : ""}`)).join("") : `<p class="blank">No ${x.kind.toLowerCase()} added yet.</p>`;
+    s += `<div class="card"><div class="ch"><b>Deliverable ${x.n}: ${esc(x.title)}</b><span class="tag">${esc(x.kind)}</span></div><div class="cb">${body}</div></div>`;
   }
   return s;
 }
@@ -50,7 +51,7 @@ function varHTML() {
     [["Prepared for", c.client + (c.clientRack ? `, Rack ${c.clientRack}` : "")], ["Prepared by", doc.meta.company], ["Assessment dates", c.dates], ["Report version", c.version], ["Assessment team", c.team], ["Client contact", c.contact]],
     "Confidential: for the client and instructor only");
   s += `<h1 class="s">1. Executive summary</h1><p>${T(v.summary)}</p>`;
-  s += `<table class="counts"><thead><tr><th>Critical</th><th>High</th><th>Medium</th><th>Low</th><th>Total</th></tr></thead><tbody><tr><td>${n.crit}</td><td>${n.high}</td><td>${n.med}</td><td>${n.low}</td><td>${real.length}</td></tr></tbody></table>`;
+  s += `<table class="counts"><thead><tr><th style="border-top-color:var(--crit)">Critical</th><th style="border-top-color:var(--high)">High</th><th style="border-top-color:var(--med)">Medium</th><th style="border-top-color:var(--low)">Low</th><th>Total</th></tr></thead><tbody><tr><td>${n.crit}</td><td>${n.high}</td><td>${n.med}</td><td>${n.low}</td><td>${real.length}</td></tr></tbody></table>`;
   s += `<div class="bar5">${[["crit", n.crit], ["high", n.high], ["med", n.med], ["low", n.low]].filter((x) => x[1]).map(([k, x]) => `<i style="background:var(--${k});width:${x / total * 100}%"></i>`).join("")}</div>`;
   s += `<p><b>Top priorities</b></p><ol>${v.recs.slice(0, 3).map((r) => `<li>${T(r.action)}</li>`).join("") || "<li><span class='blank'>None yet</span></li>"}</ol>`;
   s += `<h1 class="s">2. Scope and rules of engagement</h1><h2 class="s">In scope</h2>${tbl(["Target", "Address or range", "Notes"], v.scope.map((r) => [r.target, mono(r.range), r.notes]))}`;
@@ -60,7 +61,7 @@ function varHTML() {
   s += `<h1 class="s">5. Findings summary</h1>${tbl(["ID", "Finding", "Hosts", "Severity", "Status"], fs.map((f) => [fid(f), f.title, mono(f.hosts.join(", ")), { html: sevTag(scoreOf(f)) }, statusName(f.status)]))}`;
   s += `<h1 class="s" style="break-before:page">6. Finding details</h1>`;
   for (const f of real) {
-    s += `<div class="finding"><div class="fh">${sevTag(scoreOf(f))}<div><b>${fid(f)} ${T(f.title)}</b><br><code>${vector(f.v)}</code></div></div>${form([
+    s += `<div class="card"><div class="ch"><div><b>${fid(f)} ${T(f.title)}</b><code>${vector(f.v)}</code></div>${sevTag(scoreOf(f))}</div>${form([
       ["Host and port", [f.hosts.join(", "), f.port].filter(Boolean).join(", ")], ["Seen from", viewName(f.view)], ["Status", statusName(f.status)],
       ["What it is", f.what], ["Why it matters", f.why], ["Evidence", f.evidence], ["How we confirmed it", f.confirm], ["Recommended fix", f.fix]])}
       ${f.images.map((id, i) => img(id, `${fid(f)} evidence${f.images.length > 1 ? ` ${i + 1}` : ""}`)).join("")}</div>`;
@@ -106,7 +107,7 @@ async function exportDoc(kind, arg) {
   if (kind === "log-hub") {
     const l = LABS.find((x) => x.num === arg);
     title = `${co} Team Log, Cyber Hub ${l.num}`;
-    html = (l.num === "00" ? logCoverHTML() : `<p style="font:700 9pt Arial;letter-spacing:.12em;color:var(--navy);text-transform:uppercase">${esc(co)} · Team Log</p>`) + hubHTML(l).replace('style="break-before:page"', "")
+    html = (l.num === "00" ? logCoverHTML() : `<p class="runhead">${esc(co)} · Team Log</p>`) + hubHTML(l).replace('style="break-before:page"', "")
       + diagramHTML(`The diagram as of this export, Cyber Hub ${l.num}.`);
     if (!diagramImg && l.num !== "00") missing.push("Your network diagram (Diagram tab)");
     const d = doc.log.hubs[l.num];
@@ -120,7 +121,7 @@ async function exportDoc(kind, arg) {
   } else if (kind === "var") { title = `${co} VAR for ${V().cover.client || "client"}`; html = varHTML(); missing = varMissing().map((x) => x[1]); }
   else if (kind === "diagram") {
     title = `${co} network diagram`;
-    html = `<p style="font:700 9pt Arial;letter-spacing:.12em;color:var(--navy);text-transform:uppercase">${esc(co)}</p>` + diagramHTML("Exported " + new Date().toLocaleDateString()).replace(' style="break-before:page"', "");
+    html = `<p class="runhead">${esc(co)}</p>` + diagramHTML("Exported " + new Date().toLocaleDateString()).replace(' style="break-before:page"', "");
     if (!diagramImg) missing.push("The diagram itself");
   }
   else { title = `${co} System Security Plan`; html = sspHTML(); missing = sspMissing().map((x) => x[1]); }

@@ -185,48 +185,61 @@ table.edit td.pattern .fixed{font-family:var(--mono);color:var(--muted);font-siz
  .acts{margin-left:0}
 }
 
-/* ------------------------------------------------ printed documents */
-.doc{font:10.5pt/1.45 Arial,"Helvetica Neue",var(--sans);color:#1f2937}
+/* ------------------------------------------------ printed documents
+   Same tokens and components as the Canvas pages (cyber-hub components.py, canvas-style-guide.html):
+   navy section headings over a hairline rule, navy table headers with zebra rows, deliverable-style cards. */
+.doc{--ink:#0f172a;--head:#1e293b;--body:#334155;--muted:#64748b;--border:#cbd5e1;--hair:#e2e8f0;--zebra:#f1f5f9;--check:#006633;
+ font:10.5pt/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--body);-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .doc .page{break-after:page}
-.doc .cov{min-height:9in;display:flex;flex-direction:column}
-.doc .cov .logos{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.6in}
+.doc .cov{min-height:9.2in;display:flex;flex-direction:column}
+.doc .cov .band{height:10pt;background:var(--navy);margin:0 0 .5in}
+.doc .cov .logos{display:flex;justify-content:space-between;align-items:center;min-height:.9in;margin-bottom:1.2in}
 .doc .cov .logos img{max-height:.9in;max-width:2.4in}
-.doc .cov .kick{font:700 9pt Arial;letter-spacing:.12em;color:var(--navy);text-transform:uppercase}
-.doc .cov h1{font-size:28pt;line-height:1.1;margin:6pt 0 14pt;color:#0f172a}
-.doc .cov .for{font-size:15pt;color:#334155;margin:0 0 28pt}
-.doc .cov dl{display:grid;grid-template-columns:1.6in 1fr;gap:5pt 12pt;font-size:10.5pt;margin:0;border-top:2.5pt solid var(--navy);padding-top:14pt}
-.doc .cov dt{color:#64748b} .doc .cov dd{margin:0}
-.doc .cov .conf{margin-top:auto;font-size:9pt;color:#64748b}
-.doc h1.s{font-size:16pt;color:var(--navy);margin:20pt 0 8pt;break-after:avoid}
-.doc h2.s{font-size:12.5pt;color:#0f172a;margin:14pt 0 6pt;break-after:avoid}
-.doc h3.s{font-size:11pt;color:var(--navy);margin:10pt 0 4pt;break-after:avoid}
-.doc p{margin:0 0 6pt;white-space:pre-wrap}
-.doc .blank{color:#94a3b8;font-style:italic}
-.doc table{border-collapse:collapse;width:100%;margin:4pt 0 10pt;font-size:9.5pt;break-inside:auto}
+.doc .cov .kick{font-weight:700;font-size:9pt;letter-spacing:.12em;color:var(--navy);text-transform:uppercase}
+.doc .cov h1{font-size:30pt;line-height:1.1;margin:8pt 0 10pt;color:var(--navy)}
+.doc .cov .for{font-size:15pt;color:var(--head);margin:0 0 28pt}
+.doc .cov dl{display:grid;grid-template-columns:1.6in 1fr;gap:6pt 12pt;font-size:10.5pt;margin:0;border-top:2pt solid var(--hair);padding-top:14pt}
+.doc .cov dt{color:var(--navy);font-weight:700} .doc .cov dd{margin:0;color:var(--body)}
+.doc .cov .conf{margin-top:auto;font-size:9pt;color:var(--muted);border-top:1pt solid var(--hair);padding-top:8pt}
+.doc .runhead{font-weight:700;font-size:8.5pt;letter-spacing:.12em;color:var(--navy);text-transform:uppercase;margin:0 0 4pt}
+.doc h1.s{font-size:15pt;line-height:1.3;color:var(--navy);margin:22pt 0 10pt;padding-bottom:4pt;border-bottom:2pt solid var(--hair);break-after:avoid}
+.doc h2.s{font-size:12pt;color:var(--head);margin:14pt 0 6pt;break-after:avoid}
+.doc h3.s{font-size:11pt;color:var(--navy);margin:12pt 0 4pt;break-after:avoid}
+.doc p{margin:0 0 7pt;white-space:pre-wrap}
+.doc ol,.doc ul{margin:0 0 8pt;padding-left:18pt}
+.doc .blank{color:var(--muted);font-style:italic}
+.doc table{border-collapse:collapse;width:100%;margin:4pt 0 12pt;font-size:9.5pt;background:#fff;break-inside:auto}
 .doc tr{break-inside:avoid}
-.doc th,.doc td{border:.75pt solid #cbd5e1;padding:4pt 6pt;text-align:left;vertical-align:top}
-.doc thead th{background:#eef2f7}
-.doc table.form th{background:#eef2f7;width:1.9in}
-.doc td.mono{font-family:var(--mono);font-size:9pt}
-.doc .sevtag{display:inline-block;color:#fff;border-radius:3pt;padding:0 5pt;font-weight:700;font-size:8.5pt}
-.doc .finding{border:.75pt solid #cbd5e1;border-radius:5pt;margin:0 0 12pt;break-inside:avoid-page}
-.doc .finding .fh{display:flex;gap:10pt;align-items:center;background:#f1f5f9;padding:6pt 9pt;border-bottom:.75pt solid #cbd5e1}
-.doc .finding .fh b{font-size:11pt;color:#0f172a}
-.doc .finding .fh code{font-size:8pt;color:#64748b}
-.doc .finding table{margin:0;border:0}
-.doc .finding table th{width:1.6in;border-left:0}
-.doc .finding table td{border-right:0}
-.doc .finding tr:last-child th,.doc .finding tr:last-child td{border-bottom:0}
-.doc figure{margin:6pt 0 10pt;break-inside:avoid}
-.doc figure img{max-width:100%;max-height:6.5in;border:.75pt solid #cbd5e1}
-.doc figcaption{font-size:8.5pt;color:#64748b;margin-top:2pt}
-.doc .bar5{display:flex;height:8pt;border-radius:4pt;overflow:hidden;margin:4pt 0 10pt}
-.doc .counts td{text-align:center;font-size:14pt;font-weight:700}
-.doc .counts th{text-align:center}
-.doc .sig{display:inline-block;min-width:2.5in;border-bottom:.75pt solid #0f172a;font-family:"Segoe Script","Brush Script MT",cursive;font-size:14pt;padding:0 4pt}
+.doc th,.doc td{border:.75pt solid var(--border);padding:5pt 7pt;text-align:left;vertical-align:top}
+.doc thead th{background:var(--navy);color:#fff;font-weight:600}
+.doc tbody tr:nth-child(even) td{background:var(--zebra)}
+.doc table.form th{background:var(--zebra);color:var(--navy);font-weight:700;width:1.9in}
+.doc table.form tbody tr:nth-child(even) td{background:#fff}
+.doc td.mono,.doc code{font-family:Consolas,Menlo,Monaco,"Courier New",monospace;font-size:9pt;color:var(--ink)}
+.doc .sevtag{display:inline-block;color:#fff;border-radius:3pt;padding:1pt 6pt;font-weight:700;font-size:8.5pt;white-space:nowrap}
+.doc .card{border:1pt solid var(--border);border-radius:5pt;margin:0 0 12pt;overflow:hidden;break-inside:avoid-page;background:#fff}
+.doc .card .ch{display:flex;gap:10pt;align-items:center;justify-content:space-between;background:var(--navy);color:#fff;padding:6pt 10pt}
+.doc .card .ch b{font-size:11pt}
+.doc .card .ch .tag{background:#fff;color:var(--navy);border-radius:3pt;padding:1pt 6pt;font-size:8pt;font-weight:700;white-space:nowrap}
+.doc .card .ch code{color:#cbd5e1;font-size:8pt;display:block;margin-top:1pt}
+.doc .card .cb{padding:8pt 10pt}
+.doc .card table{margin:0;border:0}
+.doc .card table th{width:1.6in;border-left:0}
+.doc .card table td{border-right:0}
+.doc .card tr:first-child th,.doc .card tr:first-child td{border-top:0}
+.doc .card tr:last-child th,.doc .card tr:last-child td{border-bottom:0}
+.doc .card figure{margin:8pt 10pt}
+.doc figure{margin:6pt 0 12pt;break-inside:avoid}
+.doc figure img{display:block;max-width:100%;max-height:6.5in;border:1pt solid var(--border);border-radius:4pt}
+.doc figcaption{font-size:8.5pt;color:var(--muted);margin-top:3pt}
+.doc .bar5{display:flex;height:8pt;border-radius:4pt;overflow:hidden;margin:4pt 0 12pt;background:var(--zebra)}
+.doc .counts th,.doc .counts td{text-align:center;width:20%}
+.doc .counts td{font-size:16pt;font-weight:700;color:var(--ink);background:#fff!important}
+.doc .counts thead th{border-top-width:4pt}
+.doc .sig{display:inline-block;min-width:2.5in;border-bottom:.75pt solid var(--ink);font-family:"Segoe Script","Brush Script MT",cursive;font-size:14pt;padding:0 4pt}
 
 @media print{
- @page{size:letter;margin:.75in .75in .8in}
+ @page{size:letter;margin:.7in .75in .8in;@bottom-right{content:"Page " counter(page) " of " counter(pages);font:8pt system-ui,sans-serif;color:#64748b}}
  body{display:block;background:#fff}
  .bar,.savebar,.main,.toast,.modal{display:none!important}
  #print{display:block}
@@ -1369,7 +1382,7 @@ const img = (id, cap) => images[id] ? `<figure><img src="${images[id]}" alt="">$
 const sevTag = (s) => { const [n, c] = sevOf(s); return `<span class="sevtag" style="background:var(--${c})">${n} ${s.toFixed(1)}</span>`; };
 
 function coverPage(kind, title, sub, rows, conf, clientLogo) {
-  return `<section class="page cov">
+  return `<section class="page cov"><div class="band"></div>
     <div class="logos">${doc.meta.logo ? `<img src="${doc.meta.logo}" alt="">` : `<span></span>`}${clientLogo || ""}</div>
     <div class="kick">Cyber Hub 1.0 · ${esc(kind)}</div><h1>${esc(title)}</h1>${sub ? `<p class="for">${esc(sub)}</p>` : ""}
     <dl>${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${T(v)}</dd>`).join("")}</dl>
@@ -1397,9 +1410,10 @@ function hubHTML(l) {
   if (l.deliverables.length) s += `<h2 class="s">Deliverables</h2>`;
   for (const x of l.deliverables) {
     const sep = SEPARATE[`${l.num}-${x.n}`], dv = d.deliv[x.n] || { images: [], note: "", link: "" };
-    s += `<h3 class="s">Deliverable ${x.n}: ${esc(x.title)}</h3>`;
-    if (sep) s += sep[0] === "link" ? `<p>${T(dv.link)}</p>` : `<p class="blank">${esc(sep[1])}</p>`;
-    else s += dv.images.length ? dv.images.map((id, i) => img(id, `Cyber Hub ${l.num}, deliverable ${x.n}${dv.images.length > 1 ? ` (${i + 1})` : ""}`)).join("") : `<p class="blank">No ${x.kind.toLowerCase()} added yet.</p>`;
+    let body;
+    if (sep) body = sep[0] === "link" ? `<p>${T(dv.link)}</p>` : `<p class="blank">${esc(sep[1])}</p>`;
+    else body = dv.images.length ? dv.images.map((id, i) => img(id, `Cyber Hub ${l.num}, deliverable ${x.n}${dv.images.length > 1 ? ` (${i + 1})` : ""}`)).join("") : `<p class="blank">No ${x.kind.toLowerCase()} added yet.</p>`;
+    s += `<div class="card"><div class="ch"><b>Deliverable ${x.n}: ${esc(x.title)}</b><span class="tag">${esc(x.kind)}</span></div><div class="cb">${body}</div></div>`;
   }
   return s;
 }
@@ -1412,7 +1426,7 @@ function varHTML() {
     [["Prepared for", c.client + (c.clientRack ? `, Rack ${c.clientRack}` : "")], ["Prepared by", doc.meta.company], ["Assessment dates", c.dates], ["Report version", c.version], ["Assessment team", c.team], ["Client contact", c.contact]],
     "Confidential: for the client and instructor only");
   s += `<h1 class="s">1. Executive summary</h1><p>${T(v.summary)}</p>`;
-  s += `<table class="counts"><thead><tr><th>Critical</th><th>High</th><th>Medium</th><th>Low</th><th>Total</th></tr></thead><tbody><tr><td>${n.crit}</td><td>${n.high}</td><td>${n.med}</td><td>${n.low}</td><td>${real.length}</td></tr></tbody></table>`;
+  s += `<table class="counts"><thead><tr><th style="border-top-color:var(--crit)">Critical</th><th style="border-top-color:var(--high)">High</th><th style="border-top-color:var(--med)">Medium</th><th style="border-top-color:var(--low)">Low</th><th>Total</th></tr></thead><tbody><tr><td>${n.crit}</td><td>${n.high}</td><td>${n.med}</td><td>${n.low}</td><td>${real.length}</td></tr></tbody></table>`;
   s += `<div class="bar5">${[["crit", n.crit], ["high", n.high], ["med", n.med], ["low", n.low]].filter((x) => x[1]).map(([k, x]) => `<i style="background:var(--${k});width:${x / total * 100}%"></i>`).join("")}</div>`;
   s += `<p><b>Top priorities</b></p><ol>${v.recs.slice(0, 3).map((r) => `<li>${T(r.action)}</li>`).join("") || "<li><span class='blank'>None yet</span></li>"}</ol>`;
   s += `<h1 class="s">2. Scope and rules of engagement</h1><h2 class="s">In scope</h2>${tbl(["Target", "Address or range", "Notes"], v.scope.map((r) => [r.target, mono(r.range), r.notes]))}`;
@@ -1422,7 +1436,7 @@ function varHTML() {
   s += `<h1 class="s">5. Findings summary</h1>${tbl(["ID", "Finding", "Hosts", "Severity", "Status"], fs.map((f) => [fid(f), f.title, mono(f.hosts.join(", ")), { html: sevTag(scoreOf(f)) }, statusName(f.status)]))}`;
   s += `<h1 class="s" style="break-before:page">6. Finding details</h1>`;
   for (const f of real) {
-    s += `<div class="finding"><div class="fh">${sevTag(scoreOf(f))}<div><b>${fid(f)} ${T(f.title)}</b><br><code>${vector(f.v)}</code></div></div>${form([
+    s += `<div class="card"><div class="ch"><div><b>${fid(f)} ${T(f.title)}</b><code>${vector(f.v)}</code></div>${sevTag(scoreOf(f))}</div>${form([
       ["Host and port", [f.hosts.join(", "), f.port].filter(Boolean).join(", ")], ["Seen from", viewName(f.view)], ["Status", statusName(f.status)],
       ["What it is", f.what], ["Why it matters", f.why], ["Evidence", f.evidence], ["How we confirmed it", f.confirm], ["Recommended fix", f.fix]])}
       ${f.images.map((id, i) => img(id, `${fid(f)} evidence${f.images.length > 1 ? ` ${i + 1}` : ""}`)).join("")}</div>`;
@@ -1468,7 +1482,7 @@ async function exportDoc(kind, arg) {
   if (kind === "log-hub") {
     const l = LABS.find((x) => x.num === arg);
     title = `${co} Team Log, Cyber Hub ${l.num}`;
-    html = (l.num === "00" ? logCoverHTML() : `<p style="font:700 9pt Arial;letter-spacing:.12em;color:var(--navy);text-transform:uppercase">${esc(co)} · Team Log</p>`) + hubHTML(l).replace('style="break-before:page"', "")
+    html = (l.num === "00" ? logCoverHTML() : `<p class="runhead">${esc(co)} · Team Log</p>`) + hubHTML(l).replace('style="break-before:page"', "")
       + diagramHTML(`The diagram as of this export, Cyber Hub ${l.num}.`);
     if (!diagramImg && l.num !== "00") missing.push("Your network diagram (Diagram tab)");
     const d = doc.log.hubs[l.num];
@@ -1482,7 +1496,7 @@ async function exportDoc(kind, arg) {
   } else if (kind === "var") { title = `${co} VAR for ${V().cover.client || "client"}`; html = varHTML(); missing = varMissing().map((x) => x[1]); }
   else if (kind === "diagram") {
     title = `${co} network diagram`;
-    html = `<p style="font:700 9pt Arial;letter-spacing:.12em;color:var(--navy);text-transform:uppercase">${esc(co)}</p>` + diagramHTML("Exported " + new Date().toLocaleDateString()).replace(' style="break-before:page"', "");
+    html = `<p class="runhead">${esc(co)}</p>` + diagramHTML("Exported " + new Date().toLocaleDateString()).replace(' style="break-before:page"', "");
     if (!diagramImg) missing.push("The diagram itself");
   }
   else { title = `${co} System Security Plan`; html = sspHTML(); missing = sspMissing().map((x) => x[1]); }
