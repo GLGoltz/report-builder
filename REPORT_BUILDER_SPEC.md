@@ -20,7 +20,8 @@ so grading is about content.
 
 1. **No answers in the app.** As with the diagram app, nothing in the code holds a team's expected addresses,
    settings, findings or control answers. It holds only what the course pages already show: lab titles, think
-   questions, deliverable titles, the rack sheet's address patterns, the SSP's control list and requirements.
+   questions, deliverable titles, the addressing plan's patterns (Reference: Rack Schema and VLAN Plan), the Cyber
+   Hub 15 reset and drawer lists, the SSP's control list and requirements.
 2. **Nothing leaves the browser.** No server, no accounts, no analytics. Work is saved in the browser and in files
    the team keeps. Imported scan files are read in the browser and never uploaded.
 3. **Students do the thinking.** Imports bring raw data in. Every finding, answer and control statement is written,
@@ -37,8 +38,9 @@ so grading is about content.
   everything else. Company name and logo are entered once (`doc.meta`) and handed to the diagram, which uses them in
   its title and corner. The diagram frame loads `doc.diagram` through `window.parent.rbDiagram` and saves back the
   same way. Opened on its own with a share link, `diagram.html` is a view-only copy that saves nothing.
-- The diagram still never receives the rack number and never checks entries against the plan, even though the Team
-  Log's rack sheet knows the planned addresses. It shows what the team built.
+- The diagram asks the Report Builder for the rack number (`rbDiagram.rack()`) only to fill the Addressing table's
+  Planned column, which replaced the Team Log's rack sheet on Nov 24 2026. Entries that differ from the plan are
+  marked in amber there. The drawing, its checks and every export still show only what the team typed.
 
 ## 4. Saving, history and backups
 
@@ -83,21 +85,27 @@ The team file is one JSON file, extension `.cyberhub`, holding the whole workspa
 
 One log for the semester. Sections, in order:
 
-- **Cover:** company name and tagline, logo (kept under 40 KB, the diagram's limit), rack number, semester, two
-  team communication methods, roster (name, email).
-- **Team agreement:** decisions, missed labs, reply time, and each member's name typed to agree.
-- **Rack sheet:** the 17 rows of the Rack Schema page's table, filled in automatically from the cover's rack
-  number (Gabriel's decision: no busy work), plus Checked by teammate and Checked by instructor.
+- **Cover:** company name, logo, rack number, semester, roster (name, email; four rows to start). The logo is
+  cleaned on upload (`cleanLogo`): the empty margin is cropped and a plain background flooded in from the edges is
+  made transparent, along with small enclosed gaps such as letter counters. "Keep the original instead" undoes it.
+  Kept under 40 KB, the diagram's limit.
+- **Team agreement:** how we communicate, what happens when someone misses a lab, and each member's signature (their
+  roster name typed in full, dated automatically).
 - **One section per Cyber Hub, 00 to 15**, generated from `labs.json` (taken from the course pages):
-  sessions (date, who did what), commands and settings, problems and fixes (what broke, what you checked, what fixed
-  it), each Before you continue question with an answer box, and each deliverable with its instruction and a place
+  sessions (date, who did what), commands and settings (not in 00), troubleshooting tickets (issue, probable cause,
+  tests and results, resolution, verification, status, screenshots; not in 00 or 14), other screenshots and notes,
+  each Before you continue question with an answer box, and each deliverable with its instruction and a place
   for its screenshots or photo. Cyber Hub 05 adds the connectivity checkpoint table; Cyber Hub 12 adds the rules of
-  engagement. Deliverables that are separate documents (the VAR, the SSP, the private answer key, the briefing
+  engagement; Cyber Hub 15 adds the restoration record (`src/signoff.js`): a reset record per device, the Utility
+  Drawer list, and an instructor sign-off. The sign-off checks the instructor password against a salted PBKDF2 hash
+  (600,000 rounds) and stores a sign-off code, an HMAC of the record keyed by the password's other derived bits, plus a
+  SHA-256 seal that shows "changed after signing". Instructors confirm a code with Check a sign-off. The password is
+  never in either repository; `tools/signoff-hash.mjs` makes a new hash. Deliverables that are separate documents (the VAR, the SSP, the private answer key, the briefing
   slides) say where they go instead of taking an upload. The private answer key never goes in the app.
 - **Progress:** the rail shows each Cyber Hub as empty, started or complete (every question answered and every
   deliverable has an image).
 
-Exports: one Cyber Hub (what each page asks teams to submit), the cover and rack sheet (Cyber Hub 00), or the whole
+Exports: one Cyber Hub (what each page asks teams to submit), the cover and agreement (Cyber Hub 00), or the whole
 log (final submission). Every Team Log export ends with the network diagram as it is at that moment, so each
 Cyber Hub's submission shows the diagram update that page asked for.
 

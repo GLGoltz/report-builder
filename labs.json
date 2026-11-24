@@ -9,7 +9,7 @@
     "title": "Company profile",
     "role": "Team",
     "kind": "Document",
-    "instr": "In the Report Builder, export Cyber Hub 00 as a PDF. It holds your cover page, team agreement and rack sheet.",
+    "instr": "In the Report Builder, export Cyber Hub 00 as a PDF. It holds your cover page and team agreement.",
     "checks": [
      [
       "Company",
@@ -27,23 +27,6 @@
    },
    {
     "n": "2",
-    "title": "Rack sheet",
-    "role": "Team",
-    "kind": "Document",
-    "instr": "Your completed rack sheet, in the same Cyber Hub 00 export.",
-    "checks": [
-     [
-      "Rack",
-      "The rack number you were assigned"
-     ],
-     [
-      "Checked",
-      "Signed off by a teammate and the instructor"
-     ]
-    ]
-   },
-   {
-    "n": "3",
     "title": "Rack and stack",
     "role": "Server",
     "kind": "Photo",
@@ -280,7 +263,7 @@
     "checks": [
      [
       "SVIs",
-      "An SVI for each VLAN the switch routes, matching your rack sheet"
+      "An SVI for each VLAN the switch routes, matching your addressing plan"
      ],
      [
       "No extras",
@@ -369,7 +352,7 @@
     "checks": [
      [
       "Address",
-      "The NAS's fixed address from your rack sheet"
+      "The NAS's fixed address from your addressing plan"
      ],
      [
       "Version",
@@ -882,6 +865,23 @@
      [
       "Page",
       "The default login at https://192.168.1.99"
+     ]
+    ]
+   },
+   {
+    "n": "3",
+    "title": "Restoration record",
+    "role": "Team",
+    "kind": "Document",
+    "instr": "Your reset record and drawer list, signed by the instructor, in the same Cyber Hub 15 export.",
+    "checks": [
+     [
+      "Complete",
+      "Every device and drawer item ticked, with how you checked each reset"
+     ],
+     [
+      "Signed",
+      "Verified by the instructor, with a sign-off code"
      ]
     ]
    }

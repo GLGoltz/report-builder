@@ -62,14 +62,28 @@ function varCover() {
     h("div", { class: "card grid2" },
       h("div", { class: "field" }, h("label", {}, "Prepared by (your company)"), h("div", {}, doc.meta.company || h("span", { class: "hintline" }, "Set it on the Team Log cover."))),
       h("div", { class: "field" }, h("label", {}, "Logo"), doc.meta.logo ? h("img", { src: doc.meta.logo, alt: "", style: "max-height:40px" }) : h("span", { class: "hintline" }, "Upload it on the Team Log cover.")),
-      field("Client company", c, "client", { req: true }), field("Client's rack", c, "clientRack", { placeholder: "1 to 8" }),
+      field("Client company", c, "client", { req: true }), field("Client's rack", c, "clientRack", { placeholder: "1 to 8", hint: "The scope's addresses fill in from this.", oninput: () => { fillScope(); commit(); } }),
       field("Assessment dates", c, "dates", { placeholder: "Nov 16 to Nov 20, 2026" }), field("Report version", c, "version", { hint: "1.0 for the copy you give the client." }),
       field("Assessment team", c, "team", { wide: true, area: true, req: true, placeholder: "Names and roles, for example: Jordan Lee, lead assessor" }),
-      field("Client contact", c, "contact", { wide: true, placeholder: "The client team member who agreed to the rules of engagement" }))];
+      field("Client contact", c, "contact", { wide: true, placeholder: "Name", hint: "The client team member who agreed to the rules of engagement." }))];
+}
+// The standard scope fills in from the client's rack: the same three targets every assessment covers.
+// A range the team typed themselves is left alone; only empty or earlier auto-filled ranges change.
+const SCOPE_AUTO = { "Data subnet": "10.R.20.0/24", "DMZ subnet": "10.R.40.0/24", "Firewall WAN address": "10.R.200.2" };
+function fillScope() {
+  const v = V(), r = String(v.cover.clientRack || "").trim();
+  if (!/^[1-8]$/.test(r)) return;
+  for (const row of v.scope) {
+    const pat = SCOPE_AUTO[row.target];
+    if (!pat) continue;
+    const re = new RegExp("^" + pat.replace(/\./g, "\\.").replace("R", "[1-8]") + "$");
+    if (!row.range.trim() || re.test(row.range.trim())) row.range = pat.replace("R", r);
+  }
 }
 function varScope() {
   const v = V();
-  return [h("h2", {}, "Scope and rules of engagement"), h("p", { class: "sub" }, "Exactly what you were allowed to test. Use the client's real addresses, not the R pattern."),
+  fillScope();
+  return [h("h2", {}, "Scope and rules of engagement"), h("p", { class: "sub" }, "Exactly what you were allowed to test. The three standard targets fill in from the client's rack on the cover. Check them against the rules of engagement you agreed, and add anything else you agreed to test."),
     h("h3", {}, "In scope"),
     rowsTable(v.scope, [["target", "Target"], ["range", "Address or range", { cls: "mono", placeholder: "10.R.20.0/24" }], ["notes", "Notes"]], { addLabel: "Add target" }),
     h("h3", {}, "Out of scope"), field("", v, "outScope", { area: true, placeholder: "What you agreed not to touch, such as the Management, Storage and Transit VLANs, other racks and campus networks" }),
@@ -80,7 +94,7 @@ function varScope() {
 }
 function varMethod() {
   return [h("h2", {}, "Method"), h("p", { class: "sub" }, "What you did, in order, so another assessor could repeat it. Give the exact options you used."),
-    rowsTable(V().method, [["step", "Step", { w: "20%" }], ["tool", "Tool and settings", { area: true, placeholder: "Nmap -sn 10.3.20.0/24 …" }], ["purpose", "Purpose", { area: true }]], { addLabel: "Add step" })];
+    rowsTable(V().method, [["step", "Step", { w: "20%" }], ["tool", "Tool and settings", { area: true, placeholder: "nmap -sn 10.3.20.0/24" }], ["purpose", "Purpose", { area: true }]], { addLabel: "Add step" })];
 }
 
 // ---- hosts and Nmap import

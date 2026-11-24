@@ -119,7 +119,7 @@ table.edit td.pattern .fixed{font-family:var(--mono);color:var(--muted);font-siz
 .frow:hover{border-color:#94a3b8;background:#fff}
 .frow[aria-current=true]{border-color:var(--navy);box-shadow:0 0 0 1px var(--navy)}
 .frow .t{display:block;color:var(--ink);font-weight:600}
-.frow .m{display:block;color:var(--muted);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frow .m{display:block;color:var(--muted);font-size:12.5px}
 .frow.dim{opacity:.6}
 .sev{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;border-radius:7px;color:#fff;padding:5px 0;width:64px;font-variant-numeric:tabular-nums;line-height:1.1}
 .sev b{font:600 15px/1 var(--mono)}
@@ -194,8 +194,8 @@ table.edit td.pattern .fixed{font-family:var(--mono);color:var(--muted);font-siz
 .doc .page{break-after:page}
 .doc .cov{min-height:9.2in;display:flex;flex-direction:column}
 .doc .cov .band{height:10pt;background:var(--navy);margin:0 0 .5in}
-.doc .cov .logos{display:flex;justify-content:space-between;align-items:center;min-height:.9in;margin-bottom:1.2in}
-.doc .cov .logos img{max-height:.9in;max-width:2.4in}
+.doc .cov .logos{display:flex;justify-content:space-between;align-items:center;min-height:1.4in;margin-bottom:.9in}
+.doc .cov .logos img{max-height:1.4in;max-width:3in}
 .doc .cov .kick{font-weight:700;font-size:9pt;letter-spacing:.12em;color:var(--navy);text-transform:uppercase}
 .doc .cov h1{font-size:30pt;line-height:1.1;margin:8pt 0 10pt;color:var(--navy)}
 .doc .cov .for{font-size:15pt;color:var(--head);margin:0 0 28pt}
@@ -289,6 +289,21 @@ button.big{padding:8px 14px;font-weight:600}
 .wsec h3{font-size:13px;color:var(--navy);margin:14px 0 4px;text-transform:uppercase;letter-spacing:.05em}
 .wsec ul{margin:0;padding-left:18px}
 .wsec li{margin:0 0 5px}
+
+/* Cyber Hub 15 restoration record */
+table.edit.restore td.ctr{text-align:center;vertical-align:middle}
+.tickbox{display:inline-flex;align-items:center;justify-content:center;min-width:32px;min-height:32px;cursor:pointer}
+.tickbox input{width:20px;height:20px;accent-color:var(--navy,#003366);cursor:pointer}
+.card.signoff .grid2{margin-top:10px}
+.signed-by{display:flex;gap:14px;align-items:center}
+.signed-by .seal{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:#1f5f3a;color:#fff;font-size:22px;font-weight:700;flex:none}
+.signed-by code{font-size:15px;letter-spacing:.06em;background:#eef2f7;padding:2px 6px;border-radius:4px}
+.doc table.restore td:nth-child(3),.doc table.restore td:last-child,.doc table.restore th:last-child{white-space:nowrap}
+/* Cover logo: shown on a checkerboard so a transparent background is visible */
+.logowell{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.logoprev{padding:6px;border:1px solid var(--border);border-radius:6px;background:#fff conic-gradient(#eef2f7 25%,#fff 0 50%,#eef2f7 0 75%,#fff 0) 0 0/14px 14px}
+.logoprev img{display:block;max-height:72px;max-width:240px}
+.logowell .tools{margin:0}
 </style></head><body>
 <header class="bar">
  <div class="brand"><b>Report Builder</b><small id="brand-co">Cyber Hub</small></div>
@@ -326,28 +341,29 @@ button.big{padding:8px 14px;font-weight:600}
 <script>// ------------------------------------------------------------------ course data
 // Only what the course pages already show students. No answers, no expected values (spec section 2).
 // LABS is generated from the course pages by tools/labs.py and injected by build.mjs.
-const LABS = [{"num":"00","title":"Launch Your Company","questions":[],"deliverables":[{"n":"1","title":"Company profile","role":"Team","kind":"Document","instr":"In the Report Builder, export Cyber Hub 00 as a PDF. It holds your cover page, team agreement and rack sheet.","checks":[["Company","Name and original logo"],["Roster","Every team member"],["Agreement","Communication methods and missed labs, signed by every member"]]},{"n":"2","title":"Rack sheet","role":"Team","kind":"Document","instr":"Your completed rack sheet, in the same Cyber Hub 00 export.","checks":[["Rack","The rack number you were assigned"],["Checked","Signed off by a teammate and the instructor"]]},{"n":"3","title":"Rack and stack","role":"Server","kind":"Photo","instr":"Take a photo of your team holding the server off its rails.","checks":[["Lifted","The server is off the rails, held by two people, one on each side"]]}]},{"num":"01","title":"Switch Provisioning","questions":[],"deliverables":[{"n":"1","title":"OOB interface summary","role":"Core switch","kind":"Screenshot","instr":"Show the switch's interface IP summary in the console window.","checks":[["Prompt","Shows the hostname rackR-core-sw"],["OOB address","192.168.1.254 / 255.255.255.0"],["Window","The whole console window is visible and uncropped"]]},{"n":"2","title":"Saved configuration","role":"Core switch","kind":"Screenshot","instr":"Show the startup configuration after saving.","checks":[["Hostname","Present in the startup configuration"],["OOB address","Present in the startup configuration"],["Window","The whole console window is visible and uncropped"]]}]},{"num":"02","title":"Perimeter Firewall","questions":[],"deliverables":[{"n":"1","title":"Interface settings","role":"Firewall","kind":"Screenshot","instr":"Show the firewall's network interfaces list.","checks":[["Addresses","wan1, internal and dmz match the table in Part 4"],["Access","Administrative access matches the table"],["Hostname","Shows rackR-fw"]]},{"n":"2","title":"Static routes","role":"Firewall","kind":"Screenshot","instr":"Show the static route list, or the routing table from the CLI.","checks":[["Default route","0.0.0.0/0 through 10.R.200.1"],["Internal routes","Management, Data and Storage through 10.R.100.254"]]},{"n":"3","title":"Provider services","role":"Firewall","kind":"Screenshot","instr":"Show the firewall CLI pinging your provider's gateway and the lab name server, then the NTP status.","checks":[["Gateway","Replies from 10.R.200.1"],["DNS","ns.lab resolves to 203.0.113.10 and replies"],["Time","The NTP server 203.0.113.10 is synchronized"]]}]},{"num":"03","title":"Firewall Policies and Guest Wi-Fi","questions":["Upstream_Services and DMZ_to_Repo each allow one destination and a few services. Which of your devices will use them, and what would they lose without them?"],"deliverables":[{"n":"1","title":"Policies and virtual IPs","role":"Firewall","kind":"Screenshot","instr":"Show the firewall policy table and the virtual IP list.","checks":[["Policies","All seven policies with the services and NAT settings above"],["VIPs","All three mappings point into the DMZ"]]},{"n":"2","title":"Guest network lease","role":"Firewall","kind":"Screenshot","instr":"Show the guest interface's DHCP leases.","checks":[["SSID","[Company]-Guest"],["Lease","The guest laptop has an address in 10.R.50.0/24"]]},{"n":"3","title":"Guest isolation","role":"Laptop","kind":"Screenshot","instr":"On the guest network, show the laptop's address beside a failed attempt to reach the firewall.","checks":[["Address","In 10.R.50.0/24"],["Blocked","10.R.100.1 does not respond"]]}]},{"num":"04","title":"Core Switching and VLANs","questions":["The plan leaves VLAN 1 unused and puts unused ports in VLAN 999. What could happen if a stray cable were plugged into an unconfigured port otherwise?","Which VLANs get no SVI, and why?","Which next hop did you use for the default route, and why that address?"],"deliverables":[{"n":"1","title":"Management services","role":"Core switch","kind":"Screenshot","instr":"Show the TCP/UDP services page.","checks":[["Enabled","SSH and HTTPS"],["Disabled","Telnet and HTTP"]]},{"n":"2","title":"VLAN table","role":"Core switch","kind":"Screenshot","instr":"Show the VLAN table.","checks":[["VLANs","Every VLAN in the plan, with matching IDs and names"]]},{"n":"3","title":"VLAN interfaces","role":"Core switch","kind":"Screenshot","instr":"Show the IPv4 interfaces list.","checks":[["SVIs","An SVI for each VLAN the switch routes, matching your rack sheet"],["No extras","No SVI on a VLAN the switch shouldn't route"]]}]},{"num":"05","title":"Switch Ports and DHCP","questions":["Before you test: if the switch's default route were missing, which row would fail first, and why?","After you test: what does each passing row prove? Explain any result that didn't match your prediction."],"deliverables":[{"n":"1","title":"Port settings","role":"Core switch","kind":"Screenshot","instr":"Show the interface and VLAN membership settings.","checks":[["Trunk","XG3 with the right untagged and tagged VLANs"],["Access","Every other port matches the port map"],["Parking","XG6 to XG8 in VLAN 999 and shut down"]]},{"n":"2","title":"Connectivity checkpoint","role":"Laptop","kind":"Screenshot","instr":"Show your laptop's address in a terminal beside the firewall login page, loaded from the Data VLAN.","checks":[["Address","From the Data pool"],["Page","The firewall login page at https://10.R.100.1"]]}]},{"num":"06","title":"Network Storage","questions":["How many drives can fail before this pool loses data?","What does RAID 5 give up in exchange for that protection?","Your Data laptop can ping the NAS. Can it also open the NAS's login page, and should it be able to?"],"deliverables":[{"n":"1","title":"NAS discovery","role":"Core switch","kind":"Screenshot","instr":"Show the DHCP bindings page.","checks":[["Bindings","Your laptop and the NAS"]]},{"n":"2","title":"DSM Info Center","role":"NAS","kind":"Screenshot","instr":"Show DSM's Info Center.","checks":[["Address","The NAS's fixed address from your rack sheet"],["Version","The DSM version is visible"]]},{"n":"3","title":"NFS permissions","role":"NAS","kind":"Screenshot","instr":"Show the NFS service and the share's NFS permissions.","checks":[["Service","NFS enabled"],["Clients","Only the subnets that need the share"],["Squash","No mapping"]]},{"n":"4","title":"Storage reachability","role":"Laptop","kind":"Screenshot","instr":"Show a successful ping to the NAS.","checks":[["Source","A laptop on the Data or Management VLAN"],["Target","10.R.30.10"]]}]},{"num":"07","title":"Hypervisor and Shared Storage","questions":["XG3 is a trunk. Why does vmbr0 have to be VLAN-aware for your VMs to use it?"],"deliverables":[{"n":"1","title":"Proxmox console","role":"Hypervisor","kind":"Photo","instr":"Take a photo of the server monitor showing the Proxmox console.","checks":[["Address","The web interface address on the Management VLAN"],["Legible","The text is sharp and readable"]]},{"n":"2","title":"Bridge and storage","role":"Hypervisor","kind":"Screenshot","instr":"Show vmbr0's settings and the Datacenter storage list.","checks":[["Bridge","VLAN-aware is on"],["Storage","The NFS share is active"]]}]},{"num":"08","title":"DMZ Web Server","questions":["If you left the VM's VLAN tag blank, which network would it land on, and why?","For each test, which firewall policy or setting from Cyber Hub 03 makes it work?","The laptop on CyberHub-Internet opens your public name instead of the web server's address. Which address does that name resolve to, and why can't it be the web server's own?"],"deliverables":[{"n":"1","title":"Web server VM","role":"Hypervisor","kind":"Screenshot","instr":"Show the VM's hardware summary.","checks":[["Network","Tagged into the DMZ VLAN"],["Disk","On the NFS storage"]]},{"n":"2","title":"Page from the internet","role":"Laptop","kind":"Screenshot","instr":"Show your company homepage loaded on a laptop on CyberHub-Internet, with the laptop's address beside it.","checks":[["Address bar","http://www.rackR.lab"],["Content","Your company homepage with its logo"],["Outside","A terminal shows the laptop's 198.51.100.x address"]]},{"n":"3","title":"Page from the guest Wi-Fi","role":"Laptop","kind":"Screenshot","instr":"Show your company homepage loaded from a laptop on the guest Wi-Fi.","checks":[["Address bar","http://10.R.40.10"],["Network","The laptop is on [Company]-Guest"]]}]},{"num":"09","title":"Services and Traffic Analysis","questions":["Which settings from Cyber Hub 04 protect the switch's own logins from this kind of capture?"],"deliverables":[{"n":"1","title":"FTP server VM","role":"Hypervisor","kind":"Screenshot","instr":"Show the VM's hardware summary.","checks":[["Network","Tagged into the DMZ VLAN"],["Disk","On the NFS storage"]]},{"n":"2","title":"FTP installation","role":"FTP server","kind":"Screenshot","instr":"Show the install output and the service status.","checks":[["Install","Completes without errors"],["Status","Active"]]},{"n":"3","title":"Cleartext password","role":"Laptop","kind":"Screenshot","instr":"Show the Wireshark packet with the password.","checks":[["Packet","The password is visible in plain text"],["Server","10.R.40.11"]]}]},{"num":"10","title":"Scanner Appliance","questions":["Why give the scanner its own narrow, logged policy instead of widening an existing one?","Which finding on the FTP server matches what you captured in Cyber Hub 09?","Pick one other finding. Is it a real risk for your company, or something you would accept? Why?"],"deliverables":[{"n":"1","title":"Scanner appliance","role":"Hypervisor","kind":"Screenshot","instr":"Show the scanner VM's summary in Proxmox beside Greenbone's feed status.","checks":[["VM","rackR-scan running, disk on the NFS storage"],["Feed","The last sync date is shown"]]},{"n":"2","title":"Baseline scan","role":"Laptop","kind":"Screenshot","instr":"Show the results summary of the DMZ baseline scan.","checks":[["Targets","Both DMZ servers"],["Status","The scan is complete"]]}]},{"num":"11","title":"Build the Vulnerable Pi","questions":[],"deliverables":[{"n":"1","title":"Self-scan results","role":"Laptop","kind":"Screenshot","instr":"Show Greenbone's results for your Pi.","checks":[["Target","Your Pi's address on the Data VLAN"],["Findings","All four planted weaknesses appear"]]},{"n":"2","title":"Private answer key","role":"Instructor only","kind":"Document","instr":"Submit the answer key from Part 3 to the instructor only.","checks":[["Weaknesses","All four, each with how it was configured"],["Fixes","Exact steps to fix each one"]]}]},{"num":"12","title":"Vulnerability Assessment","questions":["The WAN scan found open ports even though ping is off. What does that say about hiding a device from ping?","Compare the two views. Which of the target's services can anyone on the internet reach, and which only an insider? Which would you fix first, and why?"],"deliverables":[{"n":"1","title":"Hosted appliance","role":"Laptop","kind":"Screenshot","instr":"Show your appliance's web interface, reached from your laptop on the target's Data VLAN.","checks":[["Address","The appliance's address on the target's Data VLAN"],["Feed","The feed date is visible"]]},{"n":"2","title":"Network map","role":"Laptop","kind":"Screenshot","instr":"Show the Nmap results.","checks":[["Internal","Live hosts on the target's Data and DMZ subnets"],["External","Open ports and services on the target's WAN address, scanned from CyberHub-Internet"]]},{"n":"3","title":"Scan results","role":"Laptop","kind":"Screenshot","instr":"Show Greenbone's results summary.","checks":[["Hosts","Every host in scope"],["Severity","Findings sorted by severity"]]},{"n":"4","title":"Assessment in your logs","role":"Firewall","kind":"Screenshot","instr":"Show the assessment in your firewall's forward traffic log.","checks":[["Appliance","Sessions from 10.R.20.50 to the DMZ"],["Assessors","Traffic from the assessors' laptop"],["External","Sessions from a 198.51.100.x address on Allow_Inbound_Services"]]},{"n":"5","title":"Vulnerability Assessment Report","role":"Target team","kind":"Document","instr":"Export the VAR as a PDF from the Report Builder and submit it before Cyber Hub 13. Then choose Send findings to the client. In Google Drive, share the PDF and the findings file with each member of the target team by name, with general access set to Restricted. They import the findings file into their POA&M.","checks":[["Delivered","Shared with the target team's members only"],["Scope","Hosts and subnets assessed, the external and internal views, and the rules of engagement"],["Findings","Each with severity, evidence and validation status"],["Fixes","In priority order"]]}]},{"num":"13","title":"Remediation and SSP","questions":["Why does closing the FTP finding take more than stopping the service?"],"deliverables":[{"n":"1","title":"Before and after scans","role":"Scanner","kind":"Screenshot","instr":"Show your scan results from Cyber Hubs 10 and 11 next to your new scan.","checks":[["Before","The findings from your earlier scans"],["After","The fixed findings are gone"]]},{"n":"2","title":"System Security Plan","role":"Your rack","kind":"Document","instr":"Export the SSP as a PDF from the Report Builder and submit it.","checks":[["Description","Matches your rack as built"],["POA&M","Every finding, with status"],["Accepted risks","Each with its reason"]]}]},{"num":"14","title":"Physical Security Briefing","questions":[],"deliverables":[{"n":"1","title":"CISO briefing","role":"Live","kind":"Presentation","instr":"Give the briefing and submit the slides.","checks":[["Trust","Why the target trusts the tool"],["Attack chain","How the attack unfolds"],["Defenses","Detection and prevention, tied to your rack"]]}]},{"num":"15","title":"Lab Restoration","questions":[],"deliverables":[{"n":"1","title":"Switch reset","role":"Core switch","kind":"Screenshot","instr":"Show the switch at its default login prompt.","checks":[["Prompt","Default, with no hostname"]]},{"n":"2","title":"Firewall reset","role":"Firewall","kind":"Screenshot","instr":"Show the firewall's default login page.","checks":[["Page","The default login at https://192.168.1.99"]]}]}];
+const LABS = [{"num":"00","title":"Launch Your Company","questions":[],"deliverables":[{"n":"1","title":"Company profile","role":"Team","kind":"Document","instr":"In the Report Builder, export Cyber Hub 00 as a PDF. It holds your cover page and team agreement.","checks":[["Company","Name and original logo"],["Roster","Every team member"],["Agreement","Communication methods and missed labs, signed by every member"]]},{"n":"2","title":"Rack and stack","role":"Server","kind":"Photo","instr":"Take a photo of your team holding the server off its rails.","checks":[["Lifted","The server is off the rails, held by two people, one on each side"]]}]},{"num":"01","title":"Switch Provisioning","questions":[],"deliverables":[{"n":"1","title":"OOB interface summary","role":"Core switch","kind":"Screenshot","instr":"Show the switch's interface IP summary in the console window.","checks":[["Prompt","Shows the hostname rackR-core-sw"],["OOB address","192.168.1.254 / 255.255.255.0"],["Window","The whole console window is visible and uncropped"]]},{"n":"2","title":"Saved configuration","role":"Core switch","kind":"Screenshot","instr":"Show the startup configuration after saving.","checks":[["Hostname","Present in the startup configuration"],["OOB address","Present in the startup configuration"],["Window","The whole console window is visible and uncropped"]]}]},{"num":"02","title":"Perimeter Firewall","questions":[],"deliverables":[{"n":"1","title":"Interface settings","role":"Firewall","kind":"Screenshot","instr":"Show the firewall's network interfaces list.","checks":[["Addresses","wan1, internal and dmz match the table in Part 4"],["Access","Administrative access matches the table"],["Hostname","Shows rackR-fw"]]},{"n":"2","title":"Static routes","role":"Firewall","kind":"Screenshot","instr":"Show the static route list, or the routing table from the CLI.","checks":[["Default route","0.0.0.0/0 through 10.R.200.1"],["Internal routes","Management, Data and Storage through 10.R.100.254"]]},{"n":"3","title":"Provider services","role":"Firewall","kind":"Screenshot","instr":"Show the firewall CLI pinging your provider's gateway and the lab name server, then the NTP status.","checks":[["Gateway","Replies from 10.R.200.1"],["DNS","ns.lab resolves to 203.0.113.10 and replies"],["Time","The NTP server 203.0.113.10 is synchronized"]]}]},{"num":"03","title":"Firewall Policies and Guest Wi-Fi","questions":["Upstream_Services and DMZ_to_Repo each allow one destination and a few services. Which of your devices will use them, and what would they lose without them?"],"deliverables":[{"n":"1","title":"Policies and virtual IPs","role":"Firewall","kind":"Screenshot","instr":"Show the firewall policy table and the virtual IP list.","checks":[["Policies","All seven policies with the services and NAT settings above"],["VIPs","All three mappings point into the DMZ"]]},{"n":"2","title":"Guest network lease","role":"Firewall","kind":"Screenshot","instr":"Show the guest interface's DHCP leases.","checks":[["SSID","[Company]-Guest"],["Lease","The guest laptop has an address in 10.R.50.0/24"]]},{"n":"3","title":"Guest isolation","role":"Laptop","kind":"Screenshot","instr":"On the guest network, show the laptop's address beside a failed attempt to reach the firewall.","checks":[["Address","In 10.R.50.0/24"],["Blocked","10.R.100.1 does not respond"]]}]},{"num":"04","title":"Core Switching and VLANs","questions":["The plan leaves VLAN 1 unused and puts unused ports in VLAN 999. What could happen if a stray cable were plugged into an unconfigured port otherwise?","Which VLANs get no SVI, and why?","Which next hop did you use for the default route, and why that address?"],"deliverables":[{"n":"1","title":"Management services","role":"Core switch","kind":"Screenshot","instr":"Show the TCP/UDP services page.","checks":[["Enabled","SSH and HTTPS"],["Disabled","Telnet and HTTP"]]},{"n":"2","title":"VLAN table","role":"Core switch","kind":"Screenshot","instr":"Show the VLAN table.","checks":[["VLANs","Every VLAN in the plan, with matching IDs and names"]]},{"n":"3","title":"VLAN interfaces","role":"Core switch","kind":"Screenshot","instr":"Show the IPv4 interfaces list.","checks":[["SVIs","An SVI for each VLAN the switch routes, matching your addressing plan"],["No extras","No SVI on a VLAN the switch shouldn't route"]]}]},{"num":"05","title":"Switch Ports and DHCP","questions":["Before you test: if the switch's default route were missing, which row would fail first, and why?","After you test: what does each passing row prove? Explain any result that didn't match your prediction."],"deliverables":[{"n":"1","title":"Port settings","role":"Core switch","kind":"Screenshot","instr":"Show the interface and VLAN membership settings.","checks":[["Trunk","XG3 with the right untagged and tagged VLANs"],["Access","Every other port matches the port map"],["Parking","XG6 to XG8 in VLAN 999 and shut down"]]},{"n":"2","title":"Connectivity checkpoint","role":"Laptop","kind":"Screenshot","instr":"Show your laptop's address in a terminal beside the firewall login page, loaded from the Data VLAN.","checks":[["Address","From the Data pool"],["Page","The firewall login page at https://10.R.100.1"]]}]},{"num":"06","title":"Network Storage","questions":["How many drives can fail before this pool loses data?","What does RAID 5 give up in exchange for that protection?","Your Data laptop can ping the NAS. Can it also open the NAS's login page, and should it be able to?"],"deliverables":[{"n":"1","title":"NAS discovery","role":"Core switch","kind":"Screenshot","instr":"Show the DHCP bindings page.","checks":[["Bindings","Your laptop and the NAS"]]},{"n":"2","title":"DSM Info Center","role":"NAS","kind":"Screenshot","instr":"Show DSM's Info Center.","checks":[["Address","The NAS's fixed address from your addressing plan"],["Version","The DSM version is visible"]]},{"n":"3","title":"NFS permissions","role":"NAS","kind":"Screenshot","instr":"Show the NFS service and the share's NFS permissions.","checks":[["Service","NFS enabled"],["Clients","Only the subnets that need the share"],["Squash","No mapping"]]},{"n":"4","title":"Storage reachability","role":"Laptop","kind":"Screenshot","instr":"Show a successful ping to the NAS.","checks":[["Source","A laptop on the Data or Management VLAN"],["Target","10.R.30.10"]]}]},{"num":"07","title":"Hypervisor and Shared Storage","questions":["XG3 is a trunk. Why does vmbr0 have to be VLAN-aware for your VMs to use it?"],"deliverables":[{"n":"1","title":"Proxmox console","role":"Hypervisor","kind":"Photo","instr":"Take a photo of the server monitor showing the Proxmox console.","checks":[["Address","The web interface address on the Management VLAN"],["Legible","The text is sharp and readable"]]},{"n":"2","title":"Bridge and storage","role":"Hypervisor","kind":"Screenshot","instr":"Show vmbr0's settings and the Datacenter storage list.","checks":[["Bridge","VLAN-aware is on"],["Storage","The NFS share is active"]]}]},{"num":"08","title":"DMZ Web Server","questions":["If you left the VM's VLAN tag blank, which network would it land on, and why?","For each test, which firewall policy or setting from Cyber Hub 03 makes it work?","The laptop on CyberHub-Internet opens your public name instead of the web server's address. Which address does that name resolve to, and why can't it be the web server's own?"],"deliverables":[{"n":"1","title":"Web server VM","role":"Hypervisor","kind":"Screenshot","instr":"Show the VM's hardware summary.","checks":[["Network","Tagged into the DMZ VLAN"],["Disk","On the NFS storage"]]},{"n":"2","title":"Page from the internet","role":"Laptop","kind":"Screenshot","instr":"Show your company homepage loaded on a laptop on CyberHub-Internet, with the laptop's address beside it.","checks":[["Address bar","http://www.rackR.lab"],["Content","Your company homepage with its logo"],["Outside","A terminal shows the laptop's 198.51.100.x address"]]},{"n":"3","title":"Page from the guest Wi-Fi","role":"Laptop","kind":"Screenshot","instr":"Show your company homepage loaded from a laptop on the guest Wi-Fi.","checks":[["Address bar","http://10.R.40.10"],["Network","The laptop is on [Company]-Guest"]]}]},{"num":"09","title":"Services and Traffic Analysis","questions":["Which settings from Cyber Hub 04 protect the switch's own logins from this kind of capture?"],"deliverables":[{"n":"1","title":"FTP server VM","role":"Hypervisor","kind":"Screenshot","instr":"Show the VM's hardware summary.","checks":[["Network","Tagged into the DMZ VLAN"],["Disk","On the NFS storage"]]},{"n":"2","title":"FTP installation","role":"FTP server","kind":"Screenshot","instr":"Show the install output and the service status.","checks":[["Install","Completes without errors"],["Status","Active"]]},{"n":"3","title":"Cleartext password","role":"Laptop","kind":"Screenshot","instr":"Show the Wireshark packet with the password.","checks":[["Packet","The password is visible in plain text"],["Server","10.R.40.11"]]}]},{"num":"10","title":"Scanner Appliance","questions":["Why give the scanner its own narrow, logged policy instead of widening an existing one?","Which finding on the FTP server matches what you captured in Cyber Hub 09?","Pick one other finding. Is it a real risk for your company, or something you would accept? Why?"],"deliverables":[{"n":"1","title":"Scanner appliance","role":"Hypervisor","kind":"Screenshot","instr":"Show the scanner VM's summary in Proxmox beside Greenbone's feed status.","checks":[["VM","rackR-scan running, disk on the NFS storage"],["Feed","The last sync date is shown"]]},{"n":"2","title":"Baseline scan","role":"Laptop","kind":"Screenshot","instr":"Show the results summary of the DMZ baseline scan.","checks":[["Targets","Both DMZ servers"],["Status","The scan is complete"]]}]},{"num":"11","title":"Build the Vulnerable Pi","questions":[],"deliverables":[{"n":"1","title":"Self-scan results","role":"Laptop","kind":"Screenshot","instr":"Show Greenbone's results for your Pi.","checks":[["Target","Your Pi's address on the Data VLAN"],["Findings","All four planted weaknesses appear"]]},{"n":"2","title":"Private answer key","role":"Instructor only","kind":"Document","instr":"Submit the answer key from Part 3 to the instructor only.","checks":[["Weaknesses","All four, each with how it was configured"],["Fixes","Exact steps to fix each one"]]}]},{"num":"12","title":"Vulnerability Assessment","questions":["The WAN scan found open ports even though ping is off. What does that say about hiding a device from ping?","Compare the two views. Which of the target's services can anyone on the internet reach, and which only an insider? Which would you fix first, and why?"],"deliverables":[{"n":"1","title":"Hosted appliance","role":"Laptop","kind":"Screenshot","instr":"Show your appliance's web interface, reached from your laptop on the target's Data VLAN.","checks":[["Address","The appliance's address on the target's Data VLAN"],["Feed","The feed date is visible"]]},{"n":"2","title":"Network map","role":"Laptop","kind":"Screenshot","instr":"Show the Nmap results.","checks":[["Internal","Live hosts on the target's Data and DMZ subnets"],["External","Open ports and services on the target's WAN address, scanned from CyberHub-Internet"]]},{"n":"3","title":"Scan results","role":"Laptop","kind":"Screenshot","instr":"Show Greenbone's results summary.","checks":[["Hosts","Every host in scope"],["Severity","Findings sorted by severity"]]},{"n":"4","title":"Assessment in your logs","role":"Firewall","kind":"Screenshot","instr":"Show the assessment in your firewall's forward traffic log.","checks":[["Appliance","Sessions from 10.R.20.50 to the DMZ"],["Assessors","Traffic from the assessors' laptop"],["External","Sessions from a 198.51.100.x address on Allow_Inbound_Services"]]},{"n":"5","title":"Vulnerability Assessment Report","role":"Target team","kind":"Document","instr":"Export the VAR as a PDF from the Report Builder and submit it before Cyber Hub 13. Then choose Send findings to the client. In Google Drive, share the PDF and the findings file with each member of the target team by name, with general access set to Restricted. They import the findings file into their POA&M.","checks":[["Delivered","Shared with the target team's members only"],["Scope","Hosts and subnets assessed, the external and internal views, and the rules of engagement"],["Findings","Each with severity, evidence and validation status"],["Fixes","In priority order"]]}]},{"num":"13","title":"Remediation and SSP","questions":["Why does closing the FTP finding take more than stopping the service?"],"deliverables":[{"n":"1","title":"Before and after scans","role":"Scanner","kind":"Screenshot","instr":"Show your scan results from Cyber Hubs 10 and 11 next to your new scan.","checks":[["Before","The findings from your earlier scans"],["After","The fixed findings are gone"]]},{"n":"2","title":"System Security Plan","role":"Your rack","kind":"Document","instr":"Export the SSP as a PDF from the Report Builder and submit it.","checks":[["Description","Matches your rack as built"],["POA&M","Every finding, with status"],["Accepted risks","Each with its reason"]]}]},{"num":"14","title":"Physical Security Briefing","questions":[],"deliverables":[{"n":"1","title":"CISO briefing","role":"Live","kind":"Presentation","instr":"Give the briefing and submit the slides.","checks":[["Trust","Why the target trusts the tool"],["Attack chain","How the attack unfolds"],["Defenses","Detection and prevention, tied to your rack"]]}]},{"num":"15","title":"Lab Restoration","questions":[],"deliverables":[{"n":"1","title":"Switch reset","role":"Core switch","kind":"Screenshot","instr":"Show the switch at its default login prompt.","checks":[["Prompt","Default, with no hostname"]]},{"n":"2","title":"Firewall reset","role":"Firewall","kind":"Screenshot","instr":"Show the firewall's default login page.","checks":[["Page","The default login at https://192.168.1.99"]]},{"n":"3","title":"Restoration record","role":"Team","kind":"Document","instr":"Your reset record and drawer list, signed by the instructor, in the same Cyber Hub 15 export.","checks":[["Complete","Every device and drawer item ticked, with how you checked each reset"],["Signed","Verified by the instructor, with a sign-off code"]]}]}];
 
-// The rack sheet fills itself in from the rack number on the cover (Gabriel's call: no busy work).
-// These patterns are the same ones Reference: Rack Schema and VLAN Plan shows students.
-const RACK_ROWS = [
-  ["rack", "Rack number", "R"], ["wan", "Firewall WAN (wan1)", "10.R.200.2"], ["gw", "Provider gateway", "10.R.200.1"],
-  ["dns", "Lab DNS, time and repository", "203.0.113.10"], ["fwint", "Firewall internal", "10.R.100.1"],
-  ["fwdmz", "Firewall DMZ", "10.R.40.1"], ["fwguest", "Firewall guest Wi-Fi", "10.R.50.1"],
-  ["svi", "Switch Transit SVI", "10.R.100.254"], ["mgmtgw", "Management gateway", "10.R.10.254"],
-  ["datagw", "Data gateway", "10.R.20.254"], ["storgw", "Storage gateway", "10.R.30.254"],
-  ["pve", "Proxmox host", "10.R.10.10"], ["nas", "NAS", "10.R.30.10"], ["web", "Web server VM", "10.R.40.10"],
-  ["ftp", "FTP server VM", "10.R.40.11"], ["scan", "Scanner VM", "10.R.10.20"], ["pool", "Data DHCP pool", "10.R.20.100 to .199"],
+// Cyber Hub 15: what goes back in the Utility Drawer. A placeholder until Gabriel confirms the real contents.
+// Keep it the same as the "Utility drawer contents" table on Reference: The Rack (cyber-hub pages_ref.py).
+const DRAWER = ["Console cable (blue)", "Multiport dongle", "KVM cable", "USB Stick A", "USB Stick B",
+  "Raspberry Pi 3B (VULN-PI), with its SD card"];
+// Cyber Hub 15: every device the team resets, and the reset the page asks for.
+const RESETS = [
+  ["Core switch", "Factory defaults"], ["FortiWiFi 60E", "Factory defaults"],
+  ["Proxmox host", "Every VM deleted, including the scanner"], ["R440 server", "BIOS factory defaults loaded"],
+  ["USB Stick A", "Re-flashed with the Proxmox installer"], ["USB Stick B", "Firewall backups deleted"],
+  ["NAS", "Mode 2 reset"], ["Vulnerable Pi", "SD card re-flashed from repo.lab"],
+  ["Team laptops", "Lab route removed and guest Wi-Fi forgotten"],
 ];
 
 // Deliverables that are their own document, keyed "hub-n".
 const SEPARATE = {
   "00-1": ["cover", "Your cover page and team agreement, at the front of this log. They export with Cyber Hub 00."],
-  "00-2": ["rack", "Your rack sheet, at the front of this log. It exports with Cyber Hub 00."],
   "11-2": ["none", "Don't put the answer key in this app or anywhere the other team might see it. Submit it privately to the instructor."],
   "12-5": ["var", "The VAR is its own document, in the VAR tab. Submit it separately and give the client a copy."],
   "13-2": ["ssp", "The SSP is its own document, in the SSP tab. Submit it separately."],
   "14-1": ["link", "Paste the link to your slides."],
+  "15-3": ["restore", "Your restoration record is above, in this section, with the instructor's sign-off. It exports with Cyber Hub 15."],
 };
 
 const CHECKPOINT_05 = [
@@ -407,7 +423,6 @@ function blankDoc() {
     log: {
       cover: { rack: "", semester: "", diagramLink: "", chat: "", roster: [{ name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }] },
       agreement: { missed: "", signatures: {} },   // signatures: roster name -> { sig, date }
-      rack: { values: {}, checkedTeammate: "", checkedInstructor: "" },
       hubs: {},
     },
     var: {
@@ -621,8 +636,10 @@ async function restoreBackupHandle() {
 // The diagram lives in doc.diagram. Company and logo live once, in doc.meta, and are handed to the diagram.
 const LOGO_MAX = 40000;   // the diagram's limit: its share link carries the logo
 window.rbDiagram = {
+  rack() { return rackNum(); },
   gotoCover() { state.tab = "log"; state.log = "cover"; renderAll(); toast("Add your logo here. It appears on the diagram by itself."); },
-  load() { const d = doc.diagram ? JSON.parse(JSON.stringify(doc.diagram)) : null; if (!d) return null;
+  // A team that hasn't drawn anything yet still gets its company name and logo on the diagram.
+  load() { const d = doc.diagram ? JSON.parse(JSON.stringify(doc.diagram)) : { v: 2, devices: [], links: [], meta: {} };
     d.meta = { ...(d.meta || {}), company: doc.meta.company || "" }; if (doc.meta.logo) d.meta.logo = doc.meta.logo; else delete d.meta.logo; return d; },
   save(d) {
     doc.diagram = d;
@@ -637,19 +654,78 @@ async function diagramPNG() {
   try { const w = dframe(); if (!w?.rbPNG || !w.rbHasContent?.()) return ""; return await w.rbPNG(); } catch { return ""; }
 }
 function readDiagram() { try { const d = dframe()?.rbDoc?.(); if (d) return d; } catch {} return doc.diagram; }
+// Logo makers export a square with a wide plain margin, so the mark ends up tiny on every report. Before
+// shrinking, cleanLogo crops to the artwork and, when the background is one plain color, makes it transparent
+// (the outside, plus small enclosed gaps such as the inside of letters). Pass raw to keep the image as uploaded.
+function cleanLogo(im) {
+  const k0 = Math.min(1, 1000 / Math.max(im.width, im.height));
+  const W = Math.max(1, Math.round(im.width * k0)), H = Math.max(1, Math.round(im.height * k0));
+  const c = document.createElement("canvas"); c.width = W; c.height = H;
+  const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(im, 0, 0, W, H);
+  const img = x.getImageData(0, 0, W, H), p = img.data, N = W * H;
+  // The border tells us what the background is.
+  const border = [];
+  for (let i = 0; i < W; i++) border.push(i, (H - 1) * W + i);
+  for (let j = 0; j < H; j++) border.push(j * W, j * W + W - 1);
+  const clear = border.filter((i) => p[i * 4 + 3] < 24).length / border.length;
+  let bg = null;
+  if (clear < 0.9) {
+    const med = (o) => border.map((i) => p[i * 4 + o]).sort((u, v) => u - v)[border.length >> 1];
+    bg = [med(0), med(1), med(2)];
+  }
+  const dist = (i) => Math.hypot(p[i * 4] - bg[0], p[i * 4 + 1] - bg[1], p[i * 4 + 2] - bg[2]);
+  const LO = 40, HI = 110;
+  if (bg && border.filter((i) => dist(i) < LO).length / border.length > 0.92) {
+    // Flood the background in from the edges, then clear small enclosed patches of the same color.
+    const isBg = new Uint8Array(N), seen = new Uint8Array(N);
+    const fill = (starts, mark) => { const st = [...starts]; const got = []; for (const s of st) seen[s] = 1;
+      while (st.length) { const i = st.pop(); got.push(i); const cx = i % W, cy = (i / W) | 0;
+        for (const n of [cx > 0 ? i - 1 : -1, cx < W - 1 ? i + 1 : -1, cy > 0 ? i - W : -1, cy < H - 1 ? i + W : -1])
+          if (n >= 0 && !seen[n] && dist(n) < LO) { seen[n] = 1; st.push(n); } }
+      if (mark) for (const i of got) isBg[i] = 1; return got; };
+    fill(border.filter((i) => dist(i) < LO), true);
+    const small = N * 0.004;
+    for (let i = 0; i < N; i++) if (!seen[i] && dist(i) < LO) { const g = fill([i], false); if (g.length < small) for (const j of g) isBg[j] = 1; }
+    for (let i = 0; i < N; i++) {
+      if (isBg[i]) { p[i * 4 + 3] = 0; continue; }
+      // Soften the edge: a pixel next to the background that is part background gets part transparency.
+      const cx = i % W, cy = (i / W) | 0;
+      if (!((cx > 0 && isBg[i - 1]) || (cx < W - 1 && isBg[i + 1]) || (cy > 0 && isBg[i - W]) || (cy < H - 1 && isBg[i + W]))) continue;
+      const d = dist(i); if (d >= HI) continue;
+      const a = Math.max(0.05, (d - LO / 2) / (HI - LO / 2));
+      for (let o = 0; o < 3; o++) p[i * 4 + o] = Math.max(0, Math.min(255, Math.round((p[i * 4 + o] - (1 - a) * bg[o]) / a)));
+      p[i * 4 + 3] = Math.round(p[i * 4 + 3] * a);
+    }
+    x.putImageData(img, 0, 0);
+  } else if (bg) return { canvas: c, changed: false };   // a photo or busy background: leave it alone
+  // Crop to the artwork, with a little breathing room.
+  let l = W, t = H, r = -1, b = -1;
+  for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) if (p[(j * W + i) * 4 + 3] > 16) { if (i < l) l = i; if (i > r) r = i; if (j < t) t = j; if (j > b) b = j; }
+  if (r < 0) return { canvas: c, changed: false };
+  const pad = Math.round(Math.max(r - l, b - t) * 0.04);
+  l = Math.max(0, l - pad); t = Math.max(0, t - pad); r = Math.min(W - 1, r + pad); b = Math.min(H - 1, b + pad);
+  const out = document.createElement("canvas"); out.width = r - l + 1; out.height = b - t + 1;
+  out.getContext("2d").drawImage(c, l, t, out.width, out.height, 0, 0, out.width, out.height);
+  return { canvas: out, changed: out.width < W * 0.97 || out.height < H * 0.97 || !!bg };
+}
 // Logos are kept small enough for the diagram's share link.
-function readLogo(file) {
+function readLogo(file) { return readLogoX(file).then((r) => r.data); }
+// { data, changed }: changed says whether the margin or background was cleaned up, so the page can offer the original.
+function readLogoX(file, raw = false) {
   return new Promise((res, rej) => {
     if (!file || !/^image\//.test(file.type)) return rej(new Error("That isn't an image."));
     const url = URL.createObjectURL(file), im = new Image();
     im.onload = () => {
       URL.revokeObjectURL(url);
-      for (const side of [400, 320, 256, 200, 160, 128]) for (const q of [0.85, 0.7, 0.55]) {
-        const k = Math.min(1, side / Math.max(im.width, im.height));
-        const c = document.createElement("canvas"); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
-        c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+      let src = im, changed = false;
+      if (!raw) { try { const r = cleanLogo(im); src = r.canvas; changed = r.changed; } catch {} }
+      const sw = src.width, sh = src.height;
+      for (const side of [480, 400, 320, 256, 200, 160, 128]) for (const q of [0.9, 0.8, 0.65]) {
+        const k = Math.min(1, side / Math.max(sw, sh));
+        const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(sw * k)); c.height = Math.max(1, Math.round(sh * k));
+        const g = c.getContext("2d"); g.imageSmoothingQuality = "high"; g.drawImage(src, 0, 0, c.width, c.height);
         let d = c.toDataURL("image/webp", q); if (!d.startsWith("data:image/webp")) d = c.toDataURL("image/png");
-        if (d.length <= LOGO_MAX) return res(d);
+        if (d.length <= LOGO_MAX) return res({ data: d, changed });
       }
       rej(new Error("That logo is too detailed to shrink. Try a simpler PNG."));
     };
@@ -729,7 +805,17 @@ function field(label, obj, key, o = {}) {
     label ? h("label", { for: id }, label, o.req ? h("span", { class: "req", title: "Needed for the report" }, " *") : null) : null,
     inp, o.hint ? h("p", { class: "hintline" }, o.hint) : null);
 }
-function autosize(t) { const f = () => { t.style.height = "auto"; t.style.height = Math.min(600, t.scrollHeight + 2) + "px"; }; t.addEventListener("input", f); requestAnimationFrame(f); }
+// Grows a text box to fit its text, or its placeholder while it's empty, so neither is ever cut off.
+function autosize(t) {
+  const f = () => {
+    t.style.height = "auto";
+    let sh = t.scrollHeight;
+    if (!t.value && t.placeholder) { t.value = t.placeholder; sh = t.scrollHeight; t.value = ""; }
+    t.style.height = Math.min(600, sh + 2) + "px";
+  };
+  t.addEventListener("input", f); requestAnimationFrame(f);
+  if (window.ResizeObserver) { let w = 0; new ResizeObserver(() => { if (t.clientWidth !== w) { w = t.clientWidth; f(); } }).observe(t); }
+}
 
 // Editable table: rows are objects; cols are [key, label, opts]
 function rowsTable(rows, cols, o = {}) {
@@ -786,7 +872,7 @@ function toast(msg, bad) { const t = $("toast"); t.textContent = msg; t.classNam
 function ask(title, body, acts) {
   $("m-title").textContent = title;
   $("m-body").replaceChildren(...[].concat(body));
-  $("m-acts").replaceChildren(...acts.map(([t, fn, cls]) => h("button", { class: cls || "", onclick: () => { closeModal(); fn && fn(); } }, t)));
+  $("m-acts").replaceChildren(...acts.map(([t, fn, cls, keep]) => h("button", { class: cls || "", onclick: () => { if (!keep) closeModal(); fn && fn(); } }, t)));
   $("modal").hidden = false; $("modal").querySelector(".card").scrollTop = 0; ($("m-acts").lastElementChild || $("m-acts")).focus({ preventScroll: true });
 }
 function closeModal() { $("modal").hidden = true; $("modal").querySelector(".card").classList.remove("wide"); }
@@ -799,13 +885,15 @@ const ago = (t) => { const m = Math.round((Date.now() - t) / 60e3); return m < 1
 const fmtTime = (t) => new Date(t).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
 // ------------------------------------------------------------------ Team Log
+const NO_TICKETS = ["00", "14"];
 function hubStatus(l) {
   const d = doc.log.hubs[l.num];
   if (!d) return "";
   const qs = l.questions.every((q, i) => (d.answers[i] || "").trim());
   const dl = l.deliverables.every((x) => SEPARATE[`${l.num}-${x.n}`] || (d.deliv[x.n]?.images || []).length);
   const any = d.sessions.length || d.commands.trim() || d.problems.length || (d.shots || []).length || Object.values(d.answers).some((a) => a.trim()) || Object.values(d.deliv).some((x) => (x.images || []).length);
-  return qs && dl && d.sessions.length ? "done" : any ? "part" : "";
+  const rs = l.num === "15" ? restoreStatusSync(restoreData()) : "signed";
+  return qs && dl && d.sessions.length && rs === "signed" ? "done" : any || rs !== "open" ? "part" : "";
 }
 function coverStatus() {
   const c = doc.log.cover;
@@ -813,16 +901,10 @@ function coverStatus() {
   return doc.meta.company ? "part" : "";
 }
 const rackNum = () => { const r = String(doc.log.cover.rack || "").trim(); return /^[1-8]$/.test(r) ? r : ""; };
-const rackValue = (pat) => rackNum() ? pat.replace(/\bR\b/g, rackNum()) : "";
-function rackStatus() {
-  if (!rackNum()) return "";
-  return doc.log.rack.checkedTeammate.trim() ? "done" : "part";
-}
 
 function railLog() {
   const items = [h("h3", {}, "Start"),
     stepBtn("log", "cover", "Cover and agreement", "Company, roster, agreement", coverStatus()),
-    stepBtn("log", "rack", "Rack sheet", "Every address for your rack", rackStatus()),
     h("h3", {}, "Cyber Hubs")];
   for (const l of LABS) items.push(stepBtn("log", l.num, `${l.num} ${l.title}`, null, hubStatus(l), l.num));
   return items;
@@ -831,7 +913,6 @@ function railLog() {
 function viewLog() {
   const s = state.log;
   if (s === "cover") return logCover();
-  if (s === "rack") return logRack();
   const l = LABS.find((x) => x.num === s); return l ? logHub(l) : logCover();
 }
 
@@ -843,14 +924,15 @@ function logCover() {
     h("div", { class: "card" },
       h("div", { class: "grid2" },
         field("Company name", doc.meta, "company", { req: true, oninput: () => ($("brand-co").textContent = doc.meta.company || "Cyber Hub"), hint: "It also titles your network diagram." }),
-        field("Rack number", c, "rack", { req: true, placeholder: "1 to 8", hint: "Your rack sheet fills in from this.", oninput: () => renderRail() }),
+        field("Rack number", c, "rack", { req: true, placeholder: "1 to 8", hint: "The addressing plan in the Diagram tab fills in from this.", oninput: () => renderRail() }),
         field("Semester", c, "semester", { placeholder: "Spring 2027" })),
-      h("label", {}, "Logo"), logoWell(), h("p", { class: "hintline" }, "It goes on every report and in the corner of your network diagram.")),
+      h("label", {}, "Logo"), logoWell(),
+        h("p", { class: "hintline" }, "It goes on every report and in the corner of your network diagram. Best: a PNG, cropped close to the logo, at least 600 pixels wide. Wide logos read better than square ones. A logo maker's square with a plain background works too: the app trims the margin and makes the background transparent.")),
     h("h3", {}, "Team roster"),
     rowsTable(c.roster, [["name", "Name", { w: "45%" }], ["email", "Email", { type: "email" }]], { addLabel: "Add member", onchange: () => renderAll() }),
     h("h3", {}, "Team agreement"),
     h("div", { class: "card" },
-      field("How we communicate", c, "chat", { req: true, placeholder: "Two methods, for example a group chat and email" }),
+      field("How we communicate", c, "chat", { req: true, placeholder: "For example, a group chat and email", hint: "Two methods, so a message still gets through if one is down." }),
       field("If someone misses a lab", a, "missed", { area: true, req: true }),
       signBlock()),
   ];
@@ -877,25 +959,20 @@ function signBlock() {
     })));
 }
 function logoWell() {
-  const box = h("div", { class: "tools" });
+  const box = h("div", { class: "logowell" });
+  let last = null;   // the file just uploaded, so the team can keep it exactly as it was
+  const use = async (f, raw) => {
+    try { const r = await readLogoX(f, raw); doc.meta.logo = r.data; last = r.changed && !raw ? f : null; commit(); draw(); reloadDiagram();
+      if (last) toast("Logo added. The app trimmed the empty margin and removed the plain background."); }
+    catch (e) { toast(e.message, true); }
+  };
   const draw = () => box.replaceChildren(
-    doc.meta.logo ? h("img", { src: doc.meta.logo, alt: "Company logo", style: "max-height:56px;max-width:200px;border:1px solid var(--border);border-radius:6px;background:#fff;padding:4px" }) : h("span", { class: "hintline" }, "No logo yet."),
-    h("button", { class: "small", onclick: async () => { const f = await pickFile("image/*"); if (!f) return; try { doc.meta.logo = await readLogo(f); commit(); draw(); reloadDiagram(); } catch (e) { toast(e.message, true); } } }, doc.meta.logo ? "Change logo" : "Upload logo"),
-    doc.meta.logo ? h("button", { class: "small ghost", onclick: () => { doc.meta.logo = ""; commit(); draw(); reloadDiagram(); } }, "Remove") : null);
+    doc.meta.logo ? h("div", { class: "logoprev" }, h("img", { src: doc.meta.logo, alt: "Company logo" })) : h("span", { class: "hintline" }, "No logo yet."),
+    h("div", { class: "tools" },
+      h("button", { class: "small", onclick: async () => { const f = await pickFile("image/png,image/jpeg,image/webp"); if (f) use(f, false); } }, doc.meta.logo ? "Change logo" : "Upload logo"),
+      last ? h("button", { class: "small ghost", onclick: () => use(last, true) }, "Keep the original instead") : null,
+      doc.meta.logo ? h("button", { class: "small ghost", onclick: () => { doc.meta.logo = ""; last = null; commit(); draw(); reloadDiagram(); } }, "Remove") : null));
   draw(); return box;
-}
-
-function logRack() {
-  const r = doc.log.rack;
-  const rows = RACK_ROWS.map(([k, label, pat]) => ({ label, pat, value: rackValue(pat) }));
-  return [
-    h("h2", {}, "Rack sheet"),
-    h("p", { class: "sub" }, "Every address for your rack, from the rack number on the cover. Work from this sheet instead of working addresses out mid-lab. A teammate checks it against Reference: Rack Schema and VLAN Plan."),
-    rackNum() ? null : h("p", { class: "note warn" }, "Type your rack number (1 to 8) on the cover, and this sheet fills in.",
-      " ", h("a", { href: "#", onclick: (e) => { e.preventDefault(); state.log = "cover"; renderAll(); } }, "Go to the cover")),
-    rowsTable(rows, [["label", "Device or network", { fixed: true, w: "36%" }], ["pat", "Pattern", { fixed: true, cls: "pattern", w: "24%" }], ["value", "Your rack", { fixed: true, cls: "mono" }]], { fixedRows: true }),
-    h("div", { class: "card grid2" }, field("Checked by (teammate)", r, "checkedTeammate"), field("Checked by (instructor)", r, "checkedInstructor")),
-  ];
 }
 
 function logHub(l) {
@@ -905,12 +982,14 @@ function logHub(l) {
   out.push(h("h3", {}, "Sessions"),
     rowsTable(d.sessions, [["date", "Date", { type: "date", w: "150px" }], ["who", "Who did what", { area: true, placeholder: "Each person's contribution" }]],
       { addLabel: "Add session", blank: () => ({ date: today(), who: "" }) }));
-  out.push(h("h3", {}, "Commands and settings"),
+  // Cyber Hub 00 is setup and paperwork, so it has no commands; 00 and 14 have nothing to troubleshoot.
+  if (l.num !== "00") out.push(h("h3", {}, "Commands and settings"),
     field("", d, "commands", { area: true, rows: 5, placeholder: "Every command you ran or setting you changed, and why" }));
+  if (l.num === "15") out.push(...restoreSection());
   if (l.num === "05") {
     if (!d.extra.checkpoint) d.extra.checkpoint = CHECKPOINT_05.map(([t, e]) => ({ test: t, expected: e, result: "" }));
     out.push(h("h3", {}, "Connectivity checkpoint"),
-      rowsTable(d.extra.checkpoint, [["test", "From your laptop, try", { fixed: true }], ["expected", "Expected", { fixed: true }], ["result", "Result", { placeholder: "What happened" }]], { fixedRows: true }));
+      rowsTable(d.extra.checkpoint, [["test", "From your laptop, try", { fixed: true }], ["expected", "Expected", { fixed: true }], ["result", "Result", { area: true, placeholder: "What happened" }]], { fixedRows: true }));
   }
   if (l.num === "12") {
     if (!d.extra.roe) d.extra.roe = { target: "", assessing: "", scope: "", session: "", agreed: "" };
@@ -920,7 +999,7 @@ function logHub(l) {
       field("Scope", r, "scope", { wide: true, placeholder: "Subnets and addresses agreed" }),
       field("Session", r, "session", { placeholder: "Date and times" }), field("Agreed by", r, "agreed", { placeholder: "One name from each team" })));
   }
-  out.push(h("h3", {}, "Troubleshooting tickets"), h("p", { class: "sub" }, "One ticket per problem, following the method on Reference: Troubleshooting. It's your team's record: when something like it breaks again, this is where you'll look first."), problemList(d.problems, l.num));
+  if (!NO_TICKETS.includes(l.num)) out.push(h("h3", {}, "Troubleshooting tickets"), h("p", { class: "sub" }, "One ticket per problem, following the method on Reference: Troubleshooting. It's your team's record: when something like it breaks again, this is where you'll look first."), problemList(d.problems, l.num));
   if (!d.shots) d.shots = [];
   out.push(h("h3", {}, "Other screenshots and notes"), h("p", { class: "sub" }, "Anything worth keeping that isn't a deliverable: a settings page, an error, a before-and-after."),
     imageWell(d.shots, { prompt: "Add a screenshot", label: "Other screenshots" }), field("", d, "notes", { area: true, placeholder: "Notes for your team" }));
@@ -967,6 +1046,133 @@ function problemList(list, num) {
     h("button", { class: "small", onclick: () => { list.push({ broke: "", theory: "", checked: "", fixed: "", verify: "", status: "open", images: [] }); commit(); draw(); box.querySelectorAll(".pcard")[list.length - 1]?.querySelector("textarea")?.focus(); } }, "+ Open a ticket"));
   draw(); return box;
 }
+
+// ------------------------------------------------------------------ Cyber Hub 15: restoration record and sign-off
+// Like a decommissioning record (NIST SP 800-88's certificate of sanitization): every device reset, how the team
+// checked it, the drawer inventory, then an instructor's sign-off.
+//
+// The instructor signs with a password only the instructors know. This file holds a salted PBKDF2 hash of it
+// (half of the derived bits), so the app can tell the right password from a typo but can't reveal it. The other
+// half of the derived bits never leaves the instructor's browser: it keys an HMAC of the record, shown as the
+// sign-off code. A student can't make a valid code, and an instructor can check any code with Check a sign-off.
+// If the record changes after signing, the app says so. To change the password: node tools/signoff-hash.mjs.
+const SIGNOFF = { salt: "583fbb2b27993641dd08101c21351f15", iter: 600000, check: "08845da5db17d7f9d1e1ba3937f3f59f55367f04119756acc7eead904a3563fb" };
+
+const hex = (buf) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+const normPw = (s) => String(s).normalize("NFKC").toLowerCase().replace(/[\s\-_.]+/g, "");
+async function signoffKey(pw) {
+  const enc = new TextEncoder();
+  const base = await crypto.subtle.importKey("raw", enc.encode(normPw(pw)), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: enc.encode(SIGNOFF.salt), iterations: SIGNOFF.iter }, base, 512);
+  if (hex(bits.slice(0, 32)) !== SIGNOFF.check) return null;
+  return crypto.subtle.importKey("raw", bits.slice(32), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+}
+function restoreData() {
+  const d = hubData("15");
+  const r = d.extra.restore || (d.extra.restore = {});
+  // Rebuild the rows only when the lists change (a new drawer list, say), keeping what the team entered.
+  // Otherwise keep the same objects, because the page's checkboxes hold on to them.
+  const same = (a, keys) => Array.isArray(a) && a.length === keys.length && a.every((x, i) => x && x[keys === DRAWER ? "item" : "device"] === keys[i]);
+  const devs = RESETS.map(([d]) => d);
+  if (!same(r.resets, devs)) r.resets = RESETS.map(([dev, how]) => { const o = (r.resets || []).find((x) => x.device === dev) || {}; return { device: dev, how, done: !!o.done, checked: o.checked || "", who: o.who || "" }; });
+  else r.resets.forEach((x, i) => { x.how = RESETS[i][1]; });
+  if (!same(r.drawer, DRAWER)) r.drawer = DRAWER.map((item) => { const o = (r.drawer || []).find((x) => x.item === item) || {}; return { item, present: !!o.present, note: o.note || "" }; });
+  r.sign = r.sign || null;
+  return r;
+}
+// What the signature covers: the team, the rack and every tick, plus who signed and when.
+function restoreCanon(r, sign) {
+  return JSON.stringify({ company: doc.meta.company || "", rack: String(doc.log.cover.rack || ""), team: members(),
+    resets: r.resets.map((x) => [x.device, x.done]), drawer: r.drawer.map((x) => [x.item, x.present]), by: sign.by, date: sign.date });
+}
+async function sha(s) { return hex(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s))); }
+async function makeCode(key, canon) {
+  const h = hex(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(canon))).slice(0, 10).toUpperCase();
+  return h.slice(0, 5) + "-" + h.slice(5);
+}
+const restoreComplete = (r) => r.resets.every((x) => x.done) && r.drawer.every((x) => x.present);
+let sealState = { key: "", ok: true };
+async function sealOk(r) {
+  if (!r.sign) return true;
+  const c = restoreCanon(r, r.sign);
+  if (sealState.key === c) return sealState.ok;
+  sealState = { key: c, ok: (await sha(c)) === r.sign.seal };
+  return sealState.ok;
+}
+function restoreStatusSync(r) { return r.sign && sealState.key === restoreCanon(r, r.sign) ? (sealState.ok ? "signed" : "changed") : r.sign ? "signed" : "open"; }
+
+function restoreSection() {
+  const r = restoreData();
+  const signBox = h("div", { class: "card signoff" });
+  const refresh = () => { drawSign(); renderRail(); };
+  const tick = (row, key) => h("label", { class: "tickbox" }, h("input", { type: "checkbox", checked: row[key] || null, "aria-label": key === "done" ? row.device + " reset" : row.item + " in the drawer",
+    onchange: (e) => { row[key] = e.target.checked; commit(); refresh(); } }));
+  const txt = (row, key, ph, label) => { const t = h("textarea", { rows: 1, placeholder: ph, "aria-label": label, oninput: (e) => { row[key] = e.target.value; commit(); } }); t.value = row[key]; autosize(t); return t; };
+  const resetTable = h("div", { class: "tablewrap" }, h("div", { class: "tbox" }, h("table", { class: "edit restore" },
+    h("thead", {}, h("tr", {}, h("th", { style: "width:17%" }, "Device"), h("th", { style: "width:24%" }, "Reset"), h("th", { style: "width:8%" }, "Done"), h("th", {}, "How you checked"), h("th", { style: "width:16%" }, "Who"))),
+    h("tbody", {}, r.resets.map((x) => h("tr", {}, h("td", {}, h("span", { class: "fixed" }, x.device)), h("td", {}, h("span", { class: "fixed" }, x.how)), h("td", { class: "ctr" }, tick(x, "done")),
+      h("td", {}, txt(x, "checked", "What you saw that proves it", x.device + ": how you checked")), h("td", {}, txt(x, "who", "Name", x.device + ": who did it"))))))));
+  const drawerTable = h("div", { class: "tablewrap" }, h("div", { class: "tbox" }, h("table", { class: "edit restore" },
+    h("thead", {}, h("tr", {}, h("th", { style: "width:41%" }, "Item"), h("th", { style: "width:12%" }, "In the drawer"), h("th", {}, "Notes"))),
+    h("tbody", {}, r.drawer.map((x) => h("tr", {}, h("td", {}, h("span", { class: "fixed" }, x.item)), h("td", { class: "ctr" }, tick(x, "present")),
+      h("td", {}, txt(x, "note", "Anything missing or damaged", x.item + ": notes"))))))));
+
+  function drawSign() {
+    const done = restoreComplete(r);
+    if (r.sign) {
+      const st = h("p", { class: "hintline" }, "Checking…");
+      sealOk(r).then((ok) => { st.replaceWith(ok ? h("p", { class: "hintline" }, "The record hasn't changed since it was signed.")
+        : h("p", { class: "note warn" }, "The record changed after it was signed. Ask the instructor to check the rack and sign again.")); renderRail(); });
+      signBox.replaceChildren(h("div", { class: "signed-by" }, h("span", { class: "seal", "aria-hidden": "true" }, "✓"),
+          h("div", {}, h("b", {}, `Verified by ${r.sign.by}`), h("div", {}, `${fmtDate(r.sign.date)} · Sign-off code `, h("code", {}, r.sign.code)))),
+        st, h("div", { class: "tools" }, h("button", { class: "small", onclick: () => checkDialog(r) }, "Check a sign-off (instructors)"),
+          h("button", { class: "small ghost", onclick: () => ask("Remove the sign-off?", [h("p", {}, "The instructor will need to check the rack and sign again.")],
+            [["Cancel"], ["Remove", () => { r.sign = null; commit(); refresh(); }, "danger"]]) }, "Remove sign-off")));
+      return;
+    }
+    const name = h("input", { id: "so-name", autocomplete: "off", placeholder: "Instructor's name" });
+    const pw = h("input", { id: "so-pw", type: "password", autocomplete: "off", placeholder: "Instructor password" });
+    const msg = h("p", { class: "hintline", role: "status" });
+    const go = async () => {
+      if (!name.value.trim()) { msg.textContent = "Type the instructor's name."; name.focus(); return; }
+      msg.textContent = "Checking…";
+      let key = null; try { key = await signoffKey(pw.value); } catch { msg.textContent = "This browser can't sign. Open the Report Builder from its usual address in Chrome or Edge."; return; }
+      if (!key) { msg.textContent = "That password isn't right."; pw.value = ""; pw.focus(); return; }
+      const sign = { by: name.value.trim(), date: today() };
+      const canon = restoreCanon(r, sign);
+      sign.code = await makeCode(key, canon); sign.seal = await sha(canon);
+      r.sign = sign; sealState = { key: canon, ok: true }; commit(); refresh(); toast("Signed off.");
+    };
+    pw.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
+    signBox.replaceChildren(
+      done ? h("p", {}, "Every row is ticked. Ask the instructor to check the rack and the drawer, then sign here.")
+           : h("p", { class: "note" }, "Tick every reset and every drawer item first. The instructor checks the rack and the drawer before signing."),
+      h("div", { class: "grid2" }, h("div", { class: "field" }, h("label", { for: "so-name" }, "Instructor"), name), h("div", { class: "field" }, h("label", { for: "so-pw" }, "Password"), pw)),
+      h("div", { class: "tools" }, h("button", { class: "primary", disabled: done ? null : "", onclick: go }, "Sign off")), msg);
+  }
+  drawSign();
+  return [h("h3", {}, "Reset record"),
+    h("p", { class: "sub" }, "One row per device. Tick it once the reset is done and you've checked it worked, and say what you saw."), resetTable,
+    h("h3", {}, "Utility drawer"),
+    h("p", { class: "sub" }, "Tick each item as it goes back in the drawer. Note anything missing or damaged, so it can be replaced before the next class."), drawerTable,
+    h("h3", {}, "Instructor sign-off"), signBox];
+}
+function checkDialog(r) {
+  const pw = h("input", { type: "password", autocomplete: "off", placeholder: "Instructor password", "aria-label": "Instructor password" });
+  const out = h("p", { role: "status" });
+  const run = async () => {
+    out.textContent = "Checking…";
+    const key = await signoffKey(pw.value).catch(() => null);
+    if (!key) { out.textContent = "That password isn't right."; return; }
+    const ok = (await makeCode(key, restoreCanon(r, r.sign))) === r.sign.code;
+    out.className = ok ? "note" : "note warn";
+    out.textContent = ok ? `Genuine. ${r.sign.by} signed this record on ${fmtDate(r.sign.date)}, and nothing has changed since.` : "Not genuine. Either the code wasn't made with the instructor password, or the record changed after signing.";
+  };
+  pw.addEventListener("keydown", (e) => { if (e.key === "Enter") run(); });
+  ask("Check a sign-off", [h("p", {}, "For instructors. Type the instructor password to confirm this sign-off code was made by an instructor for this exact record."), pw, out],
+    [["Close"], ["Check", run, "primary", true]]);
+}
+function fmtDate(d) { return d ? new Date(d + "T12:00").toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : ""; }
 
 // ------------------------------------------------------------------ VAR (Cyber Hub 12)
 const V = () => doc.var;
@@ -1032,14 +1238,28 @@ function varCover() {
     h("div", { class: "card grid2" },
       h("div", { class: "field" }, h("label", {}, "Prepared by (your company)"), h("div", {}, doc.meta.company || h("span", { class: "hintline" }, "Set it on the Team Log cover."))),
       h("div", { class: "field" }, h("label", {}, "Logo"), doc.meta.logo ? h("img", { src: doc.meta.logo, alt: "", style: "max-height:40px" }) : h("span", { class: "hintline" }, "Upload it on the Team Log cover.")),
-      field("Client company", c, "client", { req: true }), field("Client's rack", c, "clientRack", { placeholder: "1 to 8" }),
+      field("Client company", c, "client", { req: true }), field("Client's rack", c, "clientRack", { placeholder: "1 to 8", hint: "The scope's addresses fill in from this.", oninput: () => { fillScope(); commit(); } }),
       field("Assessment dates", c, "dates", { placeholder: "Nov 16 to Nov 20, 2026" }), field("Report version", c, "version", { hint: "1.0 for the copy you give the client." }),
       field("Assessment team", c, "team", { wide: true, area: true, req: true, placeholder: "Names and roles, for example: Jordan Lee, lead assessor" }),
-      field("Client contact", c, "contact", { wide: true, placeholder: "The client team member who agreed to the rules of engagement" }))];
+      field("Client contact", c, "contact", { wide: true, placeholder: "Name", hint: "The client team member who agreed to the rules of engagement." }))];
+}
+// The standard scope fills in from the client's rack: the same three targets every assessment covers.
+// A range the team typed themselves is left alone; only empty or earlier auto-filled ranges change.
+const SCOPE_AUTO = { "Data subnet": "10.R.20.0/24", "DMZ subnet": "10.R.40.0/24", "Firewall WAN address": "10.R.200.2" };
+function fillScope() {
+  const v = V(), r = String(v.cover.clientRack || "").trim();
+  if (!/^[1-8]$/.test(r)) return;
+  for (const row of v.scope) {
+    const pat = SCOPE_AUTO[row.target];
+    if (!pat) continue;
+    const re = new RegExp("^" + pat.replace(/\./g, "\\.").replace("R", "[1-8]") + "$");
+    if (!row.range.trim() || re.test(row.range.trim())) row.range = pat.replace("R", r);
+  }
 }
 function varScope() {
   const v = V();
-  return [h("h2", {}, "Scope and rules of engagement"), h("p", { class: "sub" }, "Exactly what you were allowed to test. Use the client's real addresses, not the R pattern."),
+  fillScope();
+  return [h("h2", {}, "Scope and rules of engagement"), h("p", { class: "sub" }, "Exactly what you were allowed to test. The three standard targets fill in from the client's rack on the cover. Check them against the rules of engagement you agreed, and add anything else you agreed to test."),
     h("h3", {}, "In scope"),
     rowsTable(v.scope, [["target", "Target"], ["range", "Address or range", { cls: "mono", placeholder: "10.R.20.0/24" }], ["notes", "Notes"]], { addLabel: "Add target" }),
     h("h3", {}, "Out of scope"), field("", v, "outScope", { area: true, placeholder: "What you agreed not to touch, such as the Management, Storage and Transit VLANs, other racks and campus networks" }),
@@ -1050,7 +1270,7 @@ function varScope() {
 }
 function varMethod() {
   return [h("h2", {}, "Method"), h("p", { class: "sub" }, "What you did, in order, so another assessor could repeat it. Give the exact options you used."),
-    rowsTable(V().method, [["step", "Step", { w: "20%" }], ["tool", "Tool and settings", { area: true, placeholder: "Nmap -sn 10.3.20.0/24 …" }], ["purpose", "Purpose", { area: true }]], { addLabel: "Add step" })];
+    rowsTable(V().method, [["step", "Step", { w: "20%" }], ["tool", "Tool and settings", { area: true, placeholder: "nmap -sn 10.3.20.0/24" }], ["purpose", "Purpose", { area: true }]], { addLabel: "Add step" })];
 }
 
 // ---- hosts and Nmap import
@@ -1483,23 +1703,31 @@ function coverPage(kind, title, sub, rows, conf, clientLogo) {
 
 // ---- Team Log
 function logCoverHTML() {
-  const c = doc.log.cover, a = doc.log.agreement, r = doc.log.rack;
+  const c = doc.log.cover, a = doc.log.agreement;
   const sg = a.signatures || {};
   return coverPage("Team Log", doc.meta.company || "Team Log", "", [["Rack", c.rack], ["Semester", c.semester], ["Team", c.roster.map((x) => x.name.trim()).filter(Boolean).join(", ")]], "Team Log")
     + `<h1 class="s">Team</h1>${tbl(["Team member", "Email"], c.roster.filter((x) => x.name || x.email).map((x) => [x.name, x.email]))}`
     + `<h2 class="s">Team agreement</h2>${form([["How we communicate", c.chat], ["If someone misses a lab", a.missed]])}`
-    + tbl(["Team member", "Signature", "Date"], c.roster.map((x) => x.name.trim()).filter(Boolean).map((n) => [n, sg[n]?.date ? { html: `<span class="sig">${esc(sg[n].sig)}</span>` } : "", sg[n]?.date || ""]))
-    + `<h1 class="s" style="break-before:page">Rack sheet</h1>${tbl(["Device or network", "Pattern", "Your rack"], RACK_ROWS.map(([k, l, p]) => [l, mono(p), mono(rackValue(p))]))}`
-    + form([["Checked by (teammate)", r.checkedTeammate], ["Checked by (instructor)", r.checkedInstructor]]);
+    + tbl(["Team member", "Signature", "Date"], c.roster.map((x) => x.name.trim()).filter(Boolean).map((n) => [n, sg[n]?.date ? { html: `<span class="sig">${esc(sg[n].sig)}</span>` } : "", sg[n]?.date || ""]));
+}
+function restoreHTML() {
+  const r = restoreData(), st = restoreStatusSync(r), yes = (v) => (v ? "Yes" : "No");
+  let s = `<h2 class="s">Reset record</h2>${tbl(["Device", "Reset", "Done", "How we checked", "Who"], r.resets.map((x) => [x.device, x.how, yes(x.done), x.checked, x.who]), "restore")}`;
+  s += `<h2 class="s">Utility drawer</h2>${tbl(["Item", "In the drawer", "Notes"], r.drawer.map((x) => [x.item, yes(x.present), x.note]))}`;
+  s += `<h2 class="s">Instructor sign-off</h2>`;
+  s += r.sign ? `<div class="card"><div class="ch"><b>Verified by ${esc(r.sign.by)}</b><span class="tag">${st === "changed" ? "Changed after signing" : "Signed"}</span></div>${form([["Date", r.sign.date], ["Sign-off code", r.sign.code]])}</div>`
+    : `<p class="blank">Not signed off yet.</p>`;
+  return s;
 }
 function hubHTML(l) {
   const d = doc.log.hubs[l.num] || { sessions: [], commands: "", problems: [], answers: {}, deliv: {}, extra: {} };
   let s = `<h1 class="s" style="break-before:page">Cyber Hub ${l.num}: ${esc(l.title)}</h1>`;
   s += `<h2 class="s">Sessions</h2>${tbl(["Date", "Who did what"], d.sessions.map((x) => [x.date, x.who]))}`;
-  s += `<h2 class="s">Commands and settings</h2><p>${T(d.commands)}</p>`;
+  if (l.num !== "00") s += `<h2 class="s">Commands and settings</h2><p>${T(d.commands)}</p>`;
+  if (l.num === "15") s += restoreHTML();
   if (d.extra.checkpoint) s += `<h2 class="s">Connectivity checkpoint</h2>${tbl(["From your laptop, try", "Expected", "Result"], d.extra.checkpoint.map((x) => [x.test, x.expected, x.result]))}`;
   if (d.extra.roe) { const r = d.extra.roe; s += `<h2 class="s">Rules of engagement</h2>${form([["Target team", r.target], ["Assessing team", r.assessing], ["Scope", r.scope], ["Session", r.session], ["Agreed by", r.agreed]])}`; }
-  s += `<h2 class="s">Troubleshooting tickets</h2>` + (d.problems.length ? d.problems.map((x, i) => `<div class="card"><div class="ch"><b>Ticket ${ticketId(l.num, i)}</b><span class="tag">${x.status === "resolved" ? "Resolved" : "Open"}</span></div>${form([["Issue", x.broke], ["Probable cause", x.theory], ["Tests and results", x.checked], ["Resolution", x.fixed], ["Verification", x.verify]])}${(x.images || []).map((id) => img(id, "")).join("")}</div>`).join("") : `<p class="blank">No tickets.</p>`);
+  if (!NO_TICKETS.includes(l.num)) s += `<h2 class="s">Troubleshooting tickets</h2>` + (d.problems.length ? d.problems.map((x, i) => `<div class="card"><div class="ch"><b>Ticket ${ticketId(l.num, i)}</b><span class="tag">${x.status === "resolved" ? "Resolved" : "Open"}</span></div>${form([["Issue", x.broke], ["Probable cause", x.theory], ["Tests and results", x.checked], ["Resolution", x.fixed], ["Verification", x.verify]])}${(x.images || []).map((id) => img(id, "")).join("")}</div>`).join("") : `<p class="blank">No tickets.</p>`);
   if ((d.shots || []).length || (d.notes || "").trim()) s += `<h2 class="s">Other screenshots and notes</h2>${(d.notes || "").trim() ? `<p>${esc(d.notes)}</p>` : ""}${(d.shots || []).map((id) => img(id, "")).join("")}`;
   if (l.questions.length) s += `<h2 class="s">Before you continue</h2>` + l.questions.map((q, i) => `<p><b>${esc(q)}</b></p><p>${T(d.answers[i])}</p>`).join("");
   if (l.deliverables.length) s += `<h2 class="s">Deliverables</h2>`;
@@ -1572,6 +1800,7 @@ function diagramHTML(note) {
 // ---- export
 async function exportDoc(kind, arg) {
   diagramImg = await diagramPNG();
+  if (doc.log.hubs["15"]?.extra?.restore?.sign) await sealOk(restoreData());
   let html, missing = [], title;
   const co = doc.meta.company || "Team";
   if (kind === "log-hub") {
@@ -1717,8 +1946,8 @@ function welcomeBody() {
     h("p", { class: "wlead" }, "This is where your team keeps its whole project: the Team Log, your network diagram, and the two reports you write for a client. You fill in the forms; the app lays out every PDF you submit."),
     sec("Why it works this way", h("p", {}, "Security teams don't format reports by hand. Assessors fill in finding cards in a reporting platform, compliance teams answer control by control, and the tool produces the document. You'll work the same way.")),
     sec("What's in each tab", h("ul", {},
-      h("li", {}, h("b", {}, "Team Log: "), "your cover, signed team agreement, rack sheet, and a section for every Cyber Hub: sessions, commands, troubleshooting tickets, answers and deliverables. It's your team's record as much as something you hand in."),
-      h("li", {}, h("b", {}, "Diagram: "), "the network you've built, updated whenever a page says so. Every Cyber Hub export includes it."),
+      h("li", {}, h("b", {}, "Team Log: "), "your cover, signed team agreement, and a section for every Cyber Hub: sessions, commands, troubleshooting tickets, answers and deliverables. It's your team's record as much as something you hand in."),
+      h("li", {}, h("b", {}, "Diagram: "), "the network you've built, updated whenever a page says so, with the addressing plan for your rack beside it. Every Cyber Hub export includes it."),
       h("li", {}, h("b", {}, "VAR: "), "the vulnerability assessment you write about another team's rack in Cyber Hub 12."),
       h("li", {}, h("b", {}, "SSP: "), "your own system security plan, in Cyber Hub 13."))),
     sec("Saving: read this", h("ul", {},

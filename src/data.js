@@ -3,26 +3,27 @@
 // LABS is generated from the course pages by tools/labs.py and injected by build.mjs.
 const LABS = /*LABS*/[];
 
-// The rack sheet fills itself in from the rack number on the cover (Gabriel's call: no busy work).
-// These patterns are the same ones Reference: Rack Schema and VLAN Plan shows students.
-const RACK_ROWS = [
-  ["rack", "Rack number", "R"], ["wan", "Firewall WAN (wan1)", "10.R.200.2"], ["gw", "Provider gateway", "10.R.200.1"],
-  ["dns", "Lab DNS, time and repository", "203.0.113.10"], ["fwint", "Firewall internal", "10.R.100.1"],
-  ["fwdmz", "Firewall DMZ", "10.R.40.1"], ["fwguest", "Firewall guest Wi-Fi", "10.R.50.1"],
-  ["svi", "Switch Transit SVI", "10.R.100.254"], ["mgmtgw", "Management gateway", "10.R.10.254"],
-  ["datagw", "Data gateway", "10.R.20.254"], ["storgw", "Storage gateway", "10.R.30.254"],
-  ["pve", "Proxmox host", "10.R.10.10"], ["nas", "NAS", "10.R.30.10"], ["web", "Web server VM", "10.R.40.10"],
-  ["ftp", "FTP server VM", "10.R.40.11"], ["scan", "Scanner VM", "10.R.10.20"], ["pool", "Data DHCP pool", "10.R.20.100 to .199"],
+// Cyber Hub 15: what goes back in the Utility Drawer. A placeholder until Gabriel confirms the real contents.
+// Keep it the same as the "Utility drawer contents" table on Reference: The Rack (cyber-hub pages_ref.py).
+const DRAWER = ["Console cable (blue)", "Multiport dongle", "KVM cable", "USB Stick A", "USB Stick B",
+  "Raspberry Pi 3B (VULN-PI), with its SD card"];
+// Cyber Hub 15: every device the team resets, and the reset the page asks for.
+const RESETS = [
+  ["Core switch", "Factory defaults"], ["FortiWiFi 60E", "Factory defaults"],
+  ["Proxmox host", "Every VM deleted, including the scanner"], ["R440 server", "BIOS factory defaults loaded"],
+  ["USB Stick A", "Re-flashed with the Proxmox installer"], ["USB Stick B", "Firewall backups deleted"],
+  ["NAS", "Mode 2 reset"], ["Vulnerable Pi", "SD card re-flashed from repo.lab"],
+  ["Team laptops", "Lab route removed and guest Wi-Fi forgotten"],
 ];
 
 // Deliverables that are their own document, keyed "hub-n".
 const SEPARATE = {
   "00-1": ["cover", "Your cover page and team agreement, at the front of this log. They export with Cyber Hub 00."],
-  "00-2": ["rack", "Your rack sheet, at the front of this log. It exports with Cyber Hub 00."],
   "11-2": ["none", "Don't put the answer key in this app or anywhere the other team might see it. Submit it privately to the instructor."],
   "12-5": ["var", "The VAR is its own document, in the VAR tab. Submit it separately and give the client a copy."],
   "13-2": ["ssp", "The SSP is its own document, in the SSP tab. Submit it separately."],
   "14-1": ["link", "Paste the link to your slides."],
+  "15-3": ["restore", "Your restoration record is above, in this section, with the instructor's sign-off. It exports with Cyber Hub 15."],
 };
 
 const CHECKPOINT_05 = [

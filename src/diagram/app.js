@@ -2,12 +2,12 @@
 //
 // Inside the Report Builder it loads and saves through window.parent.rbDiagram, so the diagram travels in the
 // team file with history and backups. Opened on its own with a share link, it is a viewer that saves nothing.
-// It never receives the team's rack number, so it can't check entries against the plan.
 //
-// Hard rule (DIAGRAM_APP_SPEC.md, section 2): this file holds no rack plan. No expected addresses, VLANs,
-// port assignments, routes or policies. Everything drawn comes from what the team typed. The only built-in
-// facts are the devices in the rack, the switch's port names and the firewall's interface names, which
-// students already have on the reference pages.
+// Everything drawn comes from what the team typed. The one exception is the Addressing table's Planned column
+// (Gabriel's call, Nov 24 2026): the addressing plan from Reference: Rack Schema and VLAN Plan, filled in from
+// the rack number on the Team Log cover (HOST.rack()). It flags entries that differ from the plan, so the
+// diagram works like an IPAM record beside the as-built. Students still type every address themselves, and
+// the canvas, the checks and the exports show only what they typed.
 "use strict";
 (() => {
 const SCHEMA = 2;
@@ -456,7 +456,7 @@ function plug(g, a, wifi) {
 
 function drawInto(root, ui) {
   layout();
-  const lw = 150, lh = 80, lx = VB.w - lw - 20, ly = 16;
+  const lw = 200, lh = 110, lx = VB.w - lw - 20, ly = 16;
   if (doc.meta.logo) {
     const g = el("g", ui ? { "data-logo": "1", class: "logo-slot", tabindex: 0, role: "button", "aria-label": "Company logo. Select to change or remove it." } : {}, root);
     el("image", { href: doc.meta.logo, x: lx, y: ly, width: lw, height: lh, preserveAspectRatio: "xMaxYMin meet", class: "d-logo" }, g);
@@ -465,11 +465,19 @@ function drawInto(root, ui) {
     // A placeholder only on screen; exports leave the corner empty until a logo is added.
     const g = el("g", { "data-logo": "1", class: "logo-slot empty", tabindex: 0, role: "button", "aria-label": "Upload your company logo" }, root);
     el("rect", { x: lx, y: ly, width: lw, height: lh, rx: 8, class: "logo-ph" }, g);
-    text(g, lx + lw / 2, ly + 36, "logo-ph-t", HOST ? "Your logo" : "Upload logo", "middle");
-    text(g, lx + lw / 2, ly + 56, "logo-ph-s", HOST ? "Add it on the Team Log cover" : "PNG or JPG", "middle");
+    if (HOST) {
+      text(g, lx + lw / 2, ly + 46, "logo-ph-t", "Your logo", "middle");
+      text(g, lx + lw / 2, ly + 66, "logo-ph-s", "Add it on the", "middle");
+      text(g, lx + lw / 2, ly + 82, "logo-ph-s", "Team Log cover", "middle");
+    } else {
+      text(g, lx + lw / 2, ly + 51, "logo-ph-t", "Upload logo", "middle");
+      text(g, lx + lw / 2, ly + 71, "logo-ph-s", "PNG or JPG", "middle");
+    }
   }
   const connected = new Set(doc.links.flatMap((l) => [l.a, l.b]).filter((e) => e.port).map((e) => e.device + "|" + e.port));
   const gd = el("g", {}, root), gl = el("g", {}, root);
+  // The × buttons go on their own top layer, so a neighbouring port, tab or cable can never cover one.
+  const ux = [];
   for (const d of doc.devices) {
     if (d.kind === "vm") continue;
     const { w, h } = boxSize(d);
@@ -492,10 +500,10 @@ function drawInto(root, ui) {
           const bw = (r.w - 8) / pv.length;
           pv.forEach((v, i) => el("rect", { x: r.x - d.x + 4 + i * bw, y: r.y - d.y + r.h - 2.5, width: bw - (pv.length > 1 ? 1 : 0), height: 5, rx: 1.5, fill: vcolor(v) }, pg));
         }
-        if (ui && on) unplugBtn(g, r.x - d.x + r.w - 2, r.y - d.y + 2, d.id, p.name, `${d.name} ${p.name}`);
+        if (ui && on) ux.push([r.x + r.w - 2, r.y + 2, d.id, p.name, `${d.name} ${p.name}`]);
         text(pg, r.cx - d.x, r.y - d.y + 19, "d-pname", p.name, "middle");
         if (mode) text(pg, r.cx - d.x, r.y - d.y + 33, "d-pmode", mode, "middle");
-        if (vl) text(pg, r.cx - d.x, r.y - d.y + 46, "d-pvl", vl, "middle");
+        if (vl) text(pg, r.cx - d.x, r.y - d.y + 46, "d-pvl" + (vl.length > 6 ? " sm" : ""), vl, "middle");
       }
       continue;
     }
@@ -530,7 +538,7 @@ function drawInto(root, ui) {
       const tg = el("g", { class: "port" + (on ? " on" : ""), ...(ui ? { "data-port": name, "data-pdev": d.id } : {}) }, g);
       el("rect", { x: t.x - d.x, y: t.y - d.y, width: t.w, height: t.h, rx: 4, class: "d-tab" }, tg);
       text(tg, t.x - d.x + t.w / 2, t.y - d.y + 15, "d-tabname", name, "middle");
-      if (ui && on) unplugBtn(g, t.x - d.x + t.w - 1, t.y - d.y + 1, d.id, single ? "" : name, `${d.name} ${name}`);
+      if (ui && on) ux.push([t.x + t.w - 1, t.y + 1, d.id, single ? "" : name, `${d.name} ${name}`]);
     }
   }
   for (const l of doc.links) {
@@ -552,6 +560,7 @@ function drawInto(root, ui) {
     r.ends.forEach((a) => plug(g, a, wifi));
     if (ui) el("path", { d: path, class: "hit" }, g);
   }
+  if (ux.length) { const gu = el("g", { class: "unplugs" }, root); for (const a of ux) unplugBtn(gu, ...a); }
   drawLegend(root, ui);
 }
 function unplugBtn(g, cx, cy, devId, port, label) {
@@ -835,16 +844,18 @@ function help() {
     sec("Record a cable"),
     h("p", {}, "Drag from a labeled port, such as a switch port or a firewall interface, and drop it on the device at the other end. Dropping on a port records that port. A port that already has a cable gets the new one instead; Undo brings the old one back."),
     sec("Enter settings"),
-    h("p", {}, "Select a device to fill in its settings, or a virtual machine inside the hypervisor. The Addressing table tab lists every interface and cable you have entered, and the SSP copies it for you."),
+    h("p", {}, "Select a device to fill in its settings, or a virtual machine inside the hypervisor. The Addressing table tab lists every interface and cable you have entered, beside the addressing plan for your rack, and the SSP copies it for you."),
     sec("See your VLANs"),
     h("p", {}, "Each VLAN gets its own color the first time it appears on a switch port, a VLAN interface or a VM tag. Ports, cables, VMs and devices take the color of their VLAN, and a trunk cable is striped with every VLAN it carries. Point at a VLAN in the legend to fade out everything outside it."),
     sec("Remove a cable"),
     h("p", {}, "Select the small × on a port that has a cable, or select the cable and choose Delete cable. Undo brings it back."),
     sec("Your logo"),
-    h("p", {}, "Select Upload logo in the top corner of the diagram and choose a PNG or JPG. Your logo replaces the placeholder and appears in Export PNG. Select it again to change or remove it. The app shrinks it so the share link stays short."),
+    h("p", {}, HOST ? "Your logo comes from the Team Log cover. Add or change it there and it shows here and on every report." : "Select Upload logo in the top corner of the diagram and choose a PNG or JPG. Your logo replaces the placeholder and appears in Export PNG. Select it again to change or remove it. The app shrinks it so the share link stays short."),
     sec("Save and share"),
     h("p", {}, "The diagram saves with your team file, like the rest of the Report Builder. Each Cyber Hub's PDF export includes it, and the SSP adds it for you. Copy share link gives a view-only link, if your instructor asks for one."),
-    h("p", { class: "muted" }, "The app shows only what you enter. It never checks your work against the lab plan, so test on the rack."),
+    sec("The addressing plan"),
+    h("p", {}, "The Addressing table's Planned column is the plan for your rack, from the rack number on the Team Log cover. Anything you enter that differs from it is marked in amber. The drawing and your exports show only what you entered."),
+    h("p", { class: "muted" }, "Matching the plan isn't the same as working. Test on the rack."),
   ], [["Close"]]);
 }
 
@@ -877,21 +888,63 @@ function prefixToMask(p) {
   const bits = "1".repeat(n).padEnd(32, "0");
   return [0, 8, 16, 24].map((i) => parseInt(bits.slice(i, i + 8), 2)).join(".");
 }
+// The addressing plan, as Reference: Rack Schema and VLAN Plan shows it. R is the rack number.
+// [address, prefix, gateway] for a fixed address, or { dhcp: "range" } for a DHCP client.
+const PLAN = {
+  "isp|Uplink": ["10.R.200.1", 24], "fw|wan1": ["10.R.200.2", 24], "fw|internal": ["10.R.100.1", 24],
+  "fw|dmz": ["10.R.40.1", 24], "fw|guest Wi-Fi": ["10.R.50.1", 24], "sw|OOB": ["192.168.1.254", 24],
+  "sw|VLAN 10": ["10.R.10.254", 24], "sw|VLAN 20": ["10.R.20.254", 24], "sw|VLAN 30": ["10.R.30.254", 24],
+  "sw|VLAN 100": ["10.R.100.254", 24],
+  hv: ["10.R.10.10", 24, "10.R.10.254"], vmweb: ["10.R.40.10", 24, "10.R.40.1"], vmftp: ["10.R.40.11", 24, "10.R.40.1"],
+  vmscan: ["10.R.10.20", 24, "10.R.10.254"], nas: ["10.R.30.10", 24, "10.R.30.254"], admin: ["10.R.10.5", 24, "10.R.10.254"],
+  pi: { dhcp: "10.R.20.100 to .199" }, lap: { dhcp: "10.R.20.100 to .199" },
+  isplap: { dhcp: "198.51.100.0/24" }, guest: { dhcp: "10.R.50.0/24" },
+};
+const PLAN_SVIS = ["10", "20", "30", "100"];
+const rackNo = () => { try { const r = String(HOST?.rack?.() || ""); return /^[1-8]$/.test(r) ? r : ""; } catch { return ""; } };
+const fillR = (v, r) => String(v).replace(/\bR\b/g, r || "R");
+function planFor(key, r) {
+  const p = PLAN[key];
+  if (!p) return null;
+  if (p.dhcp) return { dhcp: true, text: "DHCP, " + fillR(p.dhcp, r) };
+  return { ip: fillR(p[0], r), prefix: String(p[1]), gw: p[2] ? fillR(p[2], r) : "", text: fillR(p[0], r) + "/" + p[1] };
+}
+// Which cells differ from the plan. Only entries the team has made are compared.
+function planDiffs(row, plan) {
+  const out = {};
+  if (!plan || !rackNo()) return out;
+  const o = row.o || {};
+  if (plan.dhcp) { if (o.address && !o.dhcp) out.ip = plan.text; return out; }
+  if (o.dhcp && !o.address) out.ip = plan.text;
+  if (o.address && o.address.trim() !== plan.ip) out.ip = plan.text;
+  if (o.address && o.mask && String(o.mask).replace("/", "").trim() !== plan.prefix) out.mask = "/" + plan.prefix + " (" + prefixToMask(plan.prefix) + ")";
+  if (row.gw && plan.gw && row.gw.trim() !== plan.gw) out.gw = plan.gw;
+  return out;
+}
 function addressRows() {
-  const R = [];
+  const R = [], r = rackNo();
   const ip = (o) => o.address || (o.dhcp ? "DHCP" : "");
   const mask = (o) => (o.address && o.mask ? prefixToMask(o.mask) : "");
-  const add = (d, iface, vlan, o, gw) => R.push({ d, host: d.hostname || "", iface, vlan: vlan || "", ip: ip(o), mask: mask(o), gw: gw || "" });
+  const add = (d, iface, vlan, o, gw, key) => {
+    const row = { d, o, host: d.hostname || "", iface, vlan: vlan || "", ip: ip(o), mask: mask(o), gw: gw || "", plan: planFor(key, r) };
+    row.diff = planDiffs(row, row.plan);
+    R.push(row);
+  };
   const isp = dev("isp"), fw = dev("fw"), sw = dev("sw");
-  add(isp, "Uplink", "", isp, "");
-  for (const i of fw.interfaces) add(fw, i.name, "", i, "");
-  add(sw, "OOB", "", sw.oob, "");
-  const svis = [...sw.svis].sort((a, b) => (+a.vlan || 0) - (+b.vlan || 0));
-  if (svis.length) svis.forEach((v) => add(sw, "VLAN " + (v.vlan || "?"), v.vlan, v, ""));
-  else add(sw, "VLAN interfaces", "", {}, "");
+  add(isp, "Uplink", "", isp, "", "isp|Uplink");
+  for (const i of fw.interfaces) add(fw, i.name, "", i, "", "fw|" + i.name);
+  add(sw, "OOB", "", sw.oob, "", "sw|OOB");
+  // Every planned VLAN interface gets a row, entered or not, plus any the team added that the plan doesn't have.
+  const vl = [...new Set([...PLAN_SVIS, ...sw.svis.map((v) => String(v.vlan || "?"))])].sort((a, b) => (+a || 0) - (+b || 0));
+  for (const v of vl) {
+    const e = sw.svis.find((x) => String(x.vlan || "?") === v);
+    add(sw, "VLAN " + v, v, e || {}, "", "sw|VLAN " + v);
+    const row = R[R.length - 1];
+    if (!row.plan) { row.plan = { none: true, text: "Not in the plan" }; if (rackNo() && e && e.address) row.diff.ip = "No VLAN interface"; }
+  }
   for (const id of ["hv", "vmweb", "vmftp", "vmscan", "nas", "admin", "pi", "lap", "isplap", "guest"]) {
     const d = dev(id);
-    add(d, d.kind === "vm" ? "net0" : nicOf(d), d.kind === "vm" ? d.vlanTag : "", d, d.gateway);
+    add(d, d.kind === "vm" ? "net0" : nicOf(d), d.kind === "vm" ? d.vlanTag : "", d, d.gateway, id);
   }
   return R;
 }
@@ -933,15 +986,28 @@ async function copyTable(t) {
 function renderTable() {
   const top = tableView.scrollTop;
   const A = addressRows(), C = connectionRows();
-  const at = tableEl("Addressing table", ["Device", "Hostname", "Interface", "VLAN", "IP address", "Subnet mask", "Default gateway"], A,
-    (r, first) => [first ? r.d.name : "", first && r.d.kind !== "isp" ? dash(r.host) : "", r.iface, dash(r.vlan), dash(r.ip), dash(r.mask), dash(r.gw)], (r) => r.d.id, "addr");
+  const rk = rackNo();
+  const planCell = (r) => {
+    if (!r.plan) return dash("");
+    const t = h("span", { class: "plan" + (rk ? "" : " pattern") + (r.plan.none ? " none" : "") }, r.plan.text);
+    return r.plan.gw ? [t, h("span", { class: "plan-gw" }, "gateway " + r.plan.gw)] : t;
+  };
+  const flagged = (v, d) => d ? h("span", { class: "differs", title: "The plan says " + d }, v || "—", h("span", { class: "sr" }, ". Differs from the plan, which says " + d)) : dash(v);
+  const at = tableEl("Addressing table", ["Device", "Hostname", "Interface", "VLAN", "Planned", "IP address", "Subnet mask", "Default gateway"], A,
+    (r, first) => [first ? r.d.name : "", first && r.d.kind !== "isp" ? dash(r.host) : "", r.iface, dash(r.vlan), planCell(r),
+      flagged(r.ip, r.diff.ip), flagged(r.mask, r.diff.mask), flagged(r.gw, r.diff.gw)], (r) => r.d.id, "addr");
+  const nd = A.reduce((n, r) => n + Object.keys(r.diff).length, 0);
+  const planNote = !HOST ? null
+    : !rk ? h("p", { class: "plannote" }, "The Planned column shows the plan's patterns. Add your rack number on the Team Log cover and it fills in for your rack.")
+    : nd ? h("p", { class: "plannote warn" }, `${nd} ${nd === 1 ? "entry differs" : "entries differ"} from the plan, marked in amber. Either the rack or your diagram is wrong: check the device, then fix whichever is out of step.`)
+    : h("p", { class: "plannote" }, "Everything you've entered matches the plan. That isn't the same as working: test it on the rack.");
   const ct = C.length ? tableEl("Connections", ["Device", "Port", "Connects to", "Port", "Mode", "VLANs"], C,
     (r, first) => [r.A.name, dash(r.pa), r.B.name, dash(r.pb), dash(r.mode), dash(r.vlans)], (r) => r.A.id + r.pa, "conn")
     : h("p", { class: "muted" }, "No cables recorded yet.");
   const head = (title, note, t) => h("div", { class: "thead" }, h("div", {}, h("h2", {}, title), h("p", { class: "muted" }, note)),
     t.tagName === "TABLE" ? h("button", { class: "small", onclick: () => copyTable(t) }, "Copy table") : null);
   tableView.replaceChildren(
-    head("Addressing table", "Every interface, from what you entered. Select a row to edit that device.", at), at,
+    head("Addressing table", "Every interface: the plan for your rack beside what you entered. Select a row to edit that device.", at), planNote, at,
     head("Connections", "Every cable, with the switch port's mode and VLANs.", ct), ct);
   tableView.scrollTop = top;
 }

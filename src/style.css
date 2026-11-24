@@ -118,7 +118,7 @@ table.edit td.pattern .fixed{font-family:var(--mono);color:var(--muted);font-siz
 .frow:hover{border-color:#94a3b8;background:#fff}
 .frow[aria-current=true]{border-color:var(--navy);box-shadow:0 0 0 1px var(--navy)}
 .frow .t{display:block;color:var(--ink);font-weight:600}
-.frow .m{display:block;color:var(--muted);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frow .m{display:block;color:var(--muted);font-size:12.5px}
 .frow.dim{opacity:.6}
 .sev{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;border-radius:7px;color:#fff;padding:5px 0;width:64px;font-variant-numeric:tabular-nums;line-height:1.1}
 .sev b{font:600 15px/1 var(--mono)}
@@ -193,8 +193,8 @@ table.edit td.pattern .fixed{font-family:var(--mono);color:var(--muted);font-siz
 .doc .page{break-after:page}
 .doc .cov{min-height:9.2in;display:flex;flex-direction:column}
 .doc .cov .band{height:10pt;background:var(--navy);margin:0 0 .5in}
-.doc .cov .logos{display:flex;justify-content:space-between;align-items:center;min-height:.9in;margin-bottom:1.2in}
-.doc .cov .logos img{max-height:.9in;max-width:2.4in}
+.doc .cov .logos{display:flex;justify-content:space-between;align-items:center;min-height:1.4in;margin-bottom:.9in}
+.doc .cov .logos img{max-height:1.4in;max-width:3in}
 .doc .cov .kick{font-weight:700;font-size:9pt;letter-spacing:.12em;color:var(--navy);text-transform:uppercase}
 .doc .cov h1{font-size:30pt;line-height:1.1;margin:8pt 0 10pt;color:var(--navy)}
 .doc .cov .for{font-size:15pt;color:var(--head);margin:0 0 28pt}
@@ -288,3 +288,18 @@ button.big{padding:8px 14px;font-weight:600}
 .wsec h3{font-size:13px;color:var(--navy);margin:14px 0 4px;text-transform:uppercase;letter-spacing:.05em}
 .wsec ul{margin:0;padding-left:18px}
 .wsec li{margin:0 0 5px}
+
+/* Cyber Hub 15 restoration record */
+table.edit.restore td.ctr{text-align:center;vertical-align:middle}
+.tickbox{display:inline-flex;align-items:center;justify-content:center;min-width:32px;min-height:32px;cursor:pointer}
+.tickbox input{width:20px;height:20px;accent-color:var(--navy,#003366);cursor:pointer}
+.card.signoff .grid2{margin-top:10px}
+.signed-by{display:flex;gap:14px;align-items:center}
+.signed-by .seal{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:#1f5f3a;color:#fff;font-size:22px;font-weight:700;flex:none}
+.signed-by code{font-size:15px;letter-spacing:.06em;background:#eef2f7;padding:2px 6px;border-radius:4px}
+.doc table.restore td:nth-child(3),.doc table.restore td:last-child,.doc table.restore th:last-child{white-space:nowrap}
+/* Cover logo: shown on a checkerboard so a transparent background is visible */
+.logowell{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.logoprev{padding:6px;border:1px solid var(--border);border-radius:6px;background:#fff conic-gradient(#eef2f7 25%,#fff 0 50%,#eef2f7 0 75%,#fff 0) 0 0/14px 14px}
+.logoprev img{display:block;max-height:72px;max-width:240px}
+.logowell .tools{margin:0}

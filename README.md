@@ -9,6 +9,12 @@ Live at https://glgoltz.github.io/report-builder/
   pages with `python3 ../report-builder/tools/labs.py`, run from the cyber-hub repo.
 - **Saving:** IndexedDB in the browser, a version history, an optional automatic backup file (Chrome and Edge), and
   team files (`.cyberhub`) the team keeps in Google Drive. Nothing is sent to a server, and there are no accounts.
-- **Hard rule:** the app ships no answers or expected values. See `REPORT_BUILDER_SPEC.md`, section 2.
+- **Hard rule:** the app ships no answers. The only expected values are the addressing plan's patterns students already
+  have on the Rack Schema page. See `REPORT_BUILDER_SPEC.md`, section 2.
+- **Cyber Hub 15 sign-off:** `src/signoff.js`. The instructor password is never in the repo; `node tools/signoff-hash.mjs "new password"` makes a new hash.
 - **Tests:** `test/run.js` (Playwright) drives the app with the sample Nmap and Greenbone files in `test/`. Serve the
   folder first: `python3 -m http.server 8765`, then `node test/run.js` from `test/`.
+- **Visual sweep:** `test/audit-ui.js` (every view at three widths: sideways scroll, clipped text, cut-off
+  placeholders, overlapping text), `test/audit-diagram.js` (labels inside their boxes, no covered ×),
+  `test/audit-print.js <folder>` (PDF exports) and `test/audit-pages.js <files>` (course pages and guides). Run them
+  after layout changes.

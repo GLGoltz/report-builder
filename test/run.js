@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const { chromium } = require('playwright');
 const fs = require('fs');
 (async () => {
@@ -38,10 +39,61 @@ const fs = require('fs');
   const sg = await p.evaluate(() => [doc.log.agreement.signatures['Jay Lee'].date === today(), coverStatus()]);
   if (!sg[0]) errs.push('signature ' + sg); else t('signature dated, cover ' + sg[1]);
   if ((await p.locator('table.edit').first().locator('tbody tr').count()) !== 4) errs.push('roster should start with 4 rows'); else t('roster of 4');
-  // rack sheet fills from the rack number
-  await p.fill('input[placeholder="1 to 8"]', '4'); await p.click('.step:has-text("Rack sheet")');
-  const rs = await p.evaluate(() => [...document.querySelectorAll('table.edit tbody tr')].map(r => r.lastElementChild.previousElementSibling.textContent));
-  if (rs[1] !== '10.4.200.2' || rs[16] !== '10.4.20.100 to .199' || rs[0] !== '4') errs.push('rack sheet ' + rs.slice(0,2)); else t('rack sheet autofill');
+  // the rack number fills the diagram's addressing plan, and entries that differ are flagged
+  if (await p.isVisible('.step:has-text("Rack sheet")')) errs.push('rack sheet should be gone');
+  await p.fill('input[placeholder="1 to 8"]', '4');
+  await p.evaluate(() => { doc.diagram.devices.find(d => d.id === 'vmweb').gateway = '10.4.40.254'; commit(); });
+  await p.click('[data-tab=diagram]'); await p.waitForTimeout(400); await fr.locator('#t-table').click(); await p.waitForTimeout(200);
+  const pl = await fr.locator('table.addr').evaluate((tb) => { const rows = [...tb.querySelectorAll('tbody tr')];
+    const web = rows.find(r => r.textContent.includes('10.4.40.10/24'));
+    return [rows.length, !!web, web ? web.querySelectorAll('.differs').length : -1, tb.querySelector('.plan.pattern') ? 'pattern' : 'filled', document.querySelector('.plannote').textContent.slice(0, 20)]; });
+  if (pl[1] !== true || pl[2] !== 1 || pl[3] !== 'filled' || !pl[4].startsWith('1 entry differs')) errs.push('addressing plan ' + pl); else t('addressing plan filled for rack 4, gateway mismatch flagged ' + pl);
+  await fr.locator('#t-canvas').click();
+  await p.evaluate(() => { doc.diagram.devices.find(d => d.id === 'vmweb').gateway = '10.4.40.1'; commit(); });
+  await p.click('[data-tab=log]');
+  // Cyber Hubs 00 and 14 have no tickets; 00 has no commands
+  await p.click('text=00 Launch Your Company');
+  if (await p.isVisible('text=Troubleshooting tickets') || await p.isVisible('text=Commands and settings')) errs.push('00 should have no tickets or commands'); else t('00: no tickets, no commands');
+  await p.click('text=14 Physical Security Briefing');
+  if (await p.isVisible('text=Troubleshooting tickets')) errs.push('14 should have no tickets'); else t('14: no tickets');
+  // Cyber Hub 15: restoration record and instructor sign-off, with a throwaway test password (never the real one)
+  const TPW = 'test-only-' + crypto.randomBytes(4).toString('hex'), salt = crypto.randomBytes(8).toString('hex');
+  const chk = crypto.pbkdf2Sync(TPW.toLowerCase().replace(/[\s\-_.]+/g, ''), salt, 1000, 64, 'sha256').subarray(0, 32).toString('hex');
+  await p.evaluate(([salt, chk]) => Object.assign(SIGNOFF, { salt, iter: 1000, check: chk }), [salt, chk]);
+  await p.click('text=15 Lab Restoration');
+  if ((await p.locator('table.restore').count()) !== 2) errs.push('restore tables');
+  if (!(await p.isDisabled('button:has-text("Sign off")'))) errs.push('sign off should wait for every tick');
+  for (const cb of await p.locator('table.restore input[type=checkbox]').all()) await cb.check();
+  await p.fill('#so-name', 'G. Goltz'); await p.fill('#so-pw', 'wrong password'); await p.click('button:has-text("Sign off")'); await p.waitForTimeout(400);
+  if (!(await p.isVisible('text=That password isn\'t right'))) errs.push('wrong password accepted');
+  await p.fill('#so-pw', TPW.toUpperCase().replace(/-/g, ' ')); await p.click('button:has-text("Sign off")'); await p.waitForTimeout(400);
+  const so = await p.evaluate(() => restoreData().sign);
+  if (!so || !/^[0-9A-F]{5}-[0-9A-F]{5}$/.test(so.code) || so.by !== 'G. Goltz') errs.push('sign off ' + JSON.stringify(so)); else t('signed off ' + so.code);
+  if (!(await p.isVisible('text=hasn\'t changed since it was signed'))) errs.push('seal check');
+  await p.locator('table.restore input[type=checkbox]').first().uncheck(); await p.waitForTimeout(400);
+  if (!(await p.isVisible('text=changed after it was signed'))) errs.push('change after signing not caught'); else t('change after signing caught');
+  await p.locator('table.restore input[type=checkbox]').first().check(); await p.waitForTimeout(400);
+  await p.click('text=Check a sign-off'); await p.fill('#m-body input[type=password]', TPW); await p.click('#m-acts >> text=Check'); await p.waitForTimeout(400);
+  if (!(await p.isVisible('text=Genuine.'))) errs.push('code check'); else t('code checks as genuine');
+  await p.evaluate(() => { restoreData().sign.code = 'AAAAA-BBBBB'; }); await p.click('#m-acts >> text=Check'); await p.waitForTimeout(400);
+  if (!(await p.isVisible('text=Not genuine'))) errs.push('forged code accepted'); else t('forged code rejected');
+  await p.click('#m-acts >> text=Close');
+  const h15 = await p.evaluate(() => { const s = hubHTML(LABS.find(l => l.num === '15')); return [s.includes('Reset record'), s.includes('AAAAA-BBBBB')]; });
+  if (h15.join() !== 'true,true') errs.push('15 export ' + h15); else t('15 export has the record');
+  // logos from logo makers: the empty margin is trimmed and a plain background made transparent
+  const lg = await p.evaluate(() => { const c = document.createElement('canvas'); c.width = c.height = 500; const x = c.getContext('2d');
+    x.fillStyle = '#f5ecdc'; x.fillRect(0, 0, 500, 500); x.fillStyle = '#444'; x.beginPath(); x.arc(250, 220, 90, 0, 7); x.fill();
+    x.fillStyle = '#f5ecdc'; x.fillRect(225, 195, 50, 50);
+    const r = cleanLogo(c), d = r.canvas.getContext('2d').getImageData(0, 0, r.canvas.width, r.canvas.height).data, w = r.canvas.width;
+    const at = (px, py) => d[(py * w + px) * 4 + 3];
+    return [r.canvas.width < 220, r.canvas.height < 220, at(0, 0), at(w >> 1, r.canvas.height >> 1) > 200]; });
+  if (lg.join() !== 'true,true,0,true') errs.push('logo clean-up ' + lg); else t('logo margin trimmed, background transparent, enclosed shape kept');
+  // VAR scope fills from the client's rack
+  await p.click('[data-tab=var]'); await p.click('.step:has-text("Cover")'); await p.fill('input[placeholder="1 to 8"]', '6');
+  await p.click('.step:has-text("Scope")');
+  const scp = await p.evaluate(() => doc.var.scope.map(s => s.range).join(' '));
+  if (scp !== '10.6.20.0/24 10.6.40.0/24 10.6.200.2') errs.push('scope ' + scp); else t('VAR scope from client rack');
+  await p.click('[data-tab=log]');
   // hub 05
   await p.click('text=05 Switch Ports and DHCP');
   await p.click('text=+ Add session');

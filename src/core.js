@@ -17,7 +17,6 @@ function blankDoc() {
     log: {
       cover: { rack: "", semester: "", diagramLink: "", chat: "", roster: [{ name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }] },
       agreement: { missed: "", signatures: {} },   // signatures: roster name -> { sig, date }
-      rack: { values: {}, checkedTeammate: "", checkedInstructor: "" },
       hubs: {},
     },
     var: {
@@ -231,8 +230,10 @@ async function restoreBackupHandle() {
 // The diagram lives in doc.diagram. Company and logo live once, in doc.meta, and are handed to the diagram.
 const LOGO_MAX = 40000;   // the diagram's limit: its share link carries the logo
 window.rbDiagram = {
+  rack() { return rackNum(); },
   gotoCover() { state.tab = "log"; state.log = "cover"; renderAll(); toast("Add your logo here. It appears on the diagram by itself."); },
-  load() { const d = doc.diagram ? JSON.parse(JSON.stringify(doc.diagram)) : null; if (!d) return null;
+  // A team that hasn't drawn anything yet still gets its company name and logo on the diagram.
+  load() { const d = doc.diagram ? JSON.parse(JSON.stringify(doc.diagram)) : { v: 2, devices: [], links: [], meta: {} };
     d.meta = { ...(d.meta || {}), company: doc.meta.company || "" }; if (doc.meta.logo) d.meta.logo = doc.meta.logo; else delete d.meta.logo; return d; },
   save(d) {
     doc.diagram = d;
@@ -247,19 +248,78 @@ async function diagramPNG() {
   try { const w = dframe(); if (!w?.rbPNG || !w.rbHasContent?.()) return ""; return await w.rbPNG(); } catch { return ""; }
 }
 function readDiagram() { try { const d = dframe()?.rbDoc?.(); if (d) return d; } catch {} return doc.diagram; }
+// Logo makers export a square with a wide plain margin, so the mark ends up tiny on every report. Before
+// shrinking, cleanLogo crops to the artwork and, when the background is one plain color, makes it transparent
+// (the outside, plus small enclosed gaps such as the inside of letters). Pass raw to keep the image as uploaded.
+function cleanLogo(im) {
+  const k0 = Math.min(1, 1000 / Math.max(im.width, im.height));
+  const W = Math.max(1, Math.round(im.width * k0)), H = Math.max(1, Math.round(im.height * k0));
+  const c = document.createElement("canvas"); c.width = W; c.height = H;
+  const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(im, 0, 0, W, H);
+  const img = x.getImageData(0, 0, W, H), p = img.data, N = W * H;
+  // The border tells us what the background is.
+  const border = [];
+  for (let i = 0; i < W; i++) border.push(i, (H - 1) * W + i);
+  for (let j = 0; j < H; j++) border.push(j * W, j * W + W - 1);
+  const clear = border.filter((i) => p[i * 4 + 3] < 24).length / border.length;
+  let bg = null;
+  if (clear < 0.9) {
+    const med = (o) => border.map((i) => p[i * 4 + o]).sort((u, v) => u - v)[border.length >> 1];
+    bg = [med(0), med(1), med(2)];
+  }
+  const dist = (i) => Math.hypot(p[i * 4] - bg[0], p[i * 4 + 1] - bg[1], p[i * 4 + 2] - bg[2]);
+  const LO = 40, HI = 110;
+  if (bg && border.filter((i) => dist(i) < LO).length / border.length > 0.92) {
+    // Flood the background in from the edges, then clear small enclosed patches of the same color.
+    const isBg = new Uint8Array(N), seen = new Uint8Array(N);
+    const fill = (starts, mark) => { const st = [...starts]; const got = []; for (const s of st) seen[s] = 1;
+      while (st.length) { const i = st.pop(); got.push(i); const cx = i % W, cy = (i / W) | 0;
+        for (const n of [cx > 0 ? i - 1 : -1, cx < W - 1 ? i + 1 : -1, cy > 0 ? i - W : -1, cy < H - 1 ? i + W : -1])
+          if (n >= 0 && !seen[n] && dist(n) < LO) { seen[n] = 1; st.push(n); } }
+      if (mark) for (const i of got) isBg[i] = 1; return got; };
+    fill(border.filter((i) => dist(i) < LO), true);
+    const small = N * 0.004;
+    for (let i = 0; i < N; i++) if (!seen[i] && dist(i) < LO) { const g = fill([i], false); if (g.length < small) for (const j of g) isBg[j] = 1; }
+    for (let i = 0; i < N; i++) {
+      if (isBg[i]) { p[i * 4 + 3] = 0; continue; }
+      // Soften the edge: a pixel next to the background that is part background gets part transparency.
+      const cx = i % W, cy = (i / W) | 0;
+      if (!((cx > 0 && isBg[i - 1]) || (cx < W - 1 && isBg[i + 1]) || (cy > 0 && isBg[i - W]) || (cy < H - 1 && isBg[i + W]))) continue;
+      const d = dist(i); if (d >= HI) continue;
+      const a = Math.max(0.05, (d - LO / 2) / (HI - LO / 2));
+      for (let o = 0; o < 3; o++) p[i * 4 + o] = Math.max(0, Math.min(255, Math.round((p[i * 4 + o] - (1 - a) * bg[o]) / a)));
+      p[i * 4 + 3] = Math.round(p[i * 4 + 3] * a);
+    }
+    x.putImageData(img, 0, 0);
+  } else if (bg) return { canvas: c, changed: false };   // a photo or busy background: leave it alone
+  // Crop to the artwork, with a little breathing room.
+  let l = W, t = H, r = -1, b = -1;
+  for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) if (p[(j * W + i) * 4 + 3] > 16) { if (i < l) l = i; if (i > r) r = i; if (j < t) t = j; if (j > b) b = j; }
+  if (r < 0) return { canvas: c, changed: false };
+  const pad = Math.round(Math.max(r - l, b - t) * 0.04);
+  l = Math.max(0, l - pad); t = Math.max(0, t - pad); r = Math.min(W - 1, r + pad); b = Math.min(H - 1, b + pad);
+  const out = document.createElement("canvas"); out.width = r - l + 1; out.height = b - t + 1;
+  out.getContext("2d").drawImage(c, l, t, out.width, out.height, 0, 0, out.width, out.height);
+  return { canvas: out, changed: out.width < W * 0.97 || out.height < H * 0.97 || !!bg };
+}
 // Logos are kept small enough for the diagram's share link.
-function readLogo(file) {
+function readLogo(file) { return readLogoX(file).then((r) => r.data); }
+// { data, changed }: changed says whether the margin or background was cleaned up, so the page can offer the original.
+function readLogoX(file, raw = false) {
   return new Promise((res, rej) => {
     if (!file || !/^image\//.test(file.type)) return rej(new Error("That isn't an image."));
     const url = URL.createObjectURL(file), im = new Image();
     im.onload = () => {
       URL.revokeObjectURL(url);
-      for (const side of [400, 320, 256, 200, 160, 128]) for (const q of [0.85, 0.7, 0.55]) {
-        const k = Math.min(1, side / Math.max(im.width, im.height));
-        const c = document.createElement("canvas"); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
-        c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+      let src = im, changed = false;
+      if (!raw) { try { const r = cleanLogo(im); src = r.canvas; changed = r.changed; } catch {} }
+      const sw = src.width, sh = src.height;
+      for (const side of [480, 400, 320, 256, 200, 160, 128]) for (const q of [0.9, 0.8, 0.65]) {
+        const k = Math.min(1, side / Math.max(sw, sh));
+        const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(sw * k)); c.height = Math.max(1, Math.round(sh * k));
+        const g = c.getContext("2d"); g.imageSmoothingQuality = "high"; g.drawImage(src, 0, 0, c.width, c.height);
         let d = c.toDataURL("image/webp", q); if (!d.startsWith("data:image/webp")) d = c.toDataURL("image/png");
-        if (d.length <= LOGO_MAX) return res(d);
+        if (d.length <= LOGO_MAX) return res({ data: d, changed });
       }
       rej(new Error("That logo is too detailed to shrink. Try a simpler PNG."));
     };
@@ -339,7 +399,17 @@ function field(label, obj, key, o = {}) {
     label ? h("label", { for: id }, label, o.req ? h("span", { class: "req", title: "Needed for the report" }, " *") : null) : null,
     inp, o.hint ? h("p", { class: "hintline" }, o.hint) : null);
 }
-function autosize(t) { const f = () => { t.style.height = "auto"; t.style.height = Math.min(600, t.scrollHeight + 2) + "px"; }; t.addEventListener("input", f); requestAnimationFrame(f); }
+// Grows a text box to fit its text, or its placeholder while it's empty, so neither is ever cut off.
+function autosize(t) {
+  const f = () => {
+    t.style.height = "auto";
+    let sh = t.scrollHeight;
+    if (!t.value && t.placeholder) { t.value = t.placeholder; sh = t.scrollHeight; t.value = ""; }
+    t.style.height = Math.min(600, sh + 2) + "px";
+  };
+  t.addEventListener("input", f); requestAnimationFrame(f);
+  if (window.ResizeObserver) { let w = 0; new ResizeObserver(() => { if (t.clientWidth !== w) { w = t.clientWidth; f(); } }).observe(t); }
+}
 
 // Editable table: rows are objects; cols are [key, label, opts]
 function rowsTable(rows, cols, o = {}) {
@@ -396,7 +466,7 @@ function toast(msg, bad) { const t = $("toast"); t.textContent = msg; t.classNam
 function ask(title, body, acts) {
   $("m-title").textContent = title;
   $("m-body").replaceChildren(...[].concat(body));
-  $("m-acts").replaceChildren(...acts.map(([t, fn, cls]) => h("button", { class: cls || "", onclick: () => { closeModal(); fn && fn(); } }, t)));
+  $("m-acts").replaceChildren(...acts.map(([t, fn, cls, keep]) => h("button", { class: cls || "", onclick: () => { if (!keep) closeModal(); fn && fn(); } }, t)));
   $("modal").hidden = false; $("modal").querySelector(".card").scrollTop = 0; ($("m-acts").lastElementChild || $("m-acts")).focus({ preventScroll: true });
 }
 function closeModal() { $("modal").hidden = true; $("modal").querySelector(".card").classList.remove("wide"); }

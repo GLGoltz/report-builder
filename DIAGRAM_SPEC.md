@@ -20,12 +20,14 @@ The diagram is graded once, as the SSP diagram in Cyber Hub 13. It is also a tro
 
 This rule outranks every feature below. If a feature can't be built without breaking it, drop the feature.
 
-1. **Everything shown comes from what the team typed.** The app has no copy of the rack plan: no expected addresses,
-   VLAN numbers, port assignments, routes or policies anywhere in its code or data. There is no rack-number field,
-   because knowing the rack number would let the app check addresses against the plan.
+1. **Everything drawn comes from what the team typed.** The one exception (Gabriel's decision, Nov 24 2026) is the
+   Addressing table's Planned column: the addresses from Reference: Rack Schema and VLAN Plan, filled in from the
+   rack number on the Team Log cover, with entries that differ marked in amber. It replaced the Team Log's rack
+   sheet. The plan holds addresses, masks and gateways only: no port modes, VLAN tags, routes or policies, and the
+   canvas, checks and exports never use it.
 2. **Messages say what is missing or contradictory, never what the value should be.** Allowed: "The firewall has no
    route that matches 10.3.20.100." Not allowed: "Add a route to 10.3.20.0/24 through 10.3.100.254."
-3. **A message may quote only values the team entered.** No message introduces a new address, VLAN, port or name.
+3. **A message may quote only values the team entered** (the Planned column is a table, not a message). No message introduces a new address, VLAN, port or name.
 4. **The standard is what real equipment would tell them.** A failed trace should reveal about as much as a failed
    ping plus reading the routing table: where the packet stopped and why that device couldn't forward it.
 5. **No "check against the answer" mode in the student app.** The instructor comparison (section 8) uses a reference
@@ -40,9 +42,8 @@ app can produce, and confirm none states a correct value.
 
 ## 3. Where it lives
 
-- **Decision still open (ask Gabriel):** a second page inside `GLGoltz/rack-explorer` at `/diagram/`, or a new
-  repository. Default if he has no preference: inside rack-explorer, because that repository can be pushed to today
-  and is already served by GitHub Pages at `https://glgoltz.github.io/rack-explorer/`.
+- **Settled:** the diagram is the Report Builder's Diagram tab (`src/diagram/` in `GLGoltz/report-builder`, built
+  into `diagram.html`). The old `rack-explorer/diagram/` page and `GLGoltz/network-diagram` only redirect there.
 - Follow the Rack Explorer's conventions: plain JavaScript, no framework, a Node build script that writes one
   self-contained `index.html`, source split into `src/`. No runtime network requests, no analytics, no fonts from a CDN.
 - Match the Cyber Hub look: navy `#003366`, body `#334155`, borders `#cbd5e1`, page `#f8fafc`, amber for values the
@@ -260,7 +261,7 @@ Every stopping message in these tests must also pass the section 2 review.
 4. Cyber Hub 13: the SSP diagram is the app's PNG export.
 5. Instructor Guide, "The network diagram" section: replace the Slides instructions, keep the stage table, add how
    to open a team's link, how to compare, and the caveat that a trace reflects what the team typed.
-6. Keep the Google Slides starter in Drive as a fallback and say so in the Instructor Guide.
+6. (Done, then retired: the Google Slides starter was deleted on Nov 24 2026.)
 7. Release notes: a new minor version.
 8. Rebuild, publish the preview, sync the folder, update the source backup (and the `cyber-hub` repository once
    Gabriel creates it).

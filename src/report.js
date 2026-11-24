@@ -16,23 +16,31 @@ function coverPage(kind, title, sub, rows, conf, clientLogo) {
 
 // ---- Team Log
 function logCoverHTML() {
-  const c = doc.log.cover, a = doc.log.agreement, r = doc.log.rack;
+  const c = doc.log.cover, a = doc.log.agreement;
   const sg = a.signatures || {};
   return coverPage("Team Log", doc.meta.company || "Team Log", "", [["Rack", c.rack], ["Semester", c.semester], ["Team", c.roster.map((x) => x.name.trim()).filter(Boolean).join(", ")]], "Team Log")
     + `<h1 class="s">Team</h1>${tbl(["Team member", "Email"], c.roster.filter((x) => x.name || x.email).map((x) => [x.name, x.email]))}`
     + `<h2 class="s">Team agreement</h2>${form([["How we communicate", c.chat], ["If someone misses a lab", a.missed]])}`
-    + tbl(["Team member", "Signature", "Date"], c.roster.map((x) => x.name.trim()).filter(Boolean).map((n) => [n, sg[n]?.date ? { html: `<span class="sig">${esc(sg[n].sig)}</span>` } : "", sg[n]?.date || ""]))
-    + `<h1 class="s" style="break-before:page">Rack sheet</h1>${tbl(["Device or network", "Pattern", "Your rack"], RACK_ROWS.map(([k, l, p]) => [l, mono(p), mono(rackValue(p))]))}`
-    + form([["Checked by (teammate)", r.checkedTeammate], ["Checked by (instructor)", r.checkedInstructor]]);
+    + tbl(["Team member", "Signature", "Date"], c.roster.map((x) => x.name.trim()).filter(Boolean).map((n) => [n, sg[n]?.date ? { html: `<span class="sig">${esc(sg[n].sig)}</span>` } : "", sg[n]?.date || ""]));
+}
+function restoreHTML() {
+  const r = restoreData(), st = restoreStatusSync(r), yes = (v) => (v ? "Yes" : "No");
+  let s = `<h2 class="s">Reset record</h2>${tbl(["Device", "Reset", "Done", "How we checked", "Who"], r.resets.map((x) => [x.device, x.how, yes(x.done), x.checked, x.who]), "restore")}`;
+  s += `<h2 class="s">Utility drawer</h2>${tbl(["Item", "In the drawer", "Notes"], r.drawer.map((x) => [x.item, yes(x.present), x.note]))}`;
+  s += `<h2 class="s">Instructor sign-off</h2>`;
+  s += r.sign ? `<div class="card"><div class="ch"><b>Verified by ${esc(r.sign.by)}</b><span class="tag">${st === "changed" ? "Changed after signing" : "Signed"}</span></div>${form([["Date", r.sign.date], ["Sign-off code", r.sign.code]])}</div>`
+    : `<p class="blank">Not signed off yet.</p>`;
+  return s;
 }
 function hubHTML(l) {
   const d = doc.log.hubs[l.num] || { sessions: [], commands: "", problems: [], answers: {}, deliv: {}, extra: {} };
   let s = `<h1 class="s" style="break-before:page">Cyber Hub ${l.num}: ${esc(l.title)}</h1>`;
   s += `<h2 class="s">Sessions</h2>${tbl(["Date", "Who did what"], d.sessions.map((x) => [x.date, x.who]))}`;
-  s += `<h2 class="s">Commands and settings</h2><p>${T(d.commands)}</p>`;
+  if (l.num !== "00") s += `<h2 class="s">Commands and settings</h2><p>${T(d.commands)}</p>`;
+  if (l.num === "15") s += restoreHTML();
   if (d.extra.checkpoint) s += `<h2 class="s">Connectivity checkpoint</h2>${tbl(["From your laptop, try", "Expected", "Result"], d.extra.checkpoint.map((x) => [x.test, x.expected, x.result]))}`;
   if (d.extra.roe) { const r = d.extra.roe; s += `<h2 class="s">Rules of engagement</h2>${form([["Target team", r.target], ["Assessing team", r.assessing], ["Scope", r.scope], ["Session", r.session], ["Agreed by", r.agreed]])}`; }
-  s += `<h2 class="s">Troubleshooting tickets</h2>` + (d.problems.length ? d.problems.map((x, i) => `<div class="card"><div class="ch"><b>Ticket ${ticketId(l.num, i)}</b><span class="tag">${x.status === "resolved" ? "Resolved" : "Open"}</span></div>${form([["Issue", x.broke], ["Probable cause", x.theory], ["Tests and results", x.checked], ["Resolution", x.fixed], ["Verification", x.verify]])}${(x.images || []).map((id) => img(id, "")).join("")}</div>`).join("") : `<p class="blank">No tickets.</p>`);
+  if (!NO_TICKETS.includes(l.num)) s += `<h2 class="s">Troubleshooting tickets</h2>` + (d.problems.length ? d.problems.map((x, i) => `<div class="card"><div class="ch"><b>Ticket ${ticketId(l.num, i)}</b><span class="tag">${x.status === "resolved" ? "Resolved" : "Open"}</span></div>${form([["Issue", x.broke], ["Probable cause", x.theory], ["Tests and results", x.checked], ["Resolution", x.fixed], ["Verification", x.verify]])}${(x.images || []).map((id) => img(id, "")).join("")}</div>`).join("") : `<p class="blank">No tickets.</p>`);
   if ((d.shots || []).length || (d.notes || "").trim()) s += `<h2 class="s">Other screenshots and notes</h2>${(d.notes || "").trim() ? `<p>${esc(d.notes)}</p>` : ""}${(d.shots || []).map((id) => img(id, "")).join("")}`;
   if (l.questions.length) s += `<h2 class="s">Before you continue</h2>` + l.questions.map((q, i) => `<p><b>${esc(q)}</b></p><p>${T(d.answers[i])}</p>`).join("");
   if (l.deliverables.length) s += `<h2 class="s">Deliverables</h2>`;
@@ -105,6 +113,7 @@ function diagramHTML(note) {
 // ---- export
 async function exportDoc(kind, arg) {
   diagramImg = await diagramPNG();
+  if (doc.log.hubs["15"]?.extra?.restore?.sign) await sealOk(restoreData());
   let html, missing = [], title;
   const co = doc.meta.company || "Team";
   if (kind === "log-hub") {
