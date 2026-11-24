@@ -262,7 +262,9 @@ button.big{padding:8px 14px;font-weight:600}
 .pcard-h{display:flex;justify-content:space-between;align-items:center;background:var(--navy);color:#fff;padding:6px 12px}
 .pcard-h .ghost{color:#fff}
 .pcard-h .ghost:hover{background:rgba(255,255,255,.15)}
-.pcard > .grid2,.pcard-f{margin-left:12px;margin-right:12px}
+/* Everything under the header sits inside the card's padding, as in the style guide's cards */
+.pcard > :not(.pcard-h){margin-left:16px;margin-right:16px}
+.pcard > .pcard-h + *{margin-top:12px}
 .pcard > .grid2{margin-top:10px}
 .pcard-f{margin-bottom:12px}
 .pcard-f .well{margin-bottom:10px}
