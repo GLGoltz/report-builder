@@ -103,8 +103,8 @@ One log for the semester. Sections, in order:
   SHA-256 seal that shows "changed after signing". Instructors confirm a code with Check a sign-off. The password is
   never in either repository; `tools/signoff-hash.mjs` makes a new hash. Deliverables that are separate documents (the VAR, the SSP, the private answer key, the briefing
   slides) say where they go instead of taking an upload. The private answer key never goes in the app.
-- **Progress:** the rail shows each Cyber Hub as empty, started or complete (every question answered and every
-  deliverable has an image).
+- **Rail:** navigation only. Each circle shows the step's number, not progress (Gabriel's decision, Nov 24 2026).
+  Completeness is still worked out for the export's list of empty parts.
 
 Exports: one Cyber Hub (what each page asks teams to submit), the cover and agreement (Cyber Hub 00), or the whole
 log (final submission). Every Team Log export ends with the network diagram as it is at that moment, so each

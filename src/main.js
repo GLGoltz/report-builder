@@ -1,8 +1,10 @@
 // ------------------------------------------------------------------ app shell
+// The rail is navigation only: the circles show the step's number, not progress (Gabriel's call, Nov 24 2026).
+// The status functions still feed the export's "still empty" list.
 function stepBtn(tab, key, title, sub, status, num) {
-  return h("button", { class: "step " + (status || ""), "aria-current": String(state[tab] === key), onclick: () => { state[tab] = key; state.sel = null; renderAll(); $("work").scrollTop = 0; } },
-    h("span", { class: "n", "aria-hidden": "true" }, status === "done" ? "✓" : num || "•"),
-    h("span", {}, h("b", {}, title), sub ? h("small", {}, sub) : null, status ? h("span", { class: "sr" }, status === "done" ? " (complete)" : " (started)") : null));
+  return h("button", { class: "step", "aria-current": String(state[tab] === key), onclick: () => { state[tab] = key; state.sel = null; renderAll(); $("work").scrollTop = 0; } },
+    h("span", { class: "n", "aria-hidden": "true" }, num || "•"),
+    h("span", {}, h("b", {}, title), sub ? h("small", {}, sub) : null));
 }
 function renderRail() {
   const r = $("rail"), y = r.scrollTop;
