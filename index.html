@@ -276,6 +276,12 @@ button.big{padding:8px 14px;font-weight:600}
 .bkwarn{display:inline-flex;align-items:center;gap:10px;border-left:4px solid #ea580c;background:#fff7ed;color:#c2410c;padding:4px 10px;border-radius:0 6px 6px 0;font-weight:600}
 .bkwarn.red{border-color:#b91c1c;background:#fef2f2;color:#991b1b}
 .bkwarn button{font-weight:600}
+/* the backup warning pulses softly in red until the team backs up */
+.bkwarn{border-color:#b91c1c;background:#fef2f2;color:#991b1b}
+@media (prefers-reduced-motion:no-preference){
+ .bkwarn{animation:bkpulse 2.4s ease-in-out infinite}
+ @keyframes bkpulse{0%,100%{background:#fef2f2;box-shadow:0 0 0 0 rgba(185,28,28,0)}50%{background:#fecaca;box-shadow:0 0 0 4px rgba(185,28,28,.18)}}
+}
 </style></head><body>
 <header class="bar">
  <div class="brand"><b>Report Builder</b><small id="brand-co">Cyber Hub</small></div>
