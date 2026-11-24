@@ -15,10 +15,8 @@ import { fileURLToPath } from "node:url";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const read = (p) => readFileSync(join(HERE, p), "utf8");
 const labs = JSON.stringify(JSON.parse(read("labs.json")));
-// refs.json: the reference pages, written by the cyber-hub repository's build_all.py.
-const refs = JSON.stringify(JSON.parse(read("refs.json"))).replace(/<\/script/gi, "<\\/script");
 const js = ["data", "core", "log", "signoff", "var", "ssp", "report", "main"].map((f) => read(`src/${f}.js`)).join("\n")
-  .replace("/*LABS*/[]", () => labs).replace("/*REFS*/[]", () => refs);
+  .replace("/*LABS*/[]", () => labs);
 // The favicon (favicon.svg) is inlined, so the page needs no other file.
 const icon = `<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,${encodeURIComponent(read("favicon.svg").trim())}">`;
 const withIcon = (s) => s.replace("</title>", () => "</title>" + icon);

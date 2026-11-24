@@ -8,12 +8,12 @@ function stepBtn(tab, key, title, sub, status, num) {
 }
 function renderRail() {
   const r = $("rail"), y = r.scrollTop;
-  r.replaceChildren(...(state.tab === "log" ? railLog() : state.tab === "var" ? railVar() : state.tab === "ref" ? railRef() : railSsp()).flat());
+  r.replaceChildren(...(state.tab === "log" ? railLog() : state.tab === "var" ? railVar() : railSsp()).flat());
   r.scrollTop = y;
 }
 function renderWork() {
   const w = $("work");
-  const parts = state.tab === "log" ? viewLog() : state.tab === "var" ? viewVar() : state.tab === "ref" ? viewRef() : viewSsp();
+  const parts = state.tab === "log" ? viewLog() : state.tab === "var" ? viewVar() : viewSsp();
   w.replaceChildren(...[].concat(parts).flat(Infinity).filter(Boolean));
   if (state.tab === "log") w.append(h("div", { class: "tools", style: "margin-top:24px" }, h("button", { onclick: () => exportDoc("log") }, "Export the whole Team Log as PDF")));
 }
@@ -34,30 +34,9 @@ function renderAll() {
   if (f) f.classList.toggle("offstage", !dg);
   if (dg) { $("panel").hidden = true; renderSaveBar(); fillWho(); reloadDiagram(); return; }
   const wy = $("work").scrollTop;
-  $("work").tabIndex = state.tab === "ref" ? 0 : -1;   // a reference page has no fields, so the reading pane itself takes the keyboard
   renderRail(); renderWork(); renderPanel(); renderSaveBar(); fillWho();
   $("work").scrollTop = wy;
 }
-
-// ---- Reference tab: the course's reference pages, read-only, linkable as #ref/<slug> from Canvas.
-const refOf = (slug) => REFS.find((r) => r.slug === slug) || REFS[0];
-function railRef() {
-  return [h("h3", {}, "Reference"), ...REFS.map((r, i) => stepBtn("ref", r.slug, r.title, null, "", String(i + 1)))];
-}
-function viewRef() {
-  const r = refOf(state.ref); if (!r) return [h("p", {}, "No reference pages in this build.")];
-  state.ref = r.slug;
-  const page = h("article", { class: "refpage", "aria-label": r.title });
-  page.innerHTML = r.html;
-  return [h("h2", { class: "reftitle" }, r.title), page];
-}
-function openRef(slug) { state.tab = "ref"; state.ref = refOf(slug)?.slug || ""; state.sel = null; renderAll(); $("work").scrollTop = 0; }
-// Links between reference pages stay inside the app.
-document.addEventListener("click", (e) => {
-  const a = e.target.closest?.('a[href^="#ref/"]'); if (!a) return;
-  e.preventDefault(); openRef(a.getAttribute("href").slice(5)); history.replaceState(null, "", a.getAttribute("href"));
-});
-window.addEventListener("hashchange", () => { const m = location.hash.match(/^#ref\/([a-z0-9-]+)/); if (m) openRef(m[1]); });
 
 // ---- save bar
 function renderSaveBar() {
@@ -96,7 +75,6 @@ $("b-export").addEventListener("click", () => {
   if (state.tab === "diagram") return exportDoc("diagram");
   if (state.tab === "var") return exportDoc("var");
   if (state.tab === "ssp") return exportDoc("ssp");
-  if (state.tab === "ref") return exportDoc("ref", state.ref);
   const l = LABS.find((x) => x.num === state.log);
   ask("Export the Team Log", [h("p", {}, "Each Cyber Hub page asks for that Cyber Hub's section. The final submission takes the whole log.")],
     [["Cancel"], ["Whole log", () => exportDoc("log")], l ? [`Cyber Hub ${l.num}`, () => exportDoc("log-hub", l.num), "primary"] : ["Cyber Hub 00", () => exportDoc("log-hub", "00"), "primary"]]);
@@ -136,8 +114,7 @@ function welcomeBody() {
       h("li", {}, h("b", {}, "Team Log: "), "your cover, signed team agreement, and a section for every Cyber Hub: sessions, commands, troubleshooting tickets, answers and deliverables. It's your team's record as much as something you hand in."),
       h("li", {}, h("b", {}, "Diagram: "), "the network you've built, updated whenever a page says so, with the addressing plan for your rack beside it. Every Cyber Hub export includes it."),
       h("li", {}, h("b", {}, "VAR: "), "the vulnerability assessment you write about another team's rack in Cyber Hub 12."),
-      h("li", {}, h("b", {}, "SSP: "), "your own system security plan, in Cyber Hub 13."),
-      h("li", {}, h("b", {}, "Reference: "), "the rack, the rack schema and VLAN plan, laptop setup, troubleshooting, lab rules, and startup and shutdown. Links on the Cyber Hub pages open it here."))),
+      h("li", {}, h("b", {}, "SSP: "), "your own system security plan, in Cyber Hub 13."))),
     callout("caution", "Saving your work", h("ul", {},
       h("li", {}, "Your work saves as you type, but only in this browser on this laptop."),
       h("li", {}, h("b", {}, "Back up at the end of every session: "), "Save and export, then Save team file. Put the file in your team's Google Drive folder. That file is your real copy."),
@@ -202,7 +179,6 @@ const sessionStart = Date.now();
   }
   dirtySinceBackup = !!doc.meta.updated && doc.meta.updated > lastBackup;
   if (location.hash === "#diagram") state.tab = "diagram";
-  const rm = location.hash.match(/^#ref\/([a-z0-9-]+)/); if (rm && REFS.length) { state.tab = "ref"; state.ref = refOf(rm[1]).slug; }
   // The Diagram tab's page loads once the document is here, and stays loaded (off screen) so exports can draw it.
   document.querySelector(".main").prepend(h("iframe", { id: "dframe", src: "diagram.html", title: "Network diagram", class: "offstage" }));
   renderAll();

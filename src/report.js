@@ -131,7 +131,6 @@ async function exportDoc(kind, arg) {
     html = logCoverHTML() + diagramHTML("The diagram as of this export.") + LABS.map(hubHTML).join("");
     LABS.forEach((l) => { const st = hubStatus(l); if (st !== "done") missing.push(`Cyber Hub ${l.num} is ${st ? "incomplete" : "empty"}`); });
   } else if (kind === "var") { title = `${co} VAR for ${V().cover.client || "client"}`; html = varHTML(); missing = varMissing().map((x) => x[1]); }
-  else if (kind === "ref") { const r = refOf(arg); title = `Reference: ${r.title}`; html = `<h1 class="s">${esc(r.title)}</h1>` + r.html; }
   else if (kind === "diagram") {
     title = `${co} network diagram`;
     html = `<p class="runhead">${esc(co)}</p>` + diagramHTML("Exported " + new Date().toLocaleDateString()).replace(' style="break-before:page"', "");

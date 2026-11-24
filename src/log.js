@@ -117,7 +117,7 @@ function logHub(l) {
       field("Scope", r, "scope", { wide: true, placeholder: "Agreed subnets and addresses" }),
       field("Session", r, "session", { placeholder: "Date and time window" }), field("Agreed by", r, "agreed", { placeholder: "One name per team" })));
   }
-  if (!NO_TICKETS.includes(l.num)) out.push(h("h3", {}, "Troubleshooting tickets"), h("p", { class: "sub" }, "One ticket per problem, following the method on ", h("a", { href: "#ref/troubleshooting" }, "Reference: Troubleshooting"), ". Log every hypothesis, including the ones ruled out."), problemList(d.problems, l.num));
+  if (!NO_TICKETS.includes(l.num)) out.push(h("h3", {}, "Troubleshooting tickets"), h("p", { class: "sub" }, "One ticket per problem, following the method on Reference: Troubleshooting. Log every hypothesis, including the ones ruled out."), problemList(d.problems, l.num));
   if (!d.shots) d.shots = [];
   out.push(h("h3", {}, "Additional evidence"), h("p", { class: "sub" }, "Screenshots and notes beyond the deliverables."),
     imageWell(d.shots, { prompt: "Add a screenshot", label: "Additional evidence" }), field("", d, "notes", { area: true, placeholder: "Notes" }));

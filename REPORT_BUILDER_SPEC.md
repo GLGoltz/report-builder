@@ -200,11 +200,3 @@ Labels are short professional nouns, the way a ticketing system, assessment repo
 Proof, Contributions, Validation, Impact, Remediation, Mitigating factors, Justification. Not descriptions written
 as half-sentences ("What you saw that proves it", "Who did what"). Placeholders give the format, not instructions.
 Explanations go in the line under a heading, kept to one sentence where possible.
-
-## Reference tab
-
-The eight course reference pages (Skills and Learning Outcomes, The Rack, Rack Schema and VLAN Plan, Lab Access and
-Laptop Setup, Troubleshooting, Lab Rules and Safety, Startup and Shutdown, Credits and Release Notes), read-only.
-They come from the cyber-hub repository's `pages_ref.py` through `refs.json`, keep their Canvas styling, and are
-addressable as `#ref/<slug>` so Canvas pages can link straight to one. Links between them stay inside the app.
-Export PDF on this tab prints the open page.
