@@ -245,3 +245,28 @@ table.edit td.pattern .fixed{font-family:var(--mono);color:var(--muted);font-siz
  #print{display:block}
 }
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* save-and-export menu */
+button.big{padding:8px 14px;font-weight:600}
+.menu-list .mh{margin:6px 10px 2px;font:600 10.5px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+/* signatures */
+.signs{display:flex;flex-direction:column;gap:8px}
+.signrow{display:grid;grid-template-columns:minmax(120px,180px) minmax(0,1fr) 130px;gap:10px;align-items:center}
+.signrow label{margin:0;font-weight:600}
+.signin.signed{font-family:"Segoe Script","Brush Script MT","Lucida Handwriting",cursive;font-size:17px;color:var(--navy);border-color:var(--ok);background:var(--okbg)}
+.signdate{font-size:12px;color:var(--ok);font-weight:600}
+@media (max-width:600px){.signrow{grid-template-columns:minmax(0,1fr)}}
+/* problem cards */
+.plist{display:flex;flex-direction:column;gap:10px;margin:0 0 14px;align-items:flex-start}
+.pcard{width:100%;border:1px solid var(--border);border-radius:9px;background:#fff;overflow:hidden}
+.pcard-h{display:flex;justify-content:space-between;align-items:center;background:var(--navy);color:#fff;padding:6px 12px}
+.pcard-h .ghost{color:#fff}
+.pcard-h .ghost:hover{background:rgba(255,255,255,.15)}
+.pcard > .grid2,.pcard > label,.pcard > .well{margin-left:12px;margin-right:12px}
+.pcard > .grid2{margin-top:10px}
+.pcard > .well{margin-bottom:12px}
+/* backup reminder: the style guide's caution callout */
+#backup{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+.bkwarn{display:inline-flex;align-items:center;gap:10px;border-left:4px solid #ea580c;background:#fff7ed;color:#c2410c;padding:4px 10px;border-radius:0 6px 6px 0;font-weight:600}
+.bkwarn.red{border-color:#b91c1c;background:#fef2f2;color:#991b1b}
+.bkwarn button{font-weight:600}

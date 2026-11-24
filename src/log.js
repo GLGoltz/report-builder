@@ -4,12 +4,12 @@ function hubStatus(l) {
   if (!d) return "";
   const qs = l.questions.every((q, i) => (d.answers[i] || "").trim());
   const dl = l.deliverables.every((x) => SEPARATE[`${l.num}-${x.n}`] || (d.deliv[x.n]?.images || []).length);
-  const any = d.sessions.length || d.commands.trim() || d.problems.length || Object.values(d.answers).some((a) => a.trim()) || Object.values(d.deliv).some((x) => (x.images || []).length);
+  const any = d.sessions.length || d.commands.trim() || d.problems.length || (d.shots || []).length || Object.values(d.answers).some((a) => a.trim()) || Object.values(d.deliv).some((x) => (x.images || []).length);
   return qs && dl && d.sessions.length ? "done" : any ? "part" : "";
 }
 function coverStatus() {
   const c = doc.log.cover;
-  if (doc.meta.company && c.rack && c.roster.some((r) => r.name)) return doc.log.agreement.agreed.trim() ? "done" : "part";
+  if (doc.meta.company && c.rack && c.roster.some((r) => r.name)) return unsigned().length ? "part" : "done";
   return doc.meta.company ? "part" : "";
 }
 const rackNum = () => { const r = String(doc.log.cover.rack || "").trim(); return /^[1-8]$/.test(r) ? r : ""; };
@@ -43,20 +43,38 @@ function logCover() {
     h("div", { class: "card" },
       h("div", { class: "grid2" },
         field("Company name", doc.meta, "company", { req: true, oninput: () => ($("brand-co").textContent = doc.meta.company || "Cyber Hub"), hint: "It also titles your network diagram." }),
-        field("Tagline", doc.meta, "tagline", { placeholder: "One line that says what your company does" }),
         field("Rack number", c, "rack", { req: true, placeholder: "1 to 8", hint: "Your rack sheet fills in from this.", oninput: () => renderRail() }),
-        field("Semester", c, "semester", { placeholder: "Spring 2027" }),
-        field("How we communicate", c, "chat", { wide: true, placeholder: "Two methods, for example a group chat and email" })),
-      h("label", {}, "Logo"), logoWell(), h("p", { class: "hintline" }, "It goes on every report and in the corner of your network diagram. You can also add it from the Diagram tab.")),
+        field("Semester", c, "semester", { placeholder: "Spring 2027" })),
+      h("label", {}, "Logo"), logoWell(), h("p", { class: "hintline" }, "It goes on every report and in the corner of your network diagram.")),
     h("h3", {}, "Team roster"),
-    rowsTable(c.roster, [["name", "Name", { w: "45%" }], ["email", "Email", { type: "email" }]], { addLabel: "Add member", onchange: fillWho }),
+    rowsTable(c.roster, [["name", "Name", { w: "45%" }], ["email", "Email", { type: "email" }]], { addLabel: "Add member", onchange: () => renderAll() }),
     h("h3", {}, "Team agreement"),
     h("div", { class: "card" },
-      field("How we make decisions", a, "decisions", { area: true }),
-      field("If someone misses a lab", a, "missed", { area: true }),
-      field("How fast we reply between labs", a, "reply"),
-      field("Agreed by", a, "agreed", { hint: "Every team member types their name to agree.", req: true })),
+      field("How we communicate", c, "chat", { req: true, placeholder: "Two methods, for example a group chat and email" }),
+      field("If someone misses a lab", a, "missed", { area: true, req: true }),
+      signBlock()),
   ];
+}
+// Each member signs by typing their full name as it appears on the roster. The date records itself.
+const members = () => doc.log.cover.roster.map((r) => r.name.trim()).filter(Boolean);
+const unsigned = () => members().filter((n) => !doc.log.agreement.signatures?.[n]?.date);
+function signBlock() {
+  const a = doc.log.agreement; a.signatures = a.signatures || {};
+  const names = members();
+  if (!names.length) return h("p", { class: "hintline" }, "Add your team to the roster above, then each member signs here.");
+  return h("div", { class: "field" }, h("label", {}, "Signatures", h("span", { class: "req" }, " *")),
+    h("p", { class: "hintline", style: "margin:0 0 8px" }, "Each member signs by typing their full name, exactly as it appears on the roster."),
+    h("div", { class: "signs" }, names.map((n) => {
+      const s = a.signatures[n] || (a.signatures[n] = { sig: "", date: "" });
+      const id = newId("sg");
+      const stamp = h("span", { class: "signdate" });
+      const show = () => { stamp.textContent = s.date ? "Signed " + new Date(s.date + "T12:00").toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : ""; };
+      const inp = h("input", { id, class: "signin" + (s.date ? " signed" : ""), placeholder: n, autocomplete: "off", oninput: (e) => {
+        s.sig = e.target.value; const ok = s.sig.trim().toLowerCase() === n.toLowerCase();
+        s.date = ok ? (s.date || today()) : ""; e.target.classList.toggle("signed", ok); show(); commit(); renderRail(); } });
+      inp.value = s.sig || ""; show();
+      return h("div", { class: "signrow" }, h("label", { for: id }, n), inp, stamp);
+    })));
 }
 function logoWell() {
   const box = h("div", { class: "tools" });
@@ -86,7 +104,7 @@ function logHub(l) {
     h("p", { class: "sub" }, "Add a session entry every time you work on this Cyber Hub, even when it takes more than one lab.")];
   out.push(h("h3", {}, "Sessions"),
     rowsTable(d.sessions, [["date", "Date", { type: "date", w: "150px" }], ["who", "Who did what", { area: true, placeholder: "Each person's contribution" }]],
-      { addLabel: "Add session", blank: () => ({ date: today(), who: me() ? me() + ": " : "" }) }));
+      { addLabel: "Add session", blank: () => ({ date: today(), who: "" }) }));
   out.push(h("h3", {}, "Commands and settings"),
     field("", d, "commands", { area: true, rows: 5, placeholder: "Every command you ran or setting you changed, and why" }));
   if (l.num === "05") {
@@ -102,8 +120,10 @@ function logHub(l) {
       field("Scope", r, "scope", { wide: true, placeholder: "Subnets and addresses agreed" }),
       field("Session", r, "session", { placeholder: "Date and times" }), field("Agreed by", r, "agreed", { placeholder: "One name from each team" })));
   }
-  out.push(h("h3", {}, "Problems and fixes"),
-    rowsTable(d.problems, [["broke", "What broke", { area: true }], ["checked", "What you checked", { area: true }], ["fixed", "What fixed it", { area: true }]], { addLabel: "Add problem" }));
+  out.push(h("h3", {}, "Problems and fixes"), h("p", { class: "sub" }, "Your own troubleshooting record. When something like it breaks again, this is where you'll look first."), problemList(d.problems));
+  if (!d.shots) d.shots = [];
+  out.push(h("h3", {}, "Other screenshots and notes"), h("p", { class: "sub" }, "Anything worth keeping that isn't a deliverable: a settings page, an error, a before-and-after."),
+    imageWell(d.shots, { prompt: "Add a screenshot", label: "Other screenshots" }), field("", d, "notes", { area: true, placeholder: "Notes for your team" }));
   if (l.questions.length) {
     out.push(h("h3", {}, "Before you continue"), h("div", { class: "card" }, l.questions.map((q, i) => h("div", { class: "qa" },
       h("p", { class: "q" }, q), field("", d.answers, String(i), { area: true, placeholder: "Your answer" })))));
@@ -123,4 +143,18 @@ function logHub(l) {
   }
   out.push(h("div", { class: "tools" }, h("button", { class: "primary", onclick: () => exportDoc("log-hub", l.num) }, `Export Cyber Hub ${l.num} as PDF`)));
   return out;
+}
+
+// Problems are cards, so each can carry its own screenshots.
+function problemList(list) {
+  const box = h("div", { class: "plist" });
+  const draw = () => box.replaceChildren(
+    ...list.map((p, i) => { if (!p.images) p.images = [];
+      return h("div", { class: "pcard" },
+        h("div", { class: "pcard-h" }, h("b", {}, `Problem ${i + 1}`), h("button", { class: "small ghost", onclick: () => ask("Remove this problem?", [h("p", {}, p.broke || "Untitled problem")], [["Cancel"], ["Remove", () => { list.splice(i, 1); commit(); draw(); }, "danger"]]) }, "Remove")),
+        h("div", { class: "grid2" }, field("What broke", p, "broke", { area: true, wide: true, placeholder: "What you saw, and when" }),
+          field("What you checked", p, "checked", { area: true }), field("What fixed it", p, "fixed", { area: true })),
+        h("label", {}, "Screenshots"), imageWell(p.images, { prompt: "Add a screenshot", label: "Problem screenshots" })); }),
+    h("button", { class: "small", onclick: () => { list.push({ broke: "", checked: "", fixed: "", images: [] }); commit(); draw(); box.querySelectorAll("textarea")[box.querySelectorAll("textarea").length - 3]?.focus(); } }, "+ Add problem"));
+  draw(); return box;
 }

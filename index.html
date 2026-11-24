@@ -246,6 +246,31 @@ table.edit td.pattern .fixed{font-family:var(--mono);color:var(--muted);font-siz
  #print{display:block}
 }
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* save-and-export menu */
+button.big{padding:8px 14px;font-weight:600}
+.menu-list .mh{margin:6px 10px 2px;font:600 10.5px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+/* signatures */
+.signs{display:flex;flex-direction:column;gap:8px}
+.signrow{display:grid;grid-template-columns:minmax(120px,180px) minmax(0,1fr) 130px;gap:10px;align-items:center}
+.signrow label{margin:0;font-weight:600}
+.signin.signed{font-family:"Segoe Script","Brush Script MT","Lucida Handwriting",cursive;font-size:17px;color:var(--navy);border-color:var(--ok);background:var(--okbg)}
+.signdate{font-size:12px;color:var(--ok);font-weight:600}
+@media (max-width:600px){.signrow{grid-template-columns:minmax(0,1fr)}}
+/* problem cards */
+.plist{display:flex;flex-direction:column;gap:10px;margin:0 0 14px;align-items:flex-start}
+.pcard{width:100%;border:1px solid var(--border);border-radius:9px;background:#fff;overflow:hidden}
+.pcard-h{display:flex;justify-content:space-between;align-items:center;background:var(--navy);color:#fff;padding:6px 12px}
+.pcard-h .ghost{color:#fff}
+.pcard-h .ghost:hover{background:rgba(255,255,255,.15)}
+.pcard > .grid2,.pcard > label,.pcard > .well{margin-left:12px;margin-right:12px}
+.pcard > .grid2{margin-top:10px}
+.pcard > .well{margin-bottom:12px}
+/* backup reminder: the style guide's caution callout */
+#backup{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+.bkwarn{display:inline-flex;align-items:center;gap:10px;border-left:4px solid #ea580c;background:#fff7ed;color:#c2410c;padding:4px 10px;border-radius:0 6px 6px 0;font-weight:600}
+.bkwarn.red{border-color:#b91c1c;background:#fef2f2;color:#991b1b}
+.bkwarn button{font-weight:600}
 </style></head><body>
 <header class="bar">
  <div class="brand"><b>Report Builder</b><small id="brand-co">Cyber Hub</small></div>
@@ -255,17 +280,18 @@ table.edit td.pattern .fixed{font-family:var(--mono);color:var(--muted);font-siz
   <button role="tab" id="tab-var" data-tab="var" aria-selected="false">VAR</button>
   <button role="tab" id="tab-ssp" data-tab="ssp" aria-selected="false">SSP</button>
  </div>
- <label class="who"><span>Who's typing</span><select id="who"></select></label>
  <div class="acts">
-  <button id="b-export" class="primary">Export PDF</button>
-  <div class="menu"><button id="b-file" aria-haspopup="true" aria-expanded="false">Team file</button>
+  <div class="menu"><button id="b-file" class="primary big" aria-haspopup="true" aria-expanded="false">Save and export <span aria-hidden="true">▾</span></button>
    <div class="menu-list" id="filemenu" hidden>
-    <button id="b-save">Save team file</button>
+    <p class="mh">Export</p>
+    <button id="b-export">Export PDF of this tab</button>
+    <p class="mh">Save your work</p>
+    <button id="b-save">Save team file (backup)</button>
+    <button id="b-setup">Set up automatic backup</button>
     <button id="b-open">Open team file</button>
     <button id="b-merge">Add from a teammate's file</button>
-    <hr>
     <button id="b-history">History</button>
-    <button id="b-setup">Set up automatic backup</button>
+    <hr>
     <button id="b-help">How saving works</button>
    </div></div>
  </div>
@@ -282,7 +308,7 @@ table.edit td.pattern .fixed{font-family:var(--mono);color:var(--muted);font-siz
 <script>// ------------------------------------------------------------------ course data
 // Only what the course pages already show students. No answers, no expected values (spec section 2).
 // LABS is generated from the course pages by tools/labs.py and injected by build.mjs.
-const LABS = [{"num":"00","title":"Launch Your Company","questions":[],"deliverables":[{"n":"1","title":"Company profile","role":"Team","kind":"Document","instr":"In the Report Builder, export Cyber Hub 00 as a PDF. It holds your cover page, team agreement and rack sheet.","checks":[["Company","Name, tagline and original logo"],["Roster","Every team member"],["Agreement","Communication methods, decisions and missed labs"]]},{"n":"2","title":"Rack sheet","role":"Team","kind":"Document","instr":"Your completed rack sheet, in the same Cyber Hub 00 export.","checks":[["Rack","The rack number you were assigned"],["Checked","Signed off by a teammate and the instructor"]]},{"n":"3","title":"Rack and stack","role":"Server","kind":"Photo","instr":"Take a photo of your team holding the server off its rails.","checks":[["Lifted","The server is off the rails, held by two people, one on each side"]]}]},{"num":"01","title":"Switch Provisioning","questions":[],"deliverables":[{"n":"1","title":"OOB interface summary","role":"Core switch","kind":"Screenshot","instr":"Show the switch's interface IP summary in the console window.","checks":[["Prompt","Shows the hostname rackR-core-sw"],["OOB address","192.168.1.254 / 255.255.255.0"],["Window","The whole console window is visible and uncropped"]]},{"n":"2","title":"Saved configuration","role":"Core switch","kind":"Screenshot","instr":"Show the startup configuration after saving.","checks":[["Hostname","Present in the startup configuration"],["OOB address","Present in the startup configuration"],["Window","The whole console window is visible and uncropped"]]}]},{"num":"02","title":"Perimeter Firewall","questions":[],"deliverables":[{"n":"1","title":"Interface settings","role":"Firewall","kind":"Screenshot","instr":"Show the firewall's network interfaces list.","checks":[["Addresses","wan1, internal and dmz match the table in Part 4"],["Access","Administrative access matches the table"],["Hostname","Shows rackR-fw"]]},{"n":"2","title":"Static routes","role":"Firewall","kind":"Screenshot","instr":"Show the static route list, or the routing table from the CLI.","checks":[["Default route","0.0.0.0/0 through 10.R.200.1"],["Internal routes","Management, Data and Storage through 10.R.100.254"]]},{"n":"3","title":"Provider services","role":"Firewall","kind":"Screenshot","instr":"Show the firewall CLI pinging your provider's gateway and the lab name server, then the NTP status.","checks":[["Gateway","Replies from 10.R.200.1"],["DNS","ns.lab resolves to 203.0.113.10 and replies"],["Time","The NTP server 203.0.113.10 is synchronized"]]}]},{"num":"03","title":"Firewall Policies and Guest Wi-Fi","questions":["Upstream_Services and DMZ_to_Repo each allow one destination and a few services. Which of your devices will use them, and what would they lose without them?"],"deliverables":[{"n":"1","title":"Policies and virtual IPs","role":"Firewall","kind":"Screenshot","instr":"Show the firewall policy table and the virtual IP list.","checks":[["Policies","All seven policies with the services and NAT settings above"],["VIPs","All three mappings point into the DMZ"]]},{"n":"2","title":"Guest network lease","role":"Firewall","kind":"Screenshot","instr":"Show the guest interface's DHCP leases.","checks":[["SSID","[Company]-Guest"],["Lease","The guest laptop has an address in 10.R.50.0/24"]]},{"n":"3","title":"Guest isolation","role":"Laptop","kind":"Screenshot","instr":"On the guest network, show the laptop's address beside a failed attempt to reach the firewall.","checks":[["Address","In 10.R.50.0/24"],["Blocked","10.R.100.1 does not respond"]]}]},{"num":"04","title":"Core Switching and VLANs","questions":["The plan leaves VLAN 1 unused and puts unused ports in VLAN 999. What could happen if a stray cable were plugged into an unconfigured port otherwise?","Which VLANs get no SVI, and why?","Which next hop did you use for the default route, and why that address?"],"deliverables":[{"n":"1","title":"Management services","role":"Core switch","kind":"Screenshot","instr":"Show the TCP/UDP services page.","checks":[["Enabled","SSH and HTTPS"],["Disabled","Telnet and HTTP"]]},{"n":"2","title":"VLAN table","role":"Core switch","kind":"Screenshot","instr":"Show the VLAN table.","checks":[["VLANs","Every VLAN in the plan, with matching IDs and names"]]},{"n":"3","title":"VLAN interfaces","role":"Core switch","kind":"Screenshot","instr":"Show the IPv4 interfaces list.","checks":[["SVIs","An SVI for each VLAN the switch routes, matching your rack sheet"],["No extras","No SVI on a VLAN the switch shouldn't route"]]}]},{"num":"05","title":"Switch Ports and DHCP","questions":["Before you test: if the switch's default route were missing, which row would fail first, and why?","After you test: what does each passing row prove? Explain any result that didn't match your prediction."],"deliverables":[{"n":"1","title":"Port settings","role":"Core switch","kind":"Screenshot","instr":"Show the interface and VLAN membership settings.","checks":[["Trunk","XG3 with the right untagged and tagged VLANs"],["Access","Every other port matches the port map"],["Parking","XG6 to XG8 in VLAN 999 and shut down"]]},{"n":"2","title":"Connectivity checkpoint","role":"Laptop","kind":"Screenshot","instr":"Show your laptop's address in a terminal beside the firewall login page, loaded from the Data VLAN.","checks":[["Address","From the Data pool"],["Page","The firewall login page at https://10.R.100.1"]]}]},{"num":"06","title":"Network Storage","questions":["How many drives can fail before this pool loses data?","What does RAID 5 give up in exchange for that protection?","Your Data laptop can ping the NAS. Can it also open the NAS's login page, and should it be able to?"],"deliverables":[{"n":"1","title":"NAS discovery","role":"Core switch","kind":"Screenshot","instr":"Show the DHCP bindings page.","checks":[["Bindings","Your laptop and the NAS"]]},{"n":"2","title":"DSM Info Center","role":"NAS","kind":"Screenshot","instr":"Show DSM's Info Center.","checks":[["Address","The NAS's fixed address from your rack sheet"],["Version","The DSM version is visible"]]},{"n":"3","title":"NFS permissions","role":"NAS","kind":"Screenshot","instr":"Show the NFS service and the share's NFS permissions.","checks":[["Service","NFS enabled"],["Clients","Only the subnets that need the share"],["Squash","No mapping"]]},{"n":"4","title":"Storage reachability","role":"Laptop","kind":"Screenshot","instr":"Show a successful ping to the NAS.","checks":[["Source","A laptop on the Data or Management VLAN"],["Target","10.R.30.10"]]}]},{"num":"07","title":"Hypervisor and Shared Storage","questions":["XG3 is a trunk. Why does vmbr0 have to be VLAN-aware for your VMs to use it?"],"deliverables":[{"n":"1","title":"Proxmox console","role":"Hypervisor","kind":"Photo","instr":"Take a photo of the server monitor showing the Proxmox console.","checks":[["Address","The web interface address on the Management VLAN"],["Legible","The text is sharp and readable"]]},{"n":"2","title":"Bridge and storage","role":"Hypervisor","kind":"Screenshot","instr":"Show vmbr0's settings and the Datacenter storage list.","checks":[["Bridge","VLAN-aware is on"],["Storage","The NFS share is active"]]}]},{"num":"08","title":"DMZ Web Server","questions":["If you left the VM's VLAN tag blank, which network would it land on, and why?","For each test, which firewall policy or setting from Cyber Hub 03 makes it work?","The laptop on CyberHub-Internet opens your public name instead of the web server's address. Which address does that name resolve to, and why can't it be the web server's own?"],"deliverables":[{"n":"1","title":"Web server VM","role":"Hypervisor","kind":"Screenshot","instr":"Show the VM's hardware summary.","checks":[["Network","Tagged into the DMZ VLAN"],["Disk","On the NFS storage"]]},{"n":"2","title":"Page from the internet","role":"Laptop","kind":"Screenshot","instr":"Show your company homepage loaded on a laptop on CyberHub-Internet, with the laptop's address beside it.","checks":[["Address bar","http://www.rackR.lab"],["Content","Your company homepage with its logo"],["Outside","A terminal shows the laptop's 198.51.100.x address"]]},{"n":"3","title":"Page from the guest Wi-Fi","role":"Laptop","kind":"Screenshot","instr":"Show your company homepage loaded from a laptop on the guest Wi-Fi.","checks":[["Address bar","http://10.R.40.10"],["Network","The laptop is on [Company]-Guest"]]}]},{"num":"09","title":"Services and Traffic Analysis","questions":["Which settings from Cyber Hub 04 protect the switch's own logins from this kind of capture?"],"deliverables":[{"n":"1","title":"FTP server VM","role":"Hypervisor","kind":"Screenshot","instr":"Show the VM's hardware summary.","checks":[["Network","Tagged into the DMZ VLAN"],["Disk","On the NFS storage"]]},{"n":"2","title":"FTP installation","role":"FTP server","kind":"Screenshot","instr":"Show the install output and the service status.","checks":[["Install","Completes without errors"],["Status","Active"]]},{"n":"3","title":"Cleartext password","role":"Laptop","kind":"Screenshot","instr":"Show the Wireshark packet with the password.","checks":[["Packet","The password is visible in plain text"],["Server","10.R.40.11"]]}]},{"num":"10","title":"Scanner Appliance","questions":["Why give the scanner its own narrow, logged policy instead of widening an existing one?","Which finding on the FTP server matches what you captured in Cyber Hub 09?","Pick one other finding. Is it a real risk for your company, or something you would accept? Why?"],"deliverables":[{"n":"1","title":"Scanner appliance","role":"Hypervisor","kind":"Screenshot","instr":"Show the scanner VM's summary in Proxmox beside Greenbone's feed status.","checks":[["VM","rackR-scan running, disk on the NFS storage"],["Feed","The last sync date is shown"]]},{"n":"2","title":"Baseline scan","role":"Laptop","kind":"Screenshot","instr":"Show the results summary of the DMZ baseline scan.","checks":[["Targets","Both DMZ servers"],["Status","The scan is complete"]]}]},{"num":"11","title":"Build the Vulnerable Pi","questions":[],"deliverables":[{"n":"1","title":"Self-scan results","role":"Laptop","kind":"Screenshot","instr":"Show Greenbone's results for your Pi.","checks":[["Target","Your Pi's address on the Data VLAN"],["Findings","All four planted weaknesses appear"]]},{"n":"2","title":"Private answer key","role":"Instructor only","kind":"Document","instr":"Submit the answer key from Part 3 to the instructor only.","checks":[["Weaknesses","All four, each with how it was configured"],["Fixes","Exact steps to fix each one"]]}]},{"num":"12","title":"Vulnerability Assessment","questions":["The WAN scan found open ports even though ping is off. What does that say about hiding a device from ping?","Compare the two views. Which of the target's services can anyone on the internet reach, and which only an insider? Which would you fix first, and why?"],"deliverables":[{"n":"1","title":"Hosted appliance","role":"Laptop","kind":"Screenshot","instr":"Show your appliance's web interface, reached from your laptop on the target's Data VLAN.","checks":[["Address","The appliance's address on the target's Data VLAN"],["Feed","The feed date is visible"]]},{"n":"2","title":"Network map","role":"Laptop","kind":"Screenshot","instr":"Show the Nmap results.","checks":[["Internal","Live hosts on the target's Data and DMZ subnets"],["External","Open ports and services on the target's WAN address, scanned from CyberHub-Internet"]]},{"n":"3","title":"Scan results","role":"Laptop","kind":"Screenshot","instr":"Show Greenbone's results summary.","checks":[["Hosts","Every host in scope"],["Severity","Findings sorted by severity"]]},{"n":"4","title":"Assessment in your logs","role":"Firewall","kind":"Screenshot","instr":"Show the assessment in your firewall's forward traffic log.","checks":[["Appliance","Sessions from 10.R.20.50 to the DMZ"],["Assessors","Traffic from the assessors' laptop"],["External","Sessions from a 198.51.100.x address on Allow_Inbound_Services"]]},{"n":"5","title":"Vulnerability Assessment Report","role":"Target team","kind":"Document","instr":"Export the VAR as a PDF from the Report Builder and submit it before Cyber Hub 13. Then choose Send findings to the client. In Google Drive, share the PDF and the findings file with each member of the target team by name, with general access set to Restricted. They import the findings file into their POA&M.","checks":[["Delivered","Shared with the target team's members only"],["Scope","Hosts and subnets assessed, the external and internal views, and the rules of engagement"],["Findings","Each with severity, evidence and validation status"],["Fixes","In priority order"]]}]},{"num":"13","title":"Remediation and SSP","questions":["Why does closing the FTP finding take more than stopping the service?"],"deliverables":[{"n":"1","title":"Before and after scans","role":"Scanner","kind":"Screenshot","instr":"Show your scan results from Cyber Hubs 10 and 11 next to your new scan.","checks":[["Before","The findings from your earlier scans"],["After","The fixed findings are gone"]]},{"n":"2","title":"System Security Plan","role":"Your rack","kind":"Document","instr":"Export the SSP as a PDF from the Report Builder and submit it.","checks":[["Description","Matches your rack as built"],["POA&M","Every finding, with status"],["Accepted risks","Each with its reason"]]}]},{"num":"14","title":"Physical Security Briefing","questions":[],"deliverables":[{"n":"1","title":"CISO briefing","role":"Live","kind":"Presentation","instr":"Give the briefing and submit the slides.","checks":[["Trust","Why the target trusts the tool"],["Attack chain","How the attack unfolds"],["Defenses","Detection and prevention, tied to your rack"]]}]},{"num":"15","title":"Lab Restoration","questions":[],"deliverables":[{"n":"1","title":"Switch reset","role":"Core switch","kind":"Screenshot","instr":"Show the switch at its default login prompt.","checks":[["Prompt","Default, with no hostname"]]},{"n":"2","title":"Firewall reset","role":"Firewall","kind":"Screenshot","instr":"Show the firewall's default login page.","checks":[["Page","The default login at https://192.168.1.99"]]}]}];
+const LABS = [{"num":"00","title":"Launch Your Company","questions":[],"deliverables":[{"n":"1","title":"Company profile","role":"Team","kind":"Document","instr":"In the Report Builder, export Cyber Hub 00 as a PDF. It holds your cover page, team agreement and rack sheet.","checks":[["Company","Name and original logo"],["Roster","Every team member"],["Agreement","Communication methods and missed labs, signed by every member"]]},{"n":"2","title":"Rack sheet","role":"Team","kind":"Document","instr":"Your completed rack sheet, in the same Cyber Hub 00 export.","checks":[["Rack","The rack number you were assigned"],["Checked","Signed off by a teammate and the instructor"]]},{"n":"3","title":"Rack and stack","role":"Server","kind":"Photo","instr":"Take a photo of your team holding the server off its rails.","checks":[["Lifted","The server is off the rails, held by two people, one on each side"]]}]},{"num":"01","title":"Switch Provisioning","questions":[],"deliverables":[{"n":"1","title":"OOB interface summary","role":"Core switch","kind":"Screenshot","instr":"Show the switch's interface IP summary in the console window.","checks":[["Prompt","Shows the hostname rackR-core-sw"],["OOB address","192.168.1.254 / 255.255.255.0"],["Window","The whole console window is visible and uncropped"]]},{"n":"2","title":"Saved configuration","role":"Core switch","kind":"Screenshot","instr":"Show the startup configuration after saving.","checks":[["Hostname","Present in the startup configuration"],["OOB address","Present in the startup configuration"],["Window","The whole console window is visible and uncropped"]]}]},{"num":"02","title":"Perimeter Firewall","questions":[],"deliverables":[{"n":"1","title":"Interface settings","role":"Firewall","kind":"Screenshot","instr":"Show the firewall's network interfaces list.","checks":[["Addresses","wan1, internal and dmz match the table in Part 4"],["Access","Administrative access matches the table"],["Hostname","Shows rackR-fw"]]},{"n":"2","title":"Static routes","role":"Firewall","kind":"Screenshot","instr":"Show the static route list, or the routing table from the CLI.","checks":[["Default route","0.0.0.0/0 through 10.R.200.1"],["Internal routes","Management, Data and Storage through 10.R.100.254"]]},{"n":"3","title":"Provider services","role":"Firewall","kind":"Screenshot","instr":"Show the firewall CLI pinging your provider's gateway and the lab name server, then the NTP status.","checks":[["Gateway","Replies from 10.R.200.1"],["DNS","ns.lab resolves to 203.0.113.10 and replies"],["Time","The NTP server 203.0.113.10 is synchronized"]]}]},{"num":"03","title":"Firewall Policies and Guest Wi-Fi","questions":["Upstream_Services and DMZ_to_Repo each allow one destination and a few services. Which of your devices will use them, and what would they lose without them?"],"deliverables":[{"n":"1","title":"Policies and virtual IPs","role":"Firewall","kind":"Screenshot","instr":"Show the firewall policy table and the virtual IP list.","checks":[["Policies","All seven policies with the services and NAT settings above"],["VIPs","All three mappings point into the DMZ"]]},{"n":"2","title":"Guest network lease","role":"Firewall","kind":"Screenshot","instr":"Show the guest interface's DHCP leases.","checks":[["SSID","[Company]-Guest"],["Lease","The guest laptop has an address in 10.R.50.0/24"]]},{"n":"3","title":"Guest isolation","role":"Laptop","kind":"Screenshot","instr":"On the guest network, show the laptop's address beside a failed attempt to reach the firewall.","checks":[["Address","In 10.R.50.0/24"],["Blocked","10.R.100.1 does not respond"]]}]},{"num":"04","title":"Core Switching and VLANs","questions":["The plan leaves VLAN 1 unused and puts unused ports in VLAN 999. What could happen if a stray cable were plugged into an unconfigured port otherwise?","Which VLANs get no SVI, and why?","Which next hop did you use for the default route, and why that address?"],"deliverables":[{"n":"1","title":"Management services","role":"Core switch","kind":"Screenshot","instr":"Show the TCP/UDP services page.","checks":[["Enabled","SSH and HTTPS"],["Disabled","Telnet and HTTP"]]},{"n":"2","title":"VLAN table","role":"Core switch","kind":"Screenshot","instr":"Show the VLAN table.","checks":[["VLANs","Every VLAN in the plan, with matching IDs and names"]]},{"n":"3","title":"VLAN interfaces","role":"Core switch","kind":"Screenshot","instr":"Show the IPv4 interfaces list.","checks":[["SVIs","An SVI for each VLAN the switch routes, matching your rack sheet"],["No extras","No SVI on a VLAN the switch shouldn't route"]]}]},{"num":"05","title":"Switch Ports and DHCP","questions":["Before you test: if the switch's default route were missing, which row would fail first, and why?","After you test: what does each passing row prove? Explain any result that didn't match your prediction."],"deliverables":[{"n":"1","title":"Port settings","role":"Core switch","kind":"Screenshot","instr":"Show the interface and VLAN membership settings.","checks":[["Trunk","XG3 with the right untagged and tagged VLANs"],["Access","Every other port matches the port map"],["Parking","XG6 to XG8 in VLAN 999 and shut down"]]},{"n":"2","title":"Connectivity checkpoint","role":"Laptop","kind":"Screenshot","instr":"Show your laptop's address in a terminal beside the firewall login page, loaded from the Data VLAN.","checks":[["Address","From the Data pool"],["Page","The firewall login page at https://10.R.100.1"]]}]},{"num":"06","title":"Network Storage","questions":["How many drives can fail before this pool loses data?","What does RAID 5 give up in exchange for that protection?","Your Data laptop can ping the NAS. Can it also open the NAS's login page, and should it be able to?"],"deliverables":[{"n":"1","title":"NAS discovery","role":"Core switch","kind":"Screenshot","instr":"Show the DHCP bindings page.","checks":[["Bindings","Your laptop and the NAS"]]},{"n":"2","title":"DSM Info Center","role":"NAS","kind":"Screenshot","instr":"Show DSM's Info Center.","checks":[["Address","The NAS's fixed address from your rack sheet"],["Version","The DSM version is visible"]]},{"n":"3","title":"NFS permissions","role":"NAS","kind":"Screenshot","instr":"Show the NFS service and the share's NFS permissions.","checks":[["Service","NFS enabled"],["Clients","Only the subnets that need the share"],["Squash","No mapping"]]},{"n":"4","title":"Storage reachability","role":"Laptop","kind":"Screenshot","instr":"Show a successful ping to the NAS.","checks":[["Source","A laptop on the Data or Management VLAN"],["Target","10.R.30.10"]]}]},{"num":"07","title":"Hypervisor and Shared Storage","questions":["XG3 is a trunk. Why does vmbr0 have to be VLAN-aware for your VMs to use it?"],"deliverables":[{"n":"1","title":"Proxmox console","role":"Hypervisor","kind":"Photo","instr":"Take a photo of the server monitor showing the Proxmox console.","checks":[["Address","The web interface address on the Management VLAN"],["Legible","The text is sharp and readable"]]},{"n":"2","title":"Bridge and storage","role":"Hypervisor","kind":"Screenshot","instr":"Show vmbr0's settings and the Datacenter storage list.","checks":[["Bridge","VLAN-aware is on"],["Storage","The NFS share is active"]]}]},{"num":"08","title":"DMZ Web Server","questions":["If you left the VM's VLAN tag blank, which network would it land on, and why?","For each test, which firewall policy or setting from Cyber Hub 03 makes it work?","The laptop on CyberHub-Internet opens your public name instead of the web server's address. Which address does that name resolve to, and why can't it be the web server's own?"],"deliverables":[{"n":"1","title":"Web server VM","role":"Hypervisor","kind":"Screenshot","instr":"Show the VM's hardware summary.","checks":[["Network","Tagged into the DMZ VLAN"],["Disk","On the NFS storage"]]},{"n":"2","title":"Page from the internet","role":"Laptop","kind":"Screenshot","instr":"Show your company homepage loaded on a laptop on CyberHub-Internet, with the laptop's address beside it.","checks":[["Address bar","http://www.rackR.lab"],["Content","Your company homepage with its logo"],["Outside","A terminal shows the laptop's 198.51.100.x address"]]},{"n":"3","title":"Page from the guest Wi-Fi","role":"Laptop","kind":"Screenshot","instr":"Show your company homepage loaded from a laptop on the guest Wi-Fi.","checks":[["Address bar","http://10.R.40.10"],["Network","The laptop is on [Company]-Guest"]]}]},{"num":"09","title":"Services and Traffic Analysis","questions":["Which settings from Cyber Hub 04 protect the switch's own logins from this kind of capture?"],"deliverables":[{"n":"1","title":"FTP server VM","role":"Hypervisor","kind":"Screenshot","instr":"Show the VM's hardware summary.","checks":[["Network","Tagged into the DMZ VLAN"],["Disk","On the NFS storage"]]},{"n":"2","title":"FTP installation","role":"FTP server","kind":"Screenshot","instr":"Show the install output and the service status.","checks":[["Install","Completes without errors"],["Status","Active"]]},{"n":"3","title":"Cleartext password","role":"Laptop","kind":"Screenshot","instr":"Show the Wireshark packet with the password.","checks":[["Packet","The password is visible in plain text"],["Server","10.R.40.11"]]}]},{"num":"10","title":"Scanner Appliance","questions":["Why give the scanner its own narrow, logged policy instead of widening an existing one?","Which finding on the FTP server matches what you captured in Cyber Hub 09?","Pick one other finding. Is it a real risk for your company, or something you would accept? Why?"],"deliverables":[{"n":"1","title":"Scanner appliance","role":"Hypervisor","kind":"Screenshot","instr":"Show the scanner VM's summary in Proxmox beside Greenbone's feed status.","checks":[["VM","rackR-scan running, disk on the NFS storage"],["Feed","The last sync date is shown"]]},{"n":"2","title":"Baseline scan","role":"Laptop","kind":"Screenshot","instr":"Show the results summary of the DMZ baseline scan.","checks":[["Targets","Both DMZ servers"],["Status","The scan is complete"]]}]},{"num":"11","title":"Build the Vulnerable Pi","questions":[],"deliverables":[{"n":"1","title":"Self-scan results","role":"Laptop","kind":"Screenshot","instr":"Show Greenbone's results for your Pi.","checks":[["Target","Your Pi's address on the Data VLAN"],["Findings","All four planted weaknesses appear"]]},{"n":"2","title":"Private answer key","role":"Instructor only","kind":"Document","instr":"Submit the answer key from Part 3 to the instructor only.","checks":[["Weaknesses","All four, each with how it was configured"],["Fixes","Exact steps to fix each one"]]}]},{"num":"12","title":"Vulnerability Assessment","questions":["The WAN scan found open ports even though ping is off. What does that say about hiding a device from ping?","Compare the two views. Which of the target's services can anyone on the internet reach, and which only an insider? Which would you fix first, and why?"],"deliverables":[{"n":"1","title":"Hosted appliance","role":"Laptop","kind":"Screenshot","instr":"Show your appliance's web interface, reached from your laptop on the target's Data VLAN.","checks":[["Address","The appliance's address on the target's Data VLAN"],["Feed","The feed date is visible"]]},{"n":"2","title":"Network map","role":"Laptop","kind":"Screenshot","instr":"Show the Nmap results.","checks":[["Internal","Live hosts on the target's Data and DMZ subnets"],["External","Open ports and services on the target's WAN address, scanned from CyberHub-Internet"]]},{"n":"3","title":"Scan results","role":"Laptop","kind":"Screenshot","instr":"Show Greenbone's results summary.","checks":[["Hosts","Every host in scope"],["Severity","Findings sorted by severity"]]},{"n":"4","title":"Assessment in your logs","role":"Firewall","kind":"Screenshot","instr":"Show the assessment in your firewall's forward traffic log.","checks":[["Appliance","Sessions from 10.R.20.50 to the DMZ"],["Assessors","Traffic from the assessors' laptop"],["External","Sessions from a 198.51.100.x address on Allow_Inbound_Services"]]},{"n":"5","title":"Vulnerability Assessment Report","role":"Target team","kind":"Document","instr":"Export the VAR as a PDF from the Report Builder and submit it before Cyber Hub 13. Then choose Send findings to the client. In Google Drive, share the PDF and the findings file with each member of the target team by name, with general access set to Restricted. They import the findings file into their POA&M.","checks":[["Delivered","Shared with the target team's members only"],["Scope","Hosts and subnets assessed, the external and internal views, and the rules of engagement"],["Findings","Each with severity, evidence and validation status"],["Fixes","In priority order"]]}]},{"num":"13","title":"Remediation and SSP","questions":["Why does closing the FTP finding take more than stopping the service?"],"deliverables":[{"n":"1","title":"Before and after scans","role":"Scanner","kind":"Screenshot","instr":"Show your scan results from Cyber Hubs 10 and 11 next to your new scan.","checks":[["Before","The findings from your earlier scans"],["After","The fixed findings are gone"]]},{"n":"2","title":"System Security Plan","role":"Your rack","kind":"Document","instr":"Export the SSP as a PDF from the Report Builder and submit it.","checks":[["Description","Matches your rack as built"],["POA&M","Every finding, with status"],["Accepted risks","Each with its reason"]]}]},{"num":"14","title":"Physical Security Briefing","questions":[],"deliverables":[{"n":"1","title":"CISO briefing","role":"Live","kind":"Presentation","instr":"Give the briefing and submit the slides.","checks":[["Trust","Why the target trusts the tool"],["Attack chain","How the attack unfolds"],["Defenses","Detection and prevention, tied to your rack"]]}]},{"num":"15","title":"Lab Restoration","questions":[],"deliverables":[{"n":"1","title":"Switch reset","role":"Core switch","kind":"Screenshot","instr":"Show the switch at its default login prompt.","checks":[["Prompt","Default, with no hostname"]]},{"n":"2","title":"Firewall reset","role":"Firewall","kind":"Screenshot","instr":"Show the firewall's default login page.","checks":[["Page","The default login at https://192.168.1.99"]]}]}];
 
 // The rack sheet fills itself in from the rack number on the cover (Gabriel's call: no busy work).
 // These patterns are the same ones Reference: Rack Schema and VLAN Plan shows students.
@@ -361,8 +387,8 @@ function blankDoc() {
     meta: { company: "", tagline: "", logo: "", updated: 0, savedBy: "" },
     diagram: null,      // the Diagram tab's document (src/diagram), saved here so it travels in the team file
     log: {
-      cover: { rack: "", semester: "", diagramLink: "", chat: "", roster: [{ name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }] },
-      agreement: { decisions: "", missed: "", reply: "", agreed: "" },
+      cover: { rack: "", semester: "", diagramLink: "", chat: "", roster: [{ name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }] },
+      agreement: { missed: "", signatures: {} },   // signatures: roster name -> { sig, date }
       rack: { values: {}, checkedTeammate: "", checkedInstructor: "" },
       hubs: {},
     },
@@ -577,6 +603,7 @@ async function restoreBackupHandle() {
 // The diagram lives in doc.diagram. Company and logo live once, in doc.meta, and are handed to the diagram.
 const LOGO_MAX = 40000;   // the diagram's limit: its share link carries the logo
 window.rbDiagram = {
+  gotoCover() { state.tab = "log"; state.log = "cover"; renderAll(); toast("Add your logo here. It appears on the diagram by itself."); },
   load() { const d = doc.diagram ? JSON.parse(JSON.stringify(doc.diagram)) : null; if (!d) return null;
     d.meta = { ...(d.meta || {}), company: doc.meta.company || "" }; if (doc.meta.logo) d.meta.logo = doc.meta.logo; else delete d.meta.logo; return d; },
   save(d) {
@@ -759,12 +786,12 @@ function hubStatus(l) {
   if (!d) return "";
   const qs = l.questions.every((q, i) => (d.answers[i] || "").trim());
   const dl = l.deliverables.every((x) => SEPARATE[`${l.num}-${x.n}`] || (d.deliv[x.n]?.images || []).length);
-  const any = d.sessions.length || d.commands.trim() || d.problems.length || Object.values(d.answers).some((a) => a.trim()) || Object.values(d.deliv).some((x) => (x.images || []).length);
+  const any = d.sessions.length || d.commands.trim() || d.problems.length || (d.shots || []).length || Object.values(d.answers).some((a) => a.trim()) || Object.values(d.deliv).some((x) => (x.images || []).length);
   return qs && dl && d.sessions.length ? "done" : any ? "part" : "";
 }
 function coverStatus() {
   const c = doc.log.cover;
-  if (doc.meta.company && c.rack && c.roster.some((r) => r.name)) return doc.log.agreement.agreed.trim() ? "done" : "part";
+  if (doc.meta.company && c.rack && c.roster.some((r) => r.name)) return unsigned().length ? "part" : "done";
   return doc.meta.company ? "part" : "";
 }
 const rackNum = () => { const r = String(doc.log.cover.rack || "").trim(); return /^[1-8]$/.test(r) ? r : ""; };
@@ -798,20 +825,38 @@ function logCover() {
     h("div", { class: "card" },
       h("div", { class: "grid2" },
         field("Company name", doc.meta, "company", { req: true, oninput: () => ($("brand-co").textContent = doc.meta.company || "Cyber Hub"), hint: "It also titles your network diagram." }),
-        field("Tagline", doc.meta, "tagline", { placeholder: "One line that says what your company does" }),
         field("Rack number", c, "rack", { req: true, placeholder: "1 to 8", hint: "Your rack sheet fills in from this.", oninput: () => renderRail() }),
-        field("Semester", c, "semester", { placeholder: "Spring 2027" }),
-        field("How we communicate", c, "chat", { wide: true, placeholder: "Two methods, for example a group chat and email" })),
-      h("label", {}, "Logo"), logoWell(), h("p", { class: "hintline" }, "It goes on every report and in the corner of your network diagram. You can also add it from the Diagram tab.")),
+        field("Semester", c, "semester", { placeholder: "Spring 2027" })),
+      h("label", {}, "Logo"), logoWell(), h("p", { class: "hintline" }, "It goes on every report and in the corner of your network diagram.")),
     h("h3", {}, "Team roster"),
-    rowsTable(c.roster, [["name", "Name", { w: "45%" }], ["email", "Email", { type: "email" }]], { addLabel: "Add member", onchange: fillWho }),
+    rowsTable(c.roster, [["name", "Name", { w: "45%" }], ["email", "Email", { type: "email" }]], { addLabel: "Add member", onchange: () => renderAll() }),
     h("h3", {}, "Team agreement"),
     h("div", { class: "card" },
-      field("How we make decisions", a, "decisions", { area: true }),
-      field("If someone misses a lab", a, "missed", { area: true }),
-      field("How fast we reply between labs", a, "reply"),
-      field("Agreed by", a, "agreed", { hint: "Every team member types their name to agree.", req: true })),
+      field("How we communicate", c, "chat", { req: true, placeholder: "Two methods, for example a group chat and email" }),
+      field("If someone misses a lab", a, "missed", { area: true, req: true }),
+      signBlock()),
   ];
+}
+// Each member signs by typing their full name as it appears on the roster. The date records itself.
+const members = () => doc.log.cover.roster.map((r) => r.name.trim()).filter(Boolean);
+const unsigned = () => members().filter((n) => !doc.log.agreement.signatures?.[n]?.date);
+function signBlock() {
+  const a = doc.log.agreement; a.signatures = a.signatures || {};
+  const names = members();
+  if (!names.length) return h("p", { class: "hintline" }, "Add your team to the roster above, then each member signs here.");
+  return h("div", { class: "field" }, h("label", {}, "Signatures", h("span", { class: "req" }, " *")),
+    h("p", { class: "hintline", style: "margin:0 0 8px" }, "Each member signs by typing their full name, exactly as it appears on the roster."),
+    h("div", { class: "signs" }, names.map((n) => {
+      const s = a.signatures[n] || (a.signatures[n] = { sig: "", date: "" });
+      const id = newId("sg");
+      const stamp = h("span", { class: "signdate" });
+      const show = () => { stamp.textContent = s.date ? "Signed " + new Date(s.date + "T12:00").toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : ""; };
+      const inp = h("input", { id, class: "signin" + (s.date ? " signed" : ""), placeholder: n, autocomplete: "off", oninput: (e) => {
+        s.sig = e.target.value; const ok = s.sig.trim().toLowerCase() === n.toLowerCase();
+        s.date = ok ? (s.date || today()) : ""; e.target.classList.toggle("signed", ok); show(); commit(); renderRail(); } });
+      inp.value = s.sig || ""; show();
+      return h("div", { class: "signrow" }, h("label", { for: id }, n), inp, stamp);
+    })));
 }
 function logoWell() {
   const box = h("div", { class: "tools" });
@@ -841,7 +886,7 @@ function logHub(l) {
     h("p", { class: "sub" }, "Add a session entry every time you work on this Cyber Hub, even when it takes more than one lab.")];
   out.push(h("h3", {}, "Sessions"),
     rowsTable(d.sessions, [["date", "Date", { type: "date", w: "150px" }], ["who", "Who did what", { area: true, placeholder: "Each person's contribution" }]],
-      { addLabel: "Add session", blank: () => ({ date: today(), who: me() ? me() + ": " : "" }) }));
+      { addLabel: "Add session", blank: () => ({ date: today(), who: "" }) }));
   out.push(h("h3", {}, "Commands and settings"),
     field("", d, "commands", { area: true, rows: 5, placeholder: "Every command you ran or setting you changed, and why" }));
   if (l.num === "05") {
@@ -857,8 +902,10 @@ function logHub(l) {
       field("Scope", r, "scope", { wide: true, placeholder: "Subnets and addresses agreed" }),
       field("Session", r, "session", { placeholder: "Date and times" }), field("Agreed by", r, "agreed", { placeholder: "One name from each team" })));
   }
-  out.push(h("h3", {}, "Problems and fixes"),
-    rowsTable(d.problems, [["broke", "What broke", { area: true }], ["checked", "What you checked", { area: true }], ["fixed", "What fixed it", { area: true }]], { addLabel: "Add problem" }));
+  out.push(h("h3", {}, "Problems and fixes"), h("p", { class: "sub" }, "Your own troubleshooting record. When something like it breaks again, this is where you'll look first."), problemList(d.problems));
+  if (!d.shots) d.shots = [];
+  out.push(h("h3", {}, "Other screenshots and notes"), h("p", { class: "sub" }, "Anything worth keeping that isn't a deliverable: a settings page, an error, a before-and-after."),
+    imageWell(d.shots, { prompt: "Add a screenshot", label: "Other screenshots" }), field("", d, "notes", { area: true, placeholder: "Notes for your team" }));
   if (l.questions.length) {
     out.push(h("h3", {}, "Before you continue"), h("div", { class: "card" }, l.questions.map((q, i) => h("div", { class: "qa" },
       h("p", { class: "q" }, q), field("", d.answers, String(i), { area: true, placeholder: "Your answer" })))));
@@ -878,6 +925,20 @@ function logHub(l) {
   }
   out.push(h("div", { class: "tools" }, h("button", { class: "primary", onclick: () => exportDoc("log-hub", l.num) }, `Export Cyber Hub ${l.num} as PDF`)));
   return out;
+}
+
+// Problems are cards, so each can carry its own screenshots.
+function problemList(list) {
+  const box = h("div", { class: "plist" });
+  const draw = () => box.replaceChildren(
+    ...list.map((p, i) => { if (!p.images) p.images = [];
+      return h("div", { class: "pcard" },
+        h("div", { class: "pcard-h" }, h("b", {}, `Problem ${i + 1}`), h("button", { class: "small ghost", onclick: () => ask("Remove this problem?", [h("p", {}, p.broke || "Untitled problem")], [["Cancel"], ["Remove", () => { list.splice(i, 1); commit(); draw(); }, "danger"]]) }, "Remove")),
+        h("div", { class: "grid2" }, field("What broke", p, "broke", { area: true, wide: true, placeholder: "What you saw, and when" }),
+          field("What you checked", p, "checked", { area: true }), field("What fixed it", p, "fixed", { area: true })),
+        h("label", {}, "Screenshots"), imageWell(p.images, { prompt: "Add a screenshot", label: "Problem screenshots" })); }),
+    h("button", { class: "small", onclick: () => { list.push({ broke: "", checked: "", fixed: "", images: [] }); commit(); draw(); box.querySelectorAll("textarea")[box.querySelectorAll("textarea").length - 3]?.focus(); } }, "+ Add problem"));
+  draw(); return box;
 }
 
 // ------------------------------------------------------------------ VAR (Cyber Hub 12)
@@ -1396,9 +1457,11 @@ function coverPage(kind, title, sub, rows, conf, clientLogo) {
 // ---- Team Log
 function logCoverHTML() {
   const c = doc.log.cover, a = doc.log.agreement, r = doc.log.rack;
-  return coverPage("Team Log", doc.meta.company || "Team Log", doc.meta.tagline, [["Rack", c.rack], ["Semester", c.semester], ["Communication", c.chat]], "Team Log")
+  const sg = a.signatures || {};
+  return coverPage("Team Log", doc.meta.company || "Team Log", "", [["Rack", c.rack], ["Semester", c.semester], ["Team", c.roster.map((x) => x.name.trim()).filter(Boolean).join(", ")]], "Team Log")
     + `<h1 class="s">Team</h1>${tbl(["Team member", "Email"], c.roster.filter((x) => x.name || x.email).map((x) => [x.name, x.email]))}`
-    + `<h2 class="s">Team agreement</h2>${form([["How we make decisions", a.decisions], ["If someone misses a lab", a.missed], ["How fast we reply between labs", a.reply], ["Agreed by", a.agreed]])}`
+    + `<h2 class="s">Team agreement</h2>${form([["How we communicate", c.chat], ["If someone misses a lab", a.missed]])}`
+    + tbl(["Team member", "Signature", "Date"], c.roster.map((x) => x.name.trim()).filter(Boolean).map((n) => [n, sg[n]?.date ? { html: `<span class="sig">${esc(sg[n].sig)}</span>` } : "", sg[n]?.date || ""]))
     + `<h1 class="s" style="break-before:page">Rack sheet</h1>${tbl(["Device or network", "Pattern", "Your rack"], RACK_ROWS.map(([k, l, p]) => [l, mono(p), mono(rackValue(p))]))}`
     + form([["Checked by (teammate)", r.checkedTeammate], ["Checked by (instructor)", r.checkedInstructor]]);
 }
@@ -1409,7 +1472,8 @@ function hubHTML(l) {
   s += `<h2 class="s">Commands and settings</h2><p>${T(d.commands)}</p>`;
   if (d.extra.checkpoint) s += `<h2 class="s">Connectivity checkpoint</h2>${tbl(["From your laptop, try", "Expected", "Result"], d.extra.checkpoint.map((x) => [x.test, x.expected, x.result]))}`;
   if (d.extra.roe) { const r = d.extra.roe; s += `<h2 class="s">Rules of engagement</h2>${form([["Target team", r.target], ["Assessing team", r.assessing], ["Scope", r.scope], ["Session", r.session], ["Agreed by", r.agreed]])}`; }
-  s += `<h2 class="s">Problems and fixes</h2>${tbl(["What broke", "What you checked", "What fixed it"], d.problems.map((x) => [x.broke, x.checked, x.fixed]))}`;
+  s += `<h2 class="s">Problems and fixes</h2>` + (d.problems.length ? d.problems.map((x, i) => `<div class="card"><div class="ch"><b>Problem ${i + 1}</b></div>${form([["What broke", x.broke], ["What you checked", x.checked], ["What fixed it", x.fixed]])}${(x.images || []).map((id) => img(id, "")).join("")}</div>`).join("") : `<p class="blank">None recorded.</p>`);
+  if ((d.shots || []).length || (d.notes || "").trim()) s += `<h2 class="s">Other screenshots and notes</h2>${(d.notes || "").trim() ? `<p>${esc(d.notes)}</p>` : ""}${(d.shots || []).map((id) => img(id, "")).join("")}`;
   if (l.questions.length) s += `<h2 class="s">Before you continue</h2>` + l.questions.map((q, i) => `<p><b>${esc(q)}</b></p><p>${T(d.answers[i])}</p>`).join("");
   if (l.deliverables.length) s += `<h2 class="s">Deliverables</h2>`;
   for (const x of l.deliverables) {
@@ -1562,12 +1626,17 @@ function renderSaveBar() {
   if (!db) s.textContent = "This browser can't save here. Use Save team file to keep your work.";
   else if (saveFailed) s.textContent = "Couldn't save in this browser. Back up now so nothing is lost.";
   else s.textContent = doc.meta.updated ? `Saved in this browser ${fmtTime(doc.meta.updated).replace(/^.*?, /, "at ")}` : "Saves in this browser as you type.";
-  const age = Date.now() - (lastBackup || sessionStart), cls = backupState === "on" && !dirtySinceBackup ? "ok" : age < 20 * 60e3 || !doc.meta.updated ? "" : age < 60 * 60e3 ? "amber" : "red";
-  const label = backupState === "on" ? (lastBackup ? `Automatic backup on, last written ${ago(lastBackup)}` : "Automatic backup on")
-    : backupState === "paused" ? "Automatic backup paused" : lastBackup ? `Backed up ${ago(lastBackup)}` : "Not backed up yet";
-  b.replaceChildren(h("span", { class: "bk " + cls }, h("i"), label),
-    backupState === "paused" ? h("button", { onclick: resumeBackup }, "Resume backups") : null,
-    backupState !== "on" ? h("button", { onclick: backupNow }, "Back up now") : null);
+  const age = Date.now() - (lastBackup || sessionStart), edited = !!doc.meta.updated && dirtySinceBackup;
+  if (backupState === "on") {
+    b.replaceChildren(h("span", { class: "bk ok" }, h("i"), lastBackup ? `Automatic backup on, last written ${ago(lastBackup)}` : "Automatic backup on"));
+  } else if (backupState === "paused") {
+    b.replaceChildren(h("span", { class: "bkwarn" }, "Automatic backup is paused.", h("button", { class: "small", onclick: resumeBackup }, "Resume backups")));
+  } else if (edited && (!lastBackup || age > 20 * 60e3)) {
+    const msg = lastBackup ? `Last backup ${ago(lastBackup)}. Save a new team file so nothing is lost.` : "Not backed up yet. Save a team file so a lost laptop can't lose your work.";
+    b.replaceChildren(h("span", { class: "bkwarn" + (age > 60 * 60e3 ? " red" : "") }, msg, h("button", { class: "small", onclick: backupNow }, "Back up now")));
+  } else {
+    b.replaceChildren(h("span", { class: "bk ok" }, h("i"), lastBackup ? `Backed up ${ago(lastBackup)}` : "Nothing to back up yet"), lastBackup ? h("button", { class: "small", onclick: backupNow }, "Back up now") : null);
+  }
 }
 setInterval(renderSaveBar, 60e3);
 setInterval(() => writeBackup(false), BACKUP_EVERY);
@@ -1577,14 +1646,7 @@ window.addEventListener("beforeunload", (e) => {
 });
 
 // ---- who's typing
-function fillWho() {
-  const sel = $("who"), names = doc.log.cover.roster.map((r) => r.name.trim()).filter(Boolean), cur = me();
-  const opts = [["", names.length ? "Pick your name" : "Add your roster first"], ...names.map((n) => [n, n])];
-  if (cur && !names.includes(cur)) opts.push([cur, cur]);
-  sel.replaceChildren(...opts.map(([v, t]) => h("option", { value: v }, t))); sel.value = cur;
-}
-$("who").addEventListener("change", (e) => { setMe(e.target.value); doc.meta.savedBy = e.target.value; commit(); });
-
+function fillWho() { }
 // ---- tabs and menus
 for (const b of document.querySelectorAll("[data-tab]")) b.addEventListener("click", () => { state.tab = b.dataset.tab; state.sel = null; renderAll(); $("work").scrollTop = 0; });
 const menu = $("filemenu"), mbtn = $("b-file");
@@ -1650,6 +1712,7 @@ async function mergeFile(x) {
     const a = hubData(num), b = o.log.hubs[num];
     for (const s of b.sessions) if (!a.sessions.some((y) => y.date === s.date && y.who === s.who)) { a.sessions.push(s); n.sessions++; }
     for (const p of b.problems) if (!a.problems.some((y) => y.broke === p.broke && y.fixed === p.fixed)) { a.problems.push(p); n.problems++; }
+    for (const id of b.shots || []) { a.shots = a.shots || []; if (!a.shots.includes(id)) { a.shots.push(id); n.images++; } }
     for (const k in b.answers) if (!(a.answers[k] || "").trim() && (b.answers[k] || "").trim()) { a.answers[k] = b.answers[k]; n.answers++; }
     for (const k in b.deliv) { const ad = a.deliv[k] || (a.deliv[k] = { images: [], note: "", link: "" }); for (const id of b.deliv[k].images || []) if (!ad.images.includes(id)) { ad.images.push(id); n.images++; } if (!ad.note && b.deliv[k].note) ad.note = b.deliv[k].note; if (!ad.link && b.deliv[k].link) ad.link = b.deliv[k].link; }
     if (!a.commands.trim() && b.commands) a.commands = b.commands; else if (b.commands && !a.commands.includes(b.commands)) a.commands += "\n\n" + b.commands;

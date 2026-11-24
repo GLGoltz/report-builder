@@ -13,7 +13,7 @@
     "checks": [
      [
       "Company",
-      "Name, tagline and original logo"
+      "Name and original logo"
      ],
      [
       "Roster",
@@ -21,7 +21,7 @@
      ],
      [
       "Agreement",
-      "Communication methods, decisions and missed labs"
+      "Communication methods and missed labs, signed by every member"
      ]
     ]
    },

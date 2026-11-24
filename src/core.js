@@ -15,8 +15,8 @@ function blankDoc() {
     meta: { company: "", tagline: "", logo: "", updated: 0, savedBy: "" },
     diagram: null,      // the Diagram tab's document (src/diagram), saved here so it travels in the team file
     log: {
-      cover: { rack: "", semester: "", diagramLink: "", chat: "", roster: [{ name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }] },
-      agreement: { decisions: "", missed: "", reply: "", agreed: "" },
+      cover: { rack: "", semester: "", diagramLink: "", chat: "", roster: [{ name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }] },
+      agreement: { missed: "", signatures: {} },   // signatures: roster name -> { sig, date }
       rack: { values: {}, checkedTeammate: "", checkedInstructor: "" },
       hubs: {},
     },
@@ -231,6 +231,7 @@ async function restoreBackupHandle() {
 // The diagram lives in doc.diagram. Company and logo live once, in doc.meta, and are handed to the diagram.
 const LOGO_MAX = 40000;   // the diagram's limit: its share link carries the logo
 window.rbDiagram = {
+  gotoCover() { state.tab = "log"; state.log = "cover"; renderAll(); toast("Add your logo here. It appears on the diagram by itself."); },
   load() { const d = doc.diagram ? JSON.parse(JSON.stringify(doc.diagram)) : null; if (!d) return null;
     d.meta = { ...(d.meta || {}), company: doc.meta.company || "" }; if (doc.meta.logo) d.meta.logo = doc.meta.logo; else delete d.meta.logo; return d; },
   save(d) {

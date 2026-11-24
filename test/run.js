@@ -31,8 +31,11 @@ const fs = require('fs');
   const rosterInputs = p.locator('table.edit').first().locator('input');
   await rosterInputs.nth(0).fill('Ana Ramos'); await rosterInputs.nth(2).fill('Jay Lee');
   await p.click('[data-tab=var]'); await p.click('[data-tab=log]');
-  const opts = await p.$$eval('#who option', o => o.map(x => x.textContent)); if (!opts.includes('Jay Lee')) errs.push('who list missing roster'); else t('who list');
-  await p.selectOption('#who', 'Jay Lee');
+  // signatures: typing the roster name signs and dates it
+  const sig = p.locator('input.signin[placeholder="Jay Lee"]'); await sig.fill('jay lee');
+  const sg = await p.evaluate(() => [doc.log.agreement.signatures['Jay Lee'].date === today(), coverStatus()]);
+  if (!sg[0]) errs.push('signature ' + sg); else t('signature dated, cover ' + sg[1]);
+  if ((await p.locator('table.edit').first().locator('tbody tr').count()) !== 4) errs.push('roster should start with 4 rows'); else t('roster of 4');
   // rack sheet fills from the rack number
   await p.fill('input[placeholder="1 to 8"]', '4'); await p.click('.step:has-text("Rack sheet")');
   const rs = await p.evaluate(() => [...document.querySelectorAll('table.edit tbody tr')].map(r => r.lastElementChild.previousElementSibling.textContent));
@@ -40,7 +43,9 @@ const fs = require('fs');
   // hub 05
   await p.click('text=05 Switch Ports and DHCP');
   await p.click('text=+ Add session');
-  const who = await p.locator('table.edit textarea').first().inputValue(); if (!who.startsWith('Jay Lee')) errs.push('session prefill: ' + who); else t('session prefill');
+  await p.click('text=+ Add problem'); await p.locator('.pcard textarea').first().fill('Ping to the gateway failed');
+  const pc = await p.evaluate(() => [hubData('05').problems.length, Array.isArray(hubData('05').problems[0].images), Array.isArray(hubData('05').shots)]);
+  if (pc.join() !== '1,true,true') errs.push('problem card ' + pc); else t('problem card with screenshots');
   if (!(await p.isVisible('text=Connectivity checkpoint'))) errs.push('checkpoint missing'); else t('checkpoint table');
   // VAR hosts: nmap import
   await p.click('[data-tab=var]'); await p.click('.step:has-text("Hosts found")');
@@ -98,11 +103,11 @@ const fs = require('fs');
   await p.click('.step:has-text("Security controls")'); await p.screenshot({ path: 'ssp.png' });
   // persistence
   await p.waitForTimeout(900); await p.reload(); await p.waitForTimeout(500);
-  const per = await p.evaluate(() => [doc.var.findings.length, doc.var.triage.filter(x => x.state !== 'new').length, doc.log.cover.roster[1].name, me()]);
-  if (per.join() !== '1,2,Jay Lee,Jay Lee') errs.push('persist ' + per); else t('persist ' + per);
+  const per = await p.evaluate(() => [doc.var.findings.length, doc.var.triage.filter(x => x.state !== 'new').length, doc.log.cover.roster[1].name]);
+  if (per.join() !== '1,2,Jay Lee') errs.push('persist ' + per); else t('persist ' + per);
   // team file round trip + findings file
-  const rt = await p.evaluate(() => { const f = parseTeamFile(teamFileJSON()); return [f.doc.var.findings[0].title, f.savedBy, f.doc.diagram ? 'diagram' : 'nodiagram']; });
-  if (rt.join() !== 'Anonymous FTP login allowed,Jay Lee,diagram') errs.push('roundtrip ' + rt); else t('team file round trip');
+  const rt = await p.evaluate(() => { const f = parseTeamFile(teamFileJSON()); return [f.doc.var.findings[0].title, f.doc.diagram ? 'diagram' : 'nodiagram']; });
+  if (rt.join() !== 'Anonymous FTP login allowed,diagram') errs.push('roundtrip ' + rt); else t('team file round trip');
   const hist = await p.evaluate(async () => (await historyList()).length); if (!hist) errs.push('no history'); else t('history ' + hist);
   // printed docs to PDF
   await p.evaluate(async () => { diagramImg = await diagramPNG(); });

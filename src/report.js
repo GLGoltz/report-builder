@@ -17,9 +17,11 @@ function coverPage(kind, title, sub, rows, conf, clientLogo) {
 // ---- Team Log
 function logCoverHTML() {
   const c = doc.log.cover, a = doc.log.agreement, r = doc.log.rack;
-  return coverPage("Team Log", doc.meta.company || "Team Log", doc.meta.tagline, [["Rack", c.rack], ["Semester", c.semester], ["Communication", c.chat]], "Team Log")
+  const sg = a.signatures || {};
+  return coverPage("Team Log", doc.meta.company || "Team Log", "", [["Rack", c.rack], ["Semester", c.semester], ["Team", c.roster.map((x) => x.name.trim()).filter(Boolean).join(", ")]], "Team Log")
     + `<h1 class="s">Team</h1>${tbl(["Team member", "Email"], c.roster.filter((x) => x.name || x.email).map((x) => [x.name, x.email]))}`
-    + `<h2 class="s">Team agreement</h2>${form([["How we make decisions", a.decisions], ["If someone misses a lab", a.missed], ["How fast we reply between labs", a.reply], ["Agreed by", a.agreed]])}`
+    + `<h2 class="s">Team agreement</h2>${form([["How we communicate", c.chat], ["If someone misses a lab", a.missed]])}`
+    + tbl(["Team member", "Signature", "Date"], c.roster.map((x) => x.name.trim()).filter(Boolean).map((n) => [n, sg[n]?.date ? { html: `<span class="sig">${esc(sg[n].sig)}</span>` } : "", sg[n]?.date || ""]))
     + `<h1 class="s" style="break-before:page">Rack sheet</h1>${tbl(["Device or network", "Pattern", "Your rack"], RACK_ROWS.map(([k, l, p]) => [l, mono(p), mono(rackValue(p))]))}`
     + form([["Checked by (teammate)", r.checkedTeammate], ["Checked by (instructor)", r.checkedInstructor]]);
 }
@@ -30,7 +32,8 @@ function hubHTML(l) {
   s += `<h2 class="s">Commands and settings</h2><p>${T(d.commands)}</p>`;
   if (d.extra.checkpoint) s += `<h2 class="s">Connectivity checkpoint</h2>${tbl(["From your laptop, try", "Expected", "Result"], d.extra.checkpoint.map((x) => [x.test, x.expected, x.result]))}`;
   if (d.extra.roe) { const r = d.extra.roe; s += `<h2 class="s">Rules of engagement</h2>${form([["Target team", r.target], ["Assessing team", r.assessing], ["Scope", r.scope], ["Session", r.session], ["Agreed by", r.agreed]])}`; }
-  s += `<h2 class="s">Problems and fixes</h2>${tbl(["What broke", "What you checked", "What fixed it"], d.problems.map((x) => [x.broke, x.checked, x.fixed]))}`;
+  s += `<h2 class="s">Problems and fixes</h2>` + (d.problems.length ? d.problems.map((x, i) => `<div class="card"><div class="ch"><b>Problem ${i + 1}</b></div>${form([["What broke", x.broke], ["What you checked", x.checked], ["What fixed it", x.fixed]])}${(x.images || []).map((id) => img(id, "")).join("")}</div>`).join("") : `<p class="blank">None recorded.</p>`);
+  if ((d.shots || []).length || (d.notes || "").trim()) s += `<h2 class="s">Other screenshots and notes</h2>${(d.notes || "").trim() ? `<p>${esc(d.notes)}</p>` : ""}${(d.shots || []).map((id) => img(id, "")).join("")}`;
   if (l.questions.length) s += `<h2 class="s">Before you continue</h2>` + l.questions.map((q, i) => `<p><b>${esc(q)}</b></p><p>${T(d.answers[i])}</p>`).join("");
   if (l.deliverables.length) s += `<h2 class="s">Deliverables</h2>`;
   for (const x of l.deliverables) {

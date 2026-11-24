@@ -8,17 +8,18 @@
   <button role="tab" id="tab-var" data-tab="var" aria-selected="false">VAR</button>
   <button role="tab" id="tab-ssp" data-tab="ssp" aria-selected="false">SSP</button>
  </div>
- <label class="who"><span>Who's typing</span><select id="who"></select></label>
  <div class="acts">
-  <button id="b-export" class="primary">Export PDF</button>
-  <div class="menu"><button id="b-file" aria-haspopup="true" aria-expanded="false">Team file</button>
+  <div class="menu"><button id="b-file" class="primary big" aria-haspopup="true" aria-expanded="false">Save and export <span aria-hidden="true">▾</span></button>
    <div class="menu-list" id="filemenu" hidden>
-    <button id="b-save">Save team file</button>
+    <p class="mh">Export</p>
+    <button id="b-export">Export PDF of this tab</button>
+    <p class="mh">Save your work</p>
+    <button id="b-save">Save team file (backup)</button>
+    <button id="b-setup">Set up automatic backup</button>
     <button id="b-open">Open team file</button>
     <button id="b-merge">Add from a teammate's file</button>
-    <hr>
     <button id="b-history">History</button>
-    <button id="b-setup">Set up automatic backup</button>
+    <hr>
     <button id="b-help">How saving works</button>
    </div></div>
  </div>

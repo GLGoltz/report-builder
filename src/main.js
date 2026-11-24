@@ -43,12 +43,17 @@ function renderSaveBar() {
   if (!db) s.textContent = "This browser can't save here. Use Save team file to keep your work.";
   else if (saveFailed) s.textContent = "Couldn't save in this browser. Back up now so nothing is lost.";
   else s.textContent = doc.meta.updated ? `Saved in this browser ${fmtTime(doc.meta.updated).replace(/^.*?, /, "at ")}` : "Saves in this browser as you type.";
-  const age = Date.now() - (lastBackup || sessionStart), cls = backupState === "on" && !dirtySinceBackup ? "ok" : age < 20 * 60e3 || !doc.meta.updated ? "" : age < 60 * 60e3 ? "amber" : "red";
-  const label = backupState === "on" ? (lastBackup ? `Automatic backup on, last written ${ago(lastBackup)}` : "Automatic backup on")
-    : backupState === "paused" ? "Automatic backup paused" : lastBackup ? `Backed up ${ago(lastBackup)}` : "Not backed up yet";
-  b.replaceChildren(h("span", { class: "bk " + cls }, h("i"), label),
-    backupState === "paused" ? h("button", { onclick: resumeBackup }, "Resume backups") : null,
-    backupState !== "on" ? h("button", { onclick: backupNow }, "Back up now") : null);
+  const age = Date.now() - (lastBackup || sessionStart), edited = !!doc.meta.updated && dirtySinceBackup;
+  if (backupState === "on") {
+    b.replaceChildren(h("span", { class: "bk ok" }, h("i"), lastBackup ? `Automatic backup on, last written ${ago(lastBackup)}` : "Automatic backup on"));
+  } else if (backupState === "paused") {
+    b.replaceChildren(h("span", { class: "bkwarn" }, "Automatic backup is paused.", h("button", { class: "small", onclick: resumeBackup }, "Resume backups")));
+  } else if (edited && (!lastBackup || age > 20 * 60e3)) {
+    const msg = lastBackup ? `Last backup ${ago(lastBackup)}. Save a new team file so nothing is lost.` : "Not backed up yet. Save a team file so a lost laptop can't lose your work.";
+    b.replaceChildren(h("span", { class: "bkwarn" + (age > 60 * 60e3 ? " red" : "") }, msg, h("button", { class: "small", onclick: backupNow }, "Back up now")));
+  } else {
+    b.replaceChildren(h("span", { class: "bk ok" }, h("i"), lastBackup ? `Backed up ${ago(lastBackup)}` : "Nothing to back up yet"), lastBackup ? h("button", { class: "small", onclick: backupNow }, "Back up now") : null);
+  }
 }
 setInterval(renderSaveBar, 60e3);
 setInterval(() => writeBackup(false), BACKUP_EVERY);
@@ -58,14 +63,7 @@ window.addEventListener("beforeunload", (e) => {
 });
 
 // ---- who's typing
-function fillWho() {
-  const sel = $("who"), names = doc.log.cover.roster.map((r) => r.name.trim()).filter(Boolean), cur = me();
-  const opts = [["", names.length ? "Pick your name" : "Add your roster first"], ...names.map((n) => [n, n])];
-  if (cur && !names.includes(cur)) opts.push([cur, cur]);
-  sel.replaceChildren(...opts.map(([v, t]) => h("option", { value: v }, t))); sel.value = cur;
-}
-$("who").addEventListener("change", (e) => { setMe(e.target.value); doc.meta.savedBy = e.target.value; commit(); });
-
+function fillWho() { }
 // ---- tabs and menus
 for (const b of document.querySelectorAll("[data-tab]")) b.addEventListener("click", () => { state.tab = b.dataset.tab; state.sel = null; renderAll(); $("work").scrollTop = 0; });
 const menu = $("filemenu"), mbtn = $("b-file");
@@ -131,6 +129,7 @@ async function mergeFile(x) {
     const a = hubData(num), b = o.log.hubs[num];
     for (const s of b.sessions) if (!a.sessions.some((y) => y.date === s.date && y.who === s.who)) { a.sessions.push(s); n.sessions++; }
     for (const p of b.problems) if (!a.problems.some((y) => y.broke === p.broke && y.fixed === p.fixed)) { a.problems.push(p); n.problems++; }
+    for (const id of b.shots || []) { a.shots = a.shots || []; if (!a.shots.includes(id)) { a.shots.push(id); n.images++; } }
     for (const k in b.answers) if (!(a.answers[k] || "").trim() && (b.answers[k] || "").trim()) { a.answers[k] = b.answers[k]; n.answers++; }
     for (const k in b.deliv) { const ad = a.deliv[k] || (a.deliv[k] = { images: [], note: "", link: "" }); for (const id of b.deliv[k].images || []) if (!ad.images.includes(id)) { ad.images.push(id); n.images++; } if (!ad.note && b.deliv[k].note) ad.note = b.deliv[k].note; if (!ad.link && b.deliv[k].link) ad.link = b.deliv[k].link; }
     if (!a.commands.trim() && b.commands) a.commands = b.commands; else if (b.commands && !a.commands.includes(b.commands)) a.commands += "\n\n" + b.commands;

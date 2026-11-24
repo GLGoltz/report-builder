@@ -715,8 +715,8 @@ function drawInto(root, ui) {
     // A placeholder only on screen; exports leave the corner empty until a logo is added.
     const g = el("g", { "data-logo": "1", class: "logo-slot empty", tabindex: 0, role: "button", "aria-label": "Upload your company logo" }, root);
     el("rect", { x: lx, y: ly, width: lw, height: lh, rx: 8, class: "logo-ph" }, g);
-    text(g, lx + lw / 2, ly + 36, "logo-ph-t", "Upload logo", "middle");
-    text(g, lx + lw / 2, ly + 56, "logo-ph-s", "PNG or JPG", "middle");
+    text(g, lx + lw / 2, ly + 36, "logo-ph-t", HOST ? "Your logo" : "Upload logo", "middle");
+    text(g, lx + lw / 2, ly + 56, "logo-ph-s", HOST ? "Add it on the Team Log cover" : "PNG or JPG", "middle");
   }
   const connected = new Set(doc.links.flatMap((l) => [l.a, l.b]).filter((e) => e.port).map((e) => e.device + "|" + e.port));
   const gd = el("g", {}, root), gl = el("g", {}, root);
@@ -845,6 +845,7 @@ function dropTarget(e) {
   return { device: d.id, port: p && portsFor(d).length ? p.dataset.port : "" };
 }
 function logoClick() {
+  if (HOST) { HOST.gotoCover?.(); return; }   // in the Report Builder the logo is added once, on the Team Log cover
   if (!doc.meta.logo) { $("logofile").click(); return; }
   ask("Company logo", [h("img", { src: doc.meta.logo, alt: "Your company logo", class: "logoprev" })],
     [["Cancel"], ["Remove logo", () => { delete doc.meta.logo; commit(); renderAll(); }, "danger"], ["Change logo", () => $("logofile").click(), "primary"]]);
