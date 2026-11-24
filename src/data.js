@@ -2,6 +2,8 @@
 // Only what the course pages already show students. No answers, no expected values (spec section 2).
 // LABS is generated from the course pages by tools/labs.py and injected by build.mjs.
 const LABS = /*LABS*/[];
+// The reference pages (Reference tab), built from the course source by cyber-hub's build_all.py into refs.json.
+const REFS = /*REFS*/[];
 
 // Cyber Hub 15: what goes back in the Utility Drawer. A placeholder until Gabriel confirms the real contents.
 // Keep it the same as the "Utility drawer contents" table on Reference: The Rack (cyber-hub pages_ref.py).

@@ -67,7 +67,7 @@ function normalize(x) {
 
 let doc = blankDoc();
 let images = {};          // id -> data URL, the images this workspace uses
-const state = { tab: "log", log: "cover", var: "cover", ssp: "ident", sel: null };
+const state = { tab: "log", log: "cover", var: "cover", ssp: "ident", ref: "", sel: null };
 
 // ---------------------------------------------------------------- IndexedDB
 let db = null;

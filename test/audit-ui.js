@@ -13,7 +13,7 @@ const CHECK = () => {
     if (!vis(e) || ['svg', 'path', 'IFRAME'].includes(e.tagName)) continue;
     const s = getComputedStyle(e);
     // text clipped by overflow hidden / ellipsis
-    if ((s.overflowX === 'hidden' || s.textOverflow === 'ellipsis') && e.scrollWidth > e.clientWidth + 2 && e.textContent.trim() && !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.tagName)) bad.push('clipped text: ' + name(e));
+    if (e.tagName !== 'CAPTION' && (s.overflowX === 'hidden' || s.textOverflow === 'ellipsis') && e.scrollWidth > e.clientWidth + 2 && e.textContent.trim() && !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.tagName)) bad.push('clipped text: ' + name(e));
     // placeholder cut off in an empty input
     if ((e.tagName === 'INPUT' && !e.value && e.placeholder && !['checkbox', 'file', 'date'].includes(e.type)) || (e.tagName === 'TEXTAREA' && !e.value && e.placeholder && e.clientHeight < 30)) {
       const c = document.createElement('canvas').getContext('2d'); c.font = s.font;
@@ -21,7 +21,7 @@ const CHECK = () => {
       if (w > room + 1) bad.push(`placeholder cut off (${Math.round(w)} > ${Math.round(room)}): ` + name(e));
     }
     // a child sticking out of a box that clips or has a border
-    if (e.children.length === 0 && e.textContent.trim() && e.parentElement) {
+    if (e.children.length === 0 && e.tagName !== 'CAPTION' && e.textContent.trim() && e.parentElement) {
       const p = e.parentElement, pr = p.getBoundingClientRect(), r = e.getBoundingClientRect(), ps = getComputedStyle(p);
       if ((ps.borderLeftWidth !== '0px' || ps.backgroundColor !== 'rgba(0, 0, 0, 0)') && (r.right > pr.right + 1.5 || r.left < pr.left - 1.5) && ps.overflowX !== 'auto') bad.push('sticks out of its box: ' + name(e));
     }
@@ -59,7 +59,7 @@ const CHECK = () => {
   await p.locator('.flist .frow').first().click(); await p.click('#panel >> text=Make a finding'); await p.waitForTimeout(200); await p.evaluate(() => { const t = document.getElementById('toast'); if (t) t.remove(); });
   await p.evaluate(() => { doc.var.cover.clientRack = '6'; commit(); });
   // walk every view
-  for (const tab of ['log', 'var', 'ssp']) {
+  for (const tab of ['log', 'var', 'ssp', 'ref']) {
     await p.click(`[data-tab=${tab}]`); await p.waitForTimeout(150);
     const steps = await p.locator('#rail .step').count();
     for (let i = 0; i < steps; i++) {

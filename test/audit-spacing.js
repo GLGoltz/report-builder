@@ -36,7 +36,7 @@ const CHECK = () => {
   await p.click('.step:has-text("Triage")'); [fc] = await Promise.all([p.waitForEvent('filechooser'), p.click('text=Import Greenbone report')]); await fc.setFiles('greenbone.xml'); await p.waitForTimeout(200);
   await p.locator('.flist .frow').first().click(); await p.click('#panel >> text=Make a finding'); await p.waitForTimeout(200);
   for (const w of [1366, 390]) { await p.setViewportSize({ width: w, height: 900 });
-    for (const tab of ['log', 'var', 'ssp']) { await p.click(`[data-tab=${tab}]`); await p.waitForTimeout(100);
+    for (const tab of ['log', 'var', 'ssp', 'ref']) { await p.click(`[data-tab=${tab}]`); await p.waitForTimeout(100);
       const n = await p.locator('#rail .step').count();
       for (let i = 0; i < n; i++) { const st = p.locator('#rail .step').nth(i); const label = (await st.innerText()).split('\n').slice(0, 2).join(' '); await st.click(); await p.waitForTimeout(100);
         const r = await p.evaluate(CHECK); if (r.length) all[`${tab} / ${label} @${w}`] = r; } } }

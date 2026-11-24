@@ -96,6 +96,12 @@ const fs = require('fs');
   const ap = await p.evaluate(() => [doc.ssp.approval.owner, doc.ssp.approval.signature, doc.ssp.approval.date === today()].join());
   if (ap !== 'Jay Lee,Jay Lee,true') errs.push('ssp approval ' + ap); else t('SSP owner from the roster signs with one click');
   await p.click('[data-tab=log]');
+  // Reference tab: the course's reference pages, with in-app links between them
+  await p.click('[data-tab=ref]'); await p.click('#rail .step:has-text("Rack Schema and VLAN Plan")');
+  if (!(await p.isVisible('.refpage >> text=VLAN plan'))) errs.push('reference page'); else t('reference page shows');
+  const inl = p.locator('.refpage a[href^="#ref/"]').first();
+  if (await inl.count()) { const href = await inl.getAttribute('href'); await inl.click(); const st = await p.evaluate(() => state.ref); if ('#ref/' + st !== href) errs.push('in-app ref link ' + href + ' ' + st); else t('reference links stay in the app'); }
+  await p.click('[data-tab=log]');
   // VAR scope fills from the client's rack
   await p.click('[data-tab=var]'); await p.click('.step:has-text("Cover")'); await p.fill('input[placeholder="1 to 8"]', '6');
   await p.click('.step:has-text("Scope")');

@@ -8,7 +8,7 @@ const run = async (frame) => { await frame.evaluate(AXE); return frame.evaluate(
   await p.goto('http://localhost:8765/index.html'); await p.waitForTimeout(500);
   all['welcome'] = await run(p.mainFrame()); await p.click('#m-acts >> text=I understand');
   await p.evaluate(() => { doc.log.cover.roster[0].name = 'Ana Ramos'; const d = hubData('05'); d.problems.push({ broke: 'x', log: [{ date: today(), hypothesis: 'a', test: 'b', result: 'c', outcome: 'Ruled out' }], fixed: '', verify: '', status: 'open', images: [] }); commit(); });
-  for (const tab of ['log', 'var', 'ssp']) {
+  for (const tab of ['log', 'var', 'ssp', 'ref']) {
     await p.click(`[data-tab=${tab}]`); await p.waitForTimeout(150);
     const n = await p.locator('#rail .step').count();
     for (let i = 0; i < n; i++) { const st = p.locator('#rail .step').nth(i); const label = (await st.innerText()).split('\n')[0]; await st.click(); await p.waitForTimeout(120); const v = await run(p.mainFrame()); if (v.length) all[`${tab}: ${label}`] = v; }

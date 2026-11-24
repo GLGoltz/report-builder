@@ -334,3 +334,9 @@ table.edit.restore td.ctr{text-align:center;vertical-align:middle}
 .wl-entry .field{margin-bottom:0}
 /* Text boxes inside tables grow by themselves, so the resize grip is only clutter there */
 table.edit textarea{resize:none}
+/* Reference tab: the course pages keep their own inline styles */
+.reftitle{margin:0 0 14px}
+.refpage{max-width:900px}
+.refpage #dp-wrapper{background:#fff!important}
+/* Five tabs on a phone: tighter padding, and the bar scrolls sideways rather than cutting a tab off */
+@media (max-width:560px){.bar .seg{overflow-x:auto;max-width:100%}.seg button{padding:6px 10px;white-space:nowrap;flex:none}}
