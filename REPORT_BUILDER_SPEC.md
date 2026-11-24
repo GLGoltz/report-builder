@@ -6,7 +6,7 @@ It replaces the three Google Docs templates.
 
 Live at `https://glgoltz.github.io/report-builder/`. Four tabs: Team Log, Diagram, VAR and SSP. The Diagram tab is
 the former Network Diagram app (spec in `DIAGRAM_SPEC.md`), built into `diagram.html` and shown in a frame, so one
-link, one save and one team file hold everything. The old `glgoltz.github.io/network-diagram/` address redirects here.
+link, one save and one team file hold everything. (The old standalone Network Diagram app and its redirects were deleted on Nov 24 2026.)
 
 ## 1. Why
 

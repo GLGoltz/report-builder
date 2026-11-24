@@ -43,7 +43,7 @@ app can produce, and confirm none states a correct value.
 ## 3. Where it lives
 
 - **Settled:** the diagram is the Report Builder's Diagram tab (`src/diagram/` in `GLGoltz/report-builder`, built
-  into `diagram.html`). The old `rack-explorer/diagram/` page and `GLGoltz/network-diagram` only redirect there.
+  into `diagram.html`). The old standalone app (`GLGoltz/network-diagram`) and the Rack Explorer's `/diagram/` redirect were deleted on Nov 24 2026.
 - Follow the Rack Explorer's conventions: plain JavaScript, no framework, a Node build script that writes one
   self-contained `index.html`, source split into `src/`. No runtime network requests, no analytics, no fonts from a CDN.
 - Match the Cyber Hub look: navy `#003366`, body `#334155`, borders `#cbd5e1`, page `#f8fafc`, amber for values the
