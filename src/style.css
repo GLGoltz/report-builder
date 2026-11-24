@@ -313,7 +313,6 @@ table.edit.restore td.ctr{text-align:center;vertical-align:middle}
 .callout.caution{--c:#ea580c;--cb:#fff7ed;--ct:#c2410c}
 .callout.danger{--c:#b91c1c;--cb:#fef2f2;--ct:#991b1b}
 .callout.note{--c:#003366;--cb:#f1f5f9;--ct:#003366}
-button.ghostbtn{background:#fff;color:var(--navy);border:1px solid var(--border)}
 /* Ticket work log */
 .wlog{margin:12px 0}
 .wlog>label{display:block;font-weight:600;margin-bottom:6px}

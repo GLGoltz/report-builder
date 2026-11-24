@@ -130,7 +130,6 @@ function showWelcome(first) {
   $("modal").querySelector(".card").classList.add("wide");
 }
 $("b-help").addEventListener("click", () => showWelcome(false));
-$("b-helpbar").addEventListener("click", () => showWelcome(false));
 
 // ---- history
 async function showHistory() {

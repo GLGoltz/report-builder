@@ -314,7 +314,6 @@ table.edit.restore td.ctr{text-align:center;vertical-align:middle}
 .callout.caution{--c:#ea580c;--cb:#fff7ed;--ct:#c2410c}
 .callout.danger{--c:#b91c1c;--cb:#fef2f2;--ct:#991b1b}
 .callout.note{--c:#003366;--cb:#f1f5f9;--ct:#003366}
-button.ghostbtn{background:#fff;color:var(--navy);border:1px solid var(--border)}
 /* Ticket work log */
 .wlog{margin:12px 0}
 .wlog>label{display:block;font-weight:600;margin-bottom:6px}
@@ -346,7 +345,6 @@ table.edit textarea{resize:none}
   <button role="tab" id="tab-ssp" data-tab="ssp" aria-selected="false">SSP</button>
  </div>
  <div class="acts">
-  <button id="b-helpbar" class="big ghostbtn" title="What each tab is for and how saving works">Help</button>
   <div class="menu"><button id="b-file" class="primary big" aria-haspopup="true" aria-expanded="false">Save and export <span aria-hidden="true">▾</span></button>
    <div class="menu-list" id="filemenu" hidden>
     <p class="mh">Export</p>
@@ -2045,7 +2043,6 @@ function showWelcome(first) {
   $("modal").querySelector(".card").classList.add("wide");
 }
 $("b-help").addEventListener("click", () => showWelcome(false));
-$("b-helpbar").addEventListener("click", () => showWelcome(false));
 
 // ---- history
 async function showHistory() {
