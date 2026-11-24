@@ -56,27 +56,25 @@ function logCover() {
       signs),
   ];
 }
-// Each member signs by typing their full name as it appears on the roster. The date records itself.
+// Each member signs with one click next to their roster name. The date records itself, and Undo takes it back.
 const members = () => doc.log.cover.roster.map((r) => r.name.trim()).filter(Boolean);
 const unsigned = () => members().filter((n) => !doc.log.agreement.signatures?.[n]?.date);
 function signBlock() {
   const a = doc.log.agreement; a.signatures = a.signatures || {};
   const names = members();
-  if (!names.length) return h("div", { class: "field" }, h("label", {}, "Signatures", h("span", { class: "req" }, " *")),
-    h("p", { class: "note" }, "A signature line appears here for each name on the roster above."));
-  return h("div", { class: "field" }, h("label", {}, "Signatures", h("span", { class: "req" }, " *")),
-    h("p", { class: "hintline", style: "margin:0 0 8px" }, "Each member signs by typing their full name, exactly as it appears on the roster."),
-    h("div", { class: "signs" }, names.map((n) => {
-      const s = a.signatures[n] || (a.signatures[n] = { sig: "", date: "" });
-      const id = newId("sg");
-      const stamp = h("span", { class: "signdate" });
-      const show = () => { stamp.textContent = s.date ? "Signed " + new Date(s.date + "T12:00").toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : ""; };
-      const inp = h("input", { id, class: "signin" + (s.date ? " signed" : ""), placeholder: n, autocomplete: "off", oninput: (e) => {
-        s.sig = e.target.value; const ok = s.sig.trim().toLowerCase() === n.toLowerCase();
-        s.date = ok ? (s.date || today()) : ""; e.target.classList.toggle("signed", ok); show(); commit(); renderRail(); } });
-      inp.value = s.sig || ""; show();
-      return h("div", { class: "signrow" }, h("label", { for: id }, n), inp, stamp);
-    })));
+  const head = h("label", {}, "Signatures", h("span", { class: "req" }, " *"));
+  if (!names.length) return h("div", { class: "field" }, head, h("p", { class: "note" }, "A signature line appears here for each name on the roster above."));
+  const box = h("div", { class: "signs" });
+  const draw = () => box.replaceChildren(...names.map((n) => {
+    const s = a.signatures[n] || (a.signatures[n] = { sig: "", date: "" });
+    const set = (on) => { s.sig = on ? n : ""; s.date = on ? today() : ""; commit(); draw(); renderRail(); };
+    return h("div", { class: "signrow" + (s.date ? " signed" : "") }, h("span", { class: "signname" }, n),
+      s.date ? [h("span", { class: "sigmark" }, n), h("span", { class: "signdate" }, "Signed " + fmtDate(s.date)),
+          h("button", { class: "small ghost", "aria-label": `Undo ${n}'s signature`, onclick: () => set(false) }, "Undo")]
+        : [h("button", { class: "small", "aria-label": `Sign as ${n}`, onclick: () => set(true) }, "Click to sign"), h("span", {}), h("span", {})]);
+  }));
+  draw();
+  return h("div", { class: "field" }, head, h("p", { class: "hintline", style: "margin:0 0 8px" }, "Each member signs next to their own name."), box);
 }
 function logoWell() {
   const box = h("div", { class: "logowell" });

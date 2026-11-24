@@ -33,10 +33,10 @@ const fs = require('fs');
   // roster
   const rosterInputs = p.locator('table.edit').first().locator('input');
   await rosterInputs.nth(0).fill('Ana Ramos'); await rosterInputs.nth(2).fill('Jay Lee');
-  await p.waitForTimeout(700); if (!(await p.isVisible('input.signin[placeholder="Jay Lee"]'))) errs.push('signature line should appear as the name is typed'); else t('signature lines follow the roster');
+  await p.waitForTimeout(700); if (!(await p.isVisible('button[aria-label="Sign as Jay Lee"]'))) errs.push('signature line should appear as the name is typed'); else t('signature lines follow the roster');
   await p.click('[data-tab=var]'); await p.click('[data-tab=log]');
   // signatures: typing the roster name signs and dates it
-  const sig = p.locator('input.signin[placeholder="Jay Lee"]'); await sig.fill('jay lee');
+  await p.click('button[aria-label="Sign as Jay Lee"]');
   const sg = await p.evaluate(() => [doc.log.agreement.signatures['Jay Lee'].date === today(), coverStatus()]);
   if (!sg[0]) errs.push('signature ' + sg); else t('signature dated, cover ' + sg[1]);
   if ((await p.locator('table.edit').first().locator('tbody tr').count()) !== 4) errs.push('roster should start with 4 rows'); else t('roster of 4');

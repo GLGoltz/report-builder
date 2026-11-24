@@ -90,7 +90,7 @@ One log for the semester. Sections, in order:
   made transparent, along with small enclosed gaps such as letter counters. "Keep the original instead" undoes it.
   Kept under 40 KB, the diagram's limit.
 - **Team agreement:** how we communicate, what happens when someone misses a lab, and each member's signature (their
-  roster name typed in full, dated automatically).
+  Click to sign beside their roster name, dated automatically, with Undo).
 - **One section per Cyber Hub, 00 to 15**, generated from `labs.json` (taken from the course pages):
   sessions (date, contributions), configuration changes (not in 00), troubleshooting tickets (issue, a work log of
   every hypothesis with its test, result and outcome, resolution, verification, status, screenshots; not in 00 or

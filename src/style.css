@@ -249,7 +249,10 @@ button.big{padding:8px 14px;font-weight:600}
 .menu-list .mh{margin:6px 10px 2px;font:600 10.5px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 /* signatures */
 .signs{display:flex;flex-direction:column;gap:8px}
-.signrow{display:grid;grid-template-columns:minmax(120px,180px) minmax(0,1fr) 130px;gap:10px;align-items:center}
+.signrow{display:grid;grid-template-columns:minmax(120px,200px) minmax(0,1fr) auto auto;gap:12px;align-items:center;min-height:36px;padding:4px 0;border-bottom:1px solid var(--hair)}
+.signrow > button.small:not(.ghost){justify-self:start}
+.signname{font-weight:600}
+.sigmark{font-family:"Segoe Script","Brush Script MT","Lucida Handwriting",cursive;font-size:18px;color:var(--navy);border-bottom:1px solid var(--ink);padding:0 6px}
 .signrow label{margin:0;font-weight:600}
 .signin.signed{font-family:"Segoe Script","Brush Script MT","Lucida Handwriting",cursive;font-size:17px;color:var(--navy);border-color:var(--ok);background:var(--okbg)}
 .signdate{font-size:12px;color:var(--ok);font-weight:600}
