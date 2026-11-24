@@ -42,7 +42,7 @@ function findingProblems(f) {
   const p = [];
   if (!f.title.trim()) p.push("a title");
   if (!f.hosts.length) p.push("affected hosts");
-  if (f.status !== "false-positive") { if (!f.what.trim()) p.push("what it is"); if (!f.fix.trim()) p.push("a recommended fix"); if (scoreOf(f) === 0) p.push("a CVSS score"); }
+  if (f.status !== "false-positive") { if (!f.what.trim()) p.push("description"); if (!f.fix.trim()) p.push("remediation"); if (scoreOf(f) === 0) p.push("CVSS score"); }
   if (!f.evidence.trim() && !f.images.length) p.push("evidence");
   if (f.status === "confirmed" && !f.confirm.trim()) p.push("how you confirmed it");
   return p;
@@ -255,7 +255,7 @@ function varFindings() {
       const p = findingProblems(f);
       return h("button", { class: "frow", "aria-current": String(state.sel === f.id), onclick: () => { state.sel = f.id; renderAll(); } },
         sevBadge(scoreOf(f)), h("span", { style: "min-width:0" }, h("span", { class: "t" }, `${fid(f)} ${f.title || "Untitled finding"}`),
-          h("span", { class: "m" }, p.length ? "Still needs " + p.join(", ") : `${f.hosts.join(", ")} · ${viewName(f.view)}`)),
+          h("span", { class: "m" }, p.length ? "Missing: " + p.join(", ") : `${f.hosts.join(", ")} · ${viewName(f.view)}`)),
         h("span", { class: "pill " + f.status }, statusName(f.status)));
     })) : h("p", { class: "empty" }, "No findings yet. Add one, or make them from your Greenbone results in Triage.")];
 }
@@ -276,9 +276,10 @@ function findingPanel(f) {
     h("div", { class: "field" }, h("label", {}, "Severity (CVSS 3.1 base score)"), h("div", { class: "cvss" },
       h("div", { class: "cvss-head" }, sevBadge(s), h("code", {}, vector(f.v))),
       CVSS_METRICS.map(metric),
-      f.ref && (f.ref.score || f.ref.vector) ? h("p", { class: "hintline" }, `Greenbone scored it ${(+f.ref.score || 0).toFixed(1)}${f.ref.vector ? "" : "."} `,
-        f.ref.vector && parseVector(f.ref.vector) ? h("button", { class: "small", onclick: () => { f.v = parseVector(f.ref.vector); commit(); renderAll(); } }, "Start from Greenbone's vector") : null,
-        " Score it for this client's network: can it be reached from outside, and what's really at risk?") : null)),
+      f.ref && (f.ref.score || f.ref.vector) ? h("div", { class: "gbref" },
+        h("div", { class: "gbrow" }, h("span", {}, `Greenbone score: ${(+f.ref.score || 0).toFixed(1)}`),
+          f.ref.vector && parseVector(f.ref.vector) ? h("button", { class: "small", onclick: () => { f.v = parseVector(f.ref.vector); commit(); renderAll(); } }, "Start from Greenbone's vector") : null),
+        h("p", { class: "hintline" }, "Score it for this client's network: reachable from outside, and what is really at risk.")) : null)),
     h("div", { class: "field" }, h("label", {}, "Validation"), seg(VALIDATION, f.status, (x) => { f.status = x; commit(); renderAll(); }),
       f.status === "confirmed" && !f.confirm.trim() ? h("p", { class: "hintline", style: "color:var(--err)" }, "Say how you confirmed it below, or it can't count as confirmed.") : h("p", { class: "hintline" }, "Check the three most serious findings by hand, without changing anything on the target.")),
     field("Description", f, "what", { area: true, req: true, placeholder: "Plain-language description" }),

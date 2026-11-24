@@ -60,11 +60,11 @@ function restoreSection() {
     onchange: (e) => { row[key] = e.target.checked; commit(); refresh(); } }));
   const txt = (row, key, ph, label) => { const t = h("textarea", { rows: 1, placeholder: ph, "aria-label": label, oninput: (e) => { row[key] = e.target.value; commit(); } }); t.value = row[key]; autosize(t); return t; };
   const resetTable = h("div", { class: "tablewrap" }, h("div", { class: "tbox" }, h("table", { class: "edit restore" },
-    h("thead", {}, h("tr", {}, h("th", { style: "width:17%" }, "Device"), h("th", { style: "width:24%" }, "Reset method"), h("th", { style: "width:8%" }, "Complete"), h("th", {}, "Proof"), h("th", { style: "width:16%" }, "Performed by"))),
+    h("thead", {}, h("tr", {}, h("th", { style: "width:17%" }, "Device"), h("th", { style: "width:24%" }, "Reset method"), h("th", { style: "width:9%;text-align:center" }, "Complete"), h("th", {}, "Proof"), h("th", { style: "width:16%" }, "Performed by"))),
     h("tbody", {}, r.resets.map((x) => h("tr", {}, h("td", {}, h("span", { class: "fixed" }, x.device)), h("td", {}, h("span", { class: "fixed" }, x.how)), h("td", { class: "ctr" }, tick(x, "done")),
       h("td", {}, txt(x, "checked", "Proof", x.device + ": proof")), h("td", {}, txt(x, "who", "Name", x.device + ": performed by"))))))));
   const drawerTable = h("div", { class: "tablewrap" }, h("div", { class: "tbox" }, h("table", { class: "edit restore" },
-    h("thead", {}, h("tr", {}, h("th", { style: "width:41%" }, "Item"), h("th", { style: "width:12%" }, "Present"), h("th", {}, "Notes"))),
+    h("thead", {}, h("tr", {}, h("th", { style: "width:41%" }, "Item"), h("th", { style: "width:12%;text-align:center" }, "Present"), h("th", {}, "Notes"))),
     h("tbody", {}, r.drawer.map((x) => h("tr", {}, h("td", {}, h("span", { class: "fixed" }, x.item)), h("td", { class: "ctr" }, tick(x, "present")),
       h("td", {}, txt(x, "note", "Missing or damaged", x.item + ": notes"))))))));
 
