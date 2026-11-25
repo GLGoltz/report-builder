@@ -95,8 +95,9 @@ format hint for something that isn't an address. A format hint is not an answer.
   with its × button or Esc, so the drawing gets the full width the rest of the time.
 - **Grid layout.** The drawing sits on a five-column grid (240-unit columns, 40-unit gaps, 40-unit margins): the
   provider and firewall span two columns, the Internet and guest laptops sit in the fourth, the logo, key and VLAN
-  list in the fifth, the switch spans all five, and each host takes one column. Rows are 80 units apart. The SVG
-  scales to the frame's width, so it fits without a sideways scroll bar down to small screens.
+  list in the fifth, the switch spans all five, and each host takes one column. Rows are 64 units apart. The SVG
+  scales to fit the space left on screen (width and height), so there's nothing to scroll down to 420px of height.
+  Phones keep a sideways scroll instead, so the text stays readable.
 - **Reset diagram** button in the toolbar clears every setting and cable (undoable).
 - **One cable per port.** A port, or a device with a single network port, holds one cable: recording a new one
   replaces the old (undoable).

@@ -299,8 +299,8 @@ function tabRect(d, name) {
 // size while a team fills it in: no jumping boxes, and a scroll bar either always or never at a given window size.
 const ROOM = { isp: 80, firewall: 66 + 4 * 19, switch: 46 + 7 * 19 };
 const roomOf = (d) => Math.max(boxSize(d).h, ROOM[d.kind] || 0);
-const LANES = 6;   // cable lanes kept free between the switch and the hosts
-const ROW_GAP = 80;   // the same vertical gap between the provider, the firewall and the switch
+const LANES = 5;   // cable lanes kept free between the switch and the hosts
+const ROW_GAP = 64;   // the same vertical gap between the provider, the firewall and the switch
 function layout() {
   const put = (id, x, y) => { const d = dev(id); if (d) { d.x = x; d.y = y; } };
   const isp = dev("isp"), fw = dev("fw");
@@ -415,8 +415,8 @@ function routeAll() {
     const k = over.length ? Math.max(...over.map((u) => u.lane)) + 1 : 0;
     (used[k] ||= []).push(c); c.lane = k;
   }
-  const laneY = (k) => swR.y + roomOf(sw) + STUB + 10 + k * 20;
-  const hostY = laneY(Math.max(LANES - 1, used.length - 1)) + 44;
+  const laneY = (k) => swR.y + roomOf(sw) + STUB + 10 + k * 16;
+  const hostY = laneY(Math.max(LANES - 1, used.length - 1)) + 38;
   HOSTS.forEach((id) => { dev(id).y = hostY; });
   // The tallest host is the hypervisor with its three VMs and three lines of settings.
   const hvFull = 42 + 3 * 19 + 8 + vmsOf("hv").length * (VM_H + 6) + 6;
