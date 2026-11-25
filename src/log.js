@@ -39,11 +39,10 @@ function logCover() {
   drawSigns();
   return [
     h("h2", {}, "Cover and team agreement"),
-    h("p", { class: "sub" }, "The front of your Team Log, and the cover of every report this app makes. Cyber Hub 00 asks for all of it."),
     h("div", { class: "card" },
       h("div", { class: "grid2" },
-        field("Company name", doc.meta, "company", { req: true, oninput: () => ($("brand-co").textContent = doc.meta.company || "Cyber Hub"), hint: "It also titles your network diagram." }),
-        field("Rack number", c, "rack", { req: true, placeholder: "1 to 8", hint: "The addressing plan in the Diagram tab fills in from this.", oninput: () => renderRail() }),
+        field("Company name", doc.meta, "company", { req: true, oninput: () => ($("brand-co").textContent = doc.meta.company || "Cyber Hub") }),
+        field("Rack number", c, "rack", { req: true, placeholder: "1 to 8", oninput: () => renderRail() }),
         field("Semester", c, "semester", { placeholder: "Spring 2027" })),
       h("label", {}, "Logo"), logoWell()),
     h("h3", {}, "Team roster"),

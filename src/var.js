@@ -58,11 +58,11 @@ function viewVar() {
 
 function varCover() {
   const c = V().cover;
-  return [h("h2", {}, "Cover"), h("p", { class: "sub" }, "You write this report as a consultancy for a client. Your company name and logo come from your Team Log cover."),
+  return [h("h2", {}, "Cover"),
     h("div", { class: "card grid2" },
       h("div", { class: "field" }, h("label", {}, "Prepared by (your company)"), h("div", {}, doc.meta.company || h("span", { class: "hintline" }, "Set it on the Team Log cover."))),
       h("div", { class: "field" }, h("label", {}, "Logo"), doc.meta.logo ? h("img", { src: doc.meta.logo, alt: "", style: "max-height:40px" }) : h("span", { class: "hintline" }, "Upload it on the Team Log cover.")),
-      field("Client company", c, "client", { req: true }), field("Client's rack", c, "clientRack", { placeholder: "1 to 8", hint: "The scope's addresses fill in from this.", oninput: () => { fillScope(); commit(); } }),
+      field("Client company", c, "client", { req: true }), field("Client's rack", c, "clientRack", { placeholder: "1 to 8", oninput: () => { fillScope(); commit(); } }),
       field("Assessment dates", c, "dates", { placeholder: "Nov 16 to Nov 20, 2026" }), field("Report version", c, "version", { hint: "1.0 for the copy you give the client." }),
       field("Assessment team", c, "team", { wide: true, area: true, req: true, placeholder: "Name, role" }),
       field("Client contact", c, "contact", { wide: true, placeholder: "Name", hint: "The client team member who agreed to the rules of engagement." }))];
