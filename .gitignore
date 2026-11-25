@@ -2,3 +2,4 @@ test/*.png
 test/*.pdf
 node_modules/
 preview.html
+test/undefined/
