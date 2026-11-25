@@ -136,7 +136,7 @@ const fs = require('fs');
   const sc = await p.evaluate(() => cvss(doc.var.findings[0].v)); if (sc !== 6.5) errs.push('cvss from vector ' + sc); else t('cvss from vector 6.5');
   await p.fill('#f-title', 'Anonymous FTP login allowed');
   await p.click('#panel >> button:has-text("Confirmed")');
-  if (!(await p.isVisible('text=Say how you confirmed it'))) errs.push('confirm warning'); else t('confirm warning');
+  if (!(await p.isVisible('text=Explain how you confirmed it'))) errs.push('confirm warning'); else t('confirm warning');
   // CVSS known values
   const cv = await p.evaluate(() => [cvss(parseVector('CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N')), cvss(parseVector('CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H')), cvss(parseVector('CVSS:3.1/AV:A/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N')), cvss(parseVector('CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N'))]);
   if (cv.join() !== '7.4,10,4.8,4.8') errs.push('cvss table ' + cv); else t('cvss values ' + cv);

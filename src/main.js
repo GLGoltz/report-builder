@@ -42,8 +42,8 @@ function renderAll() {
 function renderSaveBar() {
   const bar = $("savebar"), s = $("saved"), b = $("backup");
   bar.classList.toggle("bad", saveFailed);
-  if (!db) s.textContent = "This browser can't save here. Use Save team file to keep your work.";
-  else if (saveFailed) s.textContent = "Couldn't save in this browser. Back up now so nothing is lost.";
+  if (!db) s.textContent = "This browser can't save your work. Use Save team file so you don't lose anything.";
+  else if (saveFailed) s.textContent = "Your work couldn't be saved in this browser. Back up now so you don't lose anything.";
   else s.textContent = doc.meta.updated ? `Saved in this browser ${fmtTime(doc.meta.updated).replace(/^.*?, /, "at ")}` : "Saves in this browser as you type.";
   const age = Date.now() - (lastBackup || sessionStart), edited = !!doc.meta.updated && dirtySinceBackup;
   if (backupState === "on") {
@@ -51,7 +51,7 @@ function renderSaveBar() {
   } else if (backupState === "paused") {
     b.replaceChildren(h("span", { class: "bkwarn" }, "Automatic backup is paused.", h("button", { class: "small", onclick: resumeBackup }, "Resume backups")));
   } else if (edited && (!lastBackup || age > 20 * 60e3)) {
-    const msg = lastBackup ? `Last backup ${ago(lastBackup)}. Save a new team file so nothing is lost.` : "Not backed up yet. Save a team file so a lost laptop can't lose your work.";
+    const msg = lastBackup ? `Last backup ${ago(lastBackup)}. Save a new team file so you don't lose anything.` : "You haven't backed up yet. Save a team file to keep your work safe.";
     b.replaceChildren(h("span", { class: "bkwarn" + (age > 60 * 60e3 ? " red" : "") }, msg, h("button", { class: "small", onclick: backupNow }, "Back up now")));
   } else {
     b.replaceChildren(h("span", { class: "bk ok" }, h("i"), lastBackup ? `Backed up ${ago(lastBackup)}` : "Nothing to back up yet"), lastBackup ? h("button", { class: "small", onclick: backupNow }, "Back up now") : null);
@@ -76,7 +76,7 @@ $("b-export").addEventListener("click", () => {
   if (state.tab === "var") return exportDoc("var");
   if (state.tab === "ssp") return exportDoc("ssp");
   const l = LABS.find((x) => x.num === state.log);
-  ask("Export the Team Log", [h("p", {}, "Each Cyber Hub page asks for that Cyber Hub's section. The final submission takes the whole log.")],
+  ask("Export the Team Log", [h("p", {}, "Each Cyber Hub page asks you to submit that Cyber Hub's section. For the final submission, you'll export the whole log.")],
     [["Cancel"], ["Whole log", () => exportDoc("log")], l ? [`Cyber Hub ${l.num}`, () => exportDoc("log-hub", l.num), "primary"] : ["Cyber Hub 00", () => exportDoc("log-hub", "00"), "primary"]]);
 });
 $("b-save").addEventListener("click", backupNow);
@@ -85,7 +85,7 @@ $("b-open").addEventListener("click", async () => {
   let x; try { x = parseTeamFile(await f.text()); } catch (e) { return toast(e.message, true); }
   const newer = doc.meta.updated > x.savedAt + 60e3 && imageRefs(doc).size + JSON.stringify(doc.log).length > 2000;
   ask("Open this team file?", [h("p", {}, `${f.name}, saved ${x.savedAt ? fmtTime(x.savedAt) : "at an unknown time"}${x.savedBy ? " by " + x.savedBy : ""}.`),
-    newer ? h("p", { class: "note warn" }, `This browser has work from ${fmtTime(doc.meta.updated)}, newer than the file. Opening the file replaces it. A copy stays in History.`) : h("p", {}, "It replaces what's in this browser. A copy of the current work stays in History.")],
+    newer ? h("p", { class: "note warn" }, `This browser has work from ${fmtTime(doc.meta.updated)}, which is newer than this file. Opening the file will replace it, but a copy will stay in History.`) : h("p", {}, "Opening a team file replaces the work in this browser. A copy of your current work will stay in History.")],
     [["Cancel"], ["Add it to mine instead", () => mergeFile(x)], ["Open it", () => loadTeamFile(x).then(() => toast("Team file opened.")), "primary"]]);
 });
 $("b-merge").addEventListener("click", async () => {
@@ -95,10 +95,10 @@ $("b-merge").addEventListener("click", async () => {
 $("b-history").addEventListener("click", showHistory);
 $("b-setup").addEventListener("click", () => {
   const framed = (() => { try { return window.self !== window.top; } catch { return true; } })();
-  if (framed) return ask("Open the app on its own page", [h("p", {}, "Automatic backup can't run inside another page, such as a preview. Open the Report Builder at its own address, then set it up there:"), h("p", {}, h("code", {}, "https://glgoltz.github.io/report-builder/"))], [["OK", null, "primary"]]);
-  if (!canAutoBackup()) return ask("Automatic backup isn't available here", [h("p", {}, "This browser can't write a backup file by itself. Chrome and Edge on a Windows, Mac or Chromebook laptop can; phones, tablets, Firefox, Safari and Brave can't."), h("p", {}, "Use Back up now in the save bar at the end of each session, and upload the file to your team's Google Drive folder.")], [["OK", null, "primary"]]);
-  ask("Set up automatic backup", [h("p", {}, "Pick where the backup file goes. The app rewrites that one file every few minutes while you work, and when you leave the page."),
-    h("p", {}, "If this laptop has Google Drive for desktop, pick your team's Drive folder and the backup reaches Drive by itself. Otherwise pick Documents, and upload the file to Drive at the end of the session.")],
+  if (framed) return ask("Open the app on its own page", [h("p", {}, "Automatic backup won't work inside another page, such as a preview. Open the Report Builder at its own address and set it up there:"), h("p", {}, h("code", {}, "https://glgoltz.github.io/report-builder/"))], [["OK", null, "primary"]]);
+  if (!canAutoBackup()) return ask("Automatic backup isn't available here", [h("p", {}, "This browser can't save a backup file on its own. Automatic backup works in Chrome and Edge on Windows, Mac and Chromebook laptops. It doesn't work on phones, tablets, Firefox, Safari or Brave."), h("p", {}, "Use Back up now in the save bar at the end of each session, and upload the file to your team's Google Drive folder.")], [["OK", null, "primary"]]);
+  ask("Set up automatic backup", [h("p", {}, "Choose where to keep your backup file. It will update every few minutes while you work, and again when you leave the page."),
+    h("p", {}, "If this laptop has Google Drive for desktop, choose your team's Drive folder and the backup will sync on its own. Otherwise, choose Documents and upload the file to Drive at the end of each session.")],
     [["Cancel"], ["Choose the file", setupBackup, "primary"]]);
 });
 // ---- welcome: shown once per browser (and again when WELCOME_V changes), and from the menu
@@ -108,19 +108,19 @@ const callout = (kind, title, ...kids) => h("div", { class: "callout " + kind, r
 function welcomeBody() {
   const sec = (t, ...kids) => h("div", { class: "wsec" }, h("h3", {}, t), ...kids);
   return [
-    h("p", { class: "wlead" }, "This is where your team keeps its whole project: the Team Log, your network diagram, and the two reports you write for a client. You fill in the forms; the app lays out every PDF you submit."),
-    sec("Why it works this way", h("p", {}, "Security teams don't format reports by hand. Assessors fill in finding cards in a reporting platform, compliance teams answer control by control, and the tool produces the document. You'll work the same way.")),
+    h("p", { class: "wlead" }, "This is where your team keeps its whole project: the Team Log, your network diagram, and the two reports you'll write for a client. You fill in the forms, and the Report Builder formats every PDF you submit."),
+    sec("Why it works this way", h("p", {}, "Security teams don't format reports by hand. Assessors fill in their findings in a reporting platform, compliance teams work through each control, and the software produces the final document. You'll work the same way.")),
     sec("What's in each tab", h("ul", {},
-      h("li", {}, h("b", {}, "Team Log: "), "your cover, signed team agreement, and a section for every Cyber Hub: sessions, commands, troubleshooting tickets, answers and deliverables. It's your team's record as much as something you hand in."),
-      h("li", {}, h("b", {}, "Diagram: "), "the network you've built, updated whenever a page says so, with the addressing plan for your rack beside it. Every Cyber Hub export includes it."),
-      h("li", {}, h("b", {}, "VAR: "), "the vulnerability assessment you write about another team's rack in Cyber Hub 12."),
-      h("li", {}, h("b", {}, "SSP: "), "your own system security plan, in Cyber Hub 13."))),
+      h("li", {}, h("b", {}, "Team Log: "), "your cover page, signed team agreement, and a section for each Cyber Hub with your sessions, commands, troubleshooting tickets, answers and deliverables. It's your team's record, not just something you hand in."),
+      h("li", {}, h("b", {}, "Diagram: "), "a drawing of the network you've built. Each Cyber Hub page tells you when to update it, and it's included in every export."),
+      h("li", {}, h("b", {}, "VAR: "), "the vulnerability assessment report you'll write about another team's rack in Cyber Hub 12."),
+      h("li", {}, h("b", {}, "SSP: "), "the system security plan you'll write for your own rack in Cyber Hub 13."))),
     callout("caution", "Saving your work", h("ul", {},
       h("li", {}, "Your work saves as you type, but only in this browser on this laptop."),
-      h("li", {}, h("b", {}, "Back up at the end of every session: "), "Save and export, then Save team file. Put the file in your team's Google Drive folder. That file is your real copy."),
-      h("li", {}, "At the start of a session on a different laptop, open the newest team file with Open team file."),
-      h("li", {}, "In Chrome or Edge, Set up automatic backup keeps a file up to date for you. A red warning at the top means you haven't backed up."),
-      h("li", {}, "One person types each session. Teammates can draft on their own laptops and the typist adds their work with Add from a teammate's file."))),
+      h("li", {}, h("b", {}, "Back up at the end of every session: "), "Choose Save and export, then Save team file, and upload the file to your team's Google Drive folder. That file is your real copy."),
+      h("li", {}, "If you're starting a session on a different laptop, use Open team file to open your newest team file."),
+      h("li", {}, "In Chrome or Edge, you can use Set up automatic backup to keep a backup file up to date for you. If you see a red warning at the top, you haven't backed up."),
+      h("li", {}, "One person types for the team each session. Teammates can draft on their own laptops, and the typist can bring their work in with Add from a teammate's file."))),
     callout("danger", "Handle it like real client work", h("p", {}, "Your VAR describes how to break into another team's network. Share it only with that team's members, never with \"anyone with the link\".")),
   ];
 }
@@ -134,8 +134,8 @@ $("b-help").addEventListener("click", () => showWelcome(false));
 // ---- history
 async function showHistory() {
   let list = []; try { list = (await historyList()).sort((a, b) => b.at - a.at); } catch {}
-  if (!list.length) return ask("History", [h("p", {}, "No saved versions yet. The app keeps one every few minutes while you work.")], [["OK", null, "primary"]]);
-  ask("History", [h("p", {}, "Restoring replaces the current work. The current work is saved in History first, so you can come back."),
+  if (!list.length) return ask("History", [h("p", {}, "No saved versions yet. A new version is saved every few minutes while you work.")], [["OK", null, "primary"]]);
+  ask("History", [h("p", {}, "Restoring a version replaces your current work. Your current work is saved in History first, so you can always go back to it."),
     h("ul", { class: "hist" }, list.slice(0, 120).map((x) => h("li", {}, h("span", {}, h("b", {}, fmtTime(x.at)), " · ", x.label, x.by ? " · " + x.by : ""),
       h("button", { class: "small", onclick: async () => { closeModal(); await snapshot("Before restoring"); try { doc = normalize(JSON.parse(x.json)); commit(); await save(); renderAll(); toast("Restored the version from " + fmtTime(x.at) + "."); } catch { toast("That version couldn't be restored.", true); } } }, "Restore"))))],
   [["Close"]]);

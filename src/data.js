@@ -18,12 +18,12 @@ const RESETS = [
 
 // Deliverables that are their own document, keyed "hub-n".
 const SEPARATE = {
-  "00-1": ["cover", "Your cover page and team agreement, at the front of this log. They export with Cyber Hub 00."],
-  "11-2": ["none", "Don't put the answer key in this app or anywhere the other team might see it. Submit it privately to the instructor."],
-  "12-5": ["var", "The VAR is its own document, in the VAR tab. Submit it separately and give the client a copy."],
-  "13-2": ["ssp", "The SSP is its own document, in the SSP tab. Submit it separately."],
+  "00-1": ["cover", "Your cover page and team agreement are at the front of this log. They're included when you export Cyber Hub 00."],
+  "11-2": ["none", "Do not put your answer key in the Report Builder or anywhere the other team might see it. Submit it privately to your instructor."],
+  "12-5": ["var", "Your VAR is a separate document. Write it in the VAR tab, submit it on its own, and give your client a copy."],
+  "13-2": ["ssp", "Your SSP is a separate document. Write it in the SSP tab and submit it on its own."],
   "14-1": ["link", "Slides link."],
-  "15-3": ["restore", "Your restoration record is above, in this section, with the instructor's sign-off. It exports with Cyber Hub 15."],
+  "15-3": ["restore", "Your restoration record and the instructor's sign-off are above. They're included when you export Cyber Hub 15."],
 };
 
 const CHECKPOINT_05 = [
@@ -39,11 +39,11 @@ const CONTROLS = [
   ["SC-7", "Boundary protection", "Public-facing systems are separated from internal systems.", "Describe the DMZ, the guest network and the port forwards (VIPs)."],
   ["SC-8", "Transmission confidentiality", "Logins and sensitive data are encrypted in transit.", "Which management and file transfer protocols are on and off?"],
   ["CM-2", "Baseline configuration", "A known-good configuration is recorded and can be restored.", "Where are the firewall backup and the switch's startup configuration kept?"],
-  ["CM-7", "Least functionality", "Only needed ports and services are enabled.", "Unused switch ports, disabled services, anything removed after the assessment."],
+  ["CM-7", "Least functionality", "Only needed ports and services are enabled.", "Which switch ports and services are turned off, and what did you remove after the assessment?"],
   ["AU-2", "Event logging", "Security-relevant events are logged.", "Which firewall policies log traffic, and where would you look during an incident?"],
-  ["RA-5", "Vulnerability scanning", "Systems are scanned for weaknesses and results are acted on.", "Your scanner, the baseline scan, the outside assessment and the re-scan."],
-  ["SI-2", "Flaw remediation", "Known weaknesses are fixed and the fixes are verified.", "What you fixed after the VAR and how the re-scan proved it."],
-  ["CP-9", "System backup", "Data and configurations can be recovered after a failure.", "The NAS RAID level and what it protects against, plus configuration backups."],
+  ["RA-5", "Vulnerability scanning", "Systems are scanned for weaknesses and results are acted on.", "Describe your scanner, your baseline scan, the outside assessment and your re-scan."],
+  ["SI-2", "Flaw remediation", "Known weaknesses are fixed and the fixes are verified.", "What did you fix after the VAR, and how did the re-scan prove it?"],
+  ["CP-9", "System backup", "Data and configurations can be recovered after a failure.", "Which RAID level does the NAS use, and what does it protect against? Where are your configuration backups kept?"],
   ["PE-3", "Physical access control", "Physical access to equipment is controlled.", "Who can reach the rack and its ports? Link to your physical security briefing."],
 ];
 const CONTROL_STATUS = ["Implemented", "Partial", "Planned", "Accepted risk"];

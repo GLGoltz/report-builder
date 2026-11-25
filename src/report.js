@@ -145,7 +145,7 @@ async function exportDoc(kind, arg) {
       setTimeout(() => { try { window.print(); } catch {} document.title = old; }, 50);
     });
   };
-  const tip = h("p", { class: "hintline" }, "In the print window, set Destination to Save as PDF. Turn off Headers and footers under More settings.");
+  const tip = h("p", { class: "hintline" }, "In the print window, set Destination to Save as PDF, then turn off Headers and footers under More settings.");
   if (missing.length) ask("Some parts are still empty", [h("p", {}, "You can export anyway. These will show as \"Not filled in\":"), h("ul", { class: "missing-list" }, missing.slice(0, 12).map((m) => h("li", {}, m)), missing.length > 12 ? h("li", {}, `and ${missing.length - 12} more`) : null), tip], [["Go back"], ["Export anyway", go, "primary"]]);
   else ask("Export as PDF", [h("p", {}, "Your browser's print window opens next."), tip], [["Cancel"], ["Continue", go, "primary"]]);
 }

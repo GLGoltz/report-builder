@@ -96,16 +96,16 @@ function restoreSection() {
     };
     pw.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
     signBox.replaceChildren(
-      done ? h("p", {}, "Record complete. The instructor checks the rack and the drawer, then signs here.")
-           : h("p", { class: "note" }, "Complete every row first. The instructor checks the rack and the drawer before signing."),
+      done ? h("p", {}, "Your record is complete. Your instructor will check the rack and the drawer, then sign here.")
+           : h("p", { class: "note" }, "Complete every row first. Your instructor will check the rack and the drawer before signing."),
       h("div", { class: "grid2" }, h("div", { class: "field" }, h("label", { for: "so-name" }, "Instructor"), name), h("div", { class: "field" }, h("label", { for: "so-pw" }, "Password"), pw)),
       h("div", { class: "tools" }, h("button", { class: "primary", disabled: done ? null : "", onclick: go }, "Sign off")), msg);
   }
   drawSign();
   return [h("h3", {}, "Reset record"),
-    h("p", { class: "sub" }, "Tick each device once it is reset and verified, and record the proof."), resetTable,
+    h("p", { class: "sub" }, "Check off each device once it's been reset and verified, and record your proof."), resetTable,
     h("h3", {}, "Utility drawer"),
-    h("p", { class: "sub" }, "Tick each item as it goes back in the drawer. Note anything missing or damaged."), drawerTable,
+    h("p", { class: "sub" }, "Check off each item as it goes back in the drawer, and note anything that's missing or damaged."), drawerTable,
     h("h3", {}, "Instructor sign-off"), signBox];
 }
 function checkDialog(r) {
@@ -117,10 +117,10 @@ function checkDialog(r) {
     if (!key) { out.textContent = "That password isn't right."; return; }
     const ok = (await makeCode(key, restoreCanon(r, r.sign))) === r.sign.code;
     out.className = ok ? "note" : "note warn";
-    out.textContent = ok ? `Genuine. ${r.sign.by} signed this record on ${fmtDate(r.sign.date)}, and nothing has changed since.` : "Not genuine. Either the code wasn't made with the instructor password, or the record changed after signing.";
+    out.textContent = ok ? `Genuine. ${r.sign.by} signed this record on ${fmtDate(r.sign.date)}, and nothing has changed since.` : "Not genuine. Either this code wasn't made with the instructor password, or the record was changed after it was signed.";
   };
   pw.addEventListener("keydown", (e) => { if (e.key === "Enter") run(); });
-  ask("Check a sign-off", [h("p", {}, "For instructors. Type the instructor password to confirm this sign-off code was made by an instructor for this exact record."), pw, out],
+  ask("Check a sign-off", [h("p", {}, "For instructors only. Enter the instructor password to confirm that an instructor signed off on this exact record."), pw, out],
     [["Close"], ["Check", run, "primary", true]]);
 }
 function fmtDate(d) { return d ? new Date(d + "T12:00").toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : ""; }

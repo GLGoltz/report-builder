@@ -38,7 +38,7 @@ function sspIdent() {
   const i = S().ident;
   if (!i.name && doc.meta.company) i.name = `${doc.meta.company} network${doc.log.cover.rack ? ", Rack " + doc.log.cover.rack : ""}`;
   if (!i.location && doc.log.cover.rack) i.location = "CIS lab, Rack " + doc.log.cover.rack;
-  return [h("h2", {}, "System identification"), h("p", { class: "sub" }, "Describe only what is actually configured on your rack. An auditor should be able to check every sentence of this plan."),
+  return [h("h2", {}, "System identification"), h("p", { class: "sub" }, "Only describe what's actually configured on your rack. An auditor should be able to check every sentence in this plan."),
     h("div", { class: "card grid2" },
       field("System name", i, "name", { req: true }), field("Location", i, "location", { req: true }),
       field("Purpose", i, "purpose", { wide: true, area: true, req: true, placeholder: "Business function, one or two sentences" }),
@@ -47,7 +47,7 @@ function sspIdent() {
       field("Internet connection", i, "internet", { wide: true, area: true, req: true, placeholder: "Uplink, provider and isolation from the real internet" }))];
 }
 function sspDesc() {
-  return [h("h2", {}, "System description"), h("p", { class: "sub" }, "Two or three paragraphs: the main parts of the network, what each is for, and how traffic moves between them. Name the VLANs and which device routes each one."),
+  return [h("h2", {}, "System description"), h("p", { class: "sub" }, "In two or three paragraphs, describe the main parts of your network, what each one is for, and how traffic moves between them. Name your VLANs and which device routes each one."),
     field("", S(), "description", { area: true, rows: 12, aria: "System description" })];
 }
 function sspDiagram() {
@@ -56,13 +56,13 @@ function sspDiagram() {
   const draw = () => box.replaceChildren(
     s.diagram && images[s.diagram] ? h("figure", { class: "card", style: "margin:0 0 10px" }, h("img", { src: images[s.diagram], alt: "Network diagram", style: "max-width:100%;display:block" })) : h("p", { class: "empty" }, "No diagram yet."),
     h("div", { class: "tools" }, h("button", { class: "primary", onclick: async () => {
-        const png = await diagramPNG(); if (!png) return toast("Your diagram is empty. Fill it in on the Diagram tab first.", true);
+        const png = await diagramPNG(); if (!png) return toast("Your diagram is empty. Fill it in on the Diagram tab first, then come back.", true);
         const id = newId("img"); images[id] = png; try { await imgPut(id, png); } catch { saveFailed = true; }
-        s.diagram = id; commit(); draw(); renderRail(); toast("Added your current diagram. Do this again whenever you change it."); } }, s.diagram ? "Update to my current diagram" : "Add my diagram"),
+        s.diagram = id; commit(); draw(); renderRail(); toast("Your current diagram has been added. Update it again any time you make changes."); } }, s.diagram ? "Update to my current diagram" : "Add my diagram"),
       h("button", { onclick: async () => { const f = await pickFile("image/png,image/*"); if (!f) return; try { s.diagram = await addImageFull(f); commit(); draw(); renderRail(); } catch (e) { toast(e.message, true); } } }, "Upload an image instead"),
       s.diagram ? h("button", { class: "ghost", onclick: () => { s.diagram = ""; commit(); draw(); renderRail(); } }, "Remove") : null));
   draw();
-  return [h("h2", {}, "Network diagram"), h("p", { class: "sub" }, "Add my diagram takes a picture of your Diagram tab as it is now. Before you add it, check that every device has its address and hostname and every switch port shows its VLANs."), box];
+  return [h("h2", {}, "Network diagram"), h("p", { class: "sub" }, "Add my diagram takes a picture of your diagram as it is right now. Before you add it, make sure every device has its address and hostname, and every switch port shows its VLANs."), box];
 }
 // The diagram needs more pixels than a screenshot to stay readable when printed.
 async function addImageFull(file) {
@@ -75,12 +75,12 @@ async function addImageFull(file) {
 
 function sspInventory() {
   const s = S(), dg = readDiagram(), rows = diagramAddressing(dg);
-  return [h("h2", {}, "Hardware and software inventory"), h("p", { class: "sub" }, "Every device, including the virtual machines and the Pi, with its model, role and OS or firmware version."),
+  return [h("h2", {}, "Hardware and software inventory"), h("p", { class: "sub" }, "List every device, including the virtual machines and the Pi, with its model, role and OS or firmware version."),
     h("div", { class: "tools" },
       rows.length ? h("button", { onclick: () => { const have = new Set(s.inventory.map((r) => r.device)); const seen = new Set(); let n = 0;
         for (const r of rows) { if (have.has(r.device) || seen.has(r.device)) continue; seen.add(r.device); s.inventory.push({ device: r.device, model: "", role: "", address: r.address, os: "" }); n++; }
-        commit(); renderAll(); toast(n ? `Added ${n} device${n === 1 ? "" : "s"} from your diagram. Fill in model, role and OS.` : "Every device in your diagram is already listed."); } }, "Start from my diagram") : null,
-      h("span", { class: "hintline" }, rows.length ? "Uses the addresses on your Diagram tab." : "Fill in the Diagram tab first, then come back.")),
+        commit(); renderAll(); toast(n ? `Added ${n} device${n === 1 ? "" : "s"} from your diagram. Fill in the model, role and OS for each one.` : "Every device in your diagram is already listed."); } }, "Start from my diagram") : null,
+      h("span", { class: "hintline" }, rows.length ? "This uses the addresses from your diagram." : "Fill in your diagram first, then come back.")),
     rowsTable(s.inventory, [["device", "Device"], ["model", "Model"], ["role", "Role", { area: true }], ["address", "Address", { cls: "mono" }], ["os", "OS or firmware"]], { addLabel: "Add device" }),
     h("h3", {}, "Addressing table"),
     h("p", { class: "sub" }, s.addressingFrom ? `From your Diagram tab, ${s.addressingFrom}. It isn't edited here: fix the diagram, then update.` : "Copied from your Diagram tab, so the plan and the diagram can't disagree."),
@@ -89,12 +89,12 @@ function sspInventory() {
       h("tbody", {}, s.addressing.map((r) => h("tr", {}, [r.device, r.hostname, r.iface, r.vlan, r.address, r.mask, r.gateway].map((x, i) => h("td", { class: i >= 4 ? "mono" : "" }, h("span", { class: "fixed" }, x || ""))))))) ) : null];
 }
 function sspPorts() {
-  return [h("h2", {}, "Ports, protocols and services"), h("p", { class: "sub" }, "Every listening service in use. Anything without a reason belongs under CM-7 Least functionality."),
+  return [h("h2", {}, "Ports, protocols and services"), h("p", { class: "sub" }, "List every service that's listening on your network. If a service doesn't have a reason to be there, address it under CM-7 Least functionality."),
     rowsTable(S().ports, [["host", "Host", { cls: "mono" }], ["port", "Port and protocol", { placeholder: "TCP 80" }], ["service", "Service"], ["who", "Exposure", { area: true }], ["why", "Business need", { area: true }]], { addLabel: "Add service" })];
 }
 function sspControls() {
   const s = S();
-  return [h("h2", {}, "Security controls"), h("p", { class: "sub" }, "The control IDs come from NIST SP 800-53, the catalog federal systems use. For each one, describe how your rack meets it, then give its status."),
+  return [h("h2", {}, "Security controls"), h("p", { class: "sub" }, "These control IDs come from NIST SP 800-53, the catalog used for federal systems. For each one, describe how your rack meets it, then give its status."),
     CONTROLS.map(([id, name, req, guide]) => {
       if (!s.controls[id]) s.controls[id] = { how: "", status: "" };
       const c = s.controls[id];
@@ -104,7 +104,7 @@ function sspControls() {
     })];
 }
 function sspRisks() {
-  return [h("h2", {}, "Accepted risks"), h("p", { class: "sub" }, "Weaknesses you're choosing to keep, with the reason and what limits the damage. Keep the example row and add at least two of your own."),
+  return [h("h2", {}, "Accepted risks"), h("p", { class: "sub" }, "List the weaknesses you're choosing to keep, why you're keeping them, and what limits the damage. Keep the example row and add at least two of your own."),
     rowsTable(S().risks, [["risk", "Risk", { area: true }], ["why", "Justification", { area: true }], ["limits", "Mitigating factors", { area: true }], ["by", "Accepted by"], ["date", "Date", { type: "date", w: "140px" }]],
       { addLabel: "Add risk", blank: () => ({ id: newId("r"), risk: "", why: "", limits: "", by: "", date: "" }) })];
 }
@@ -112,15 +112,15 @@ function sspPoam() {
   const s = S();
   const cols = [["pid", "ID", { w: "60px" }], ["weakness", "Weakness", { area: true }], ["source", "Source"], ["severity", "Severity", { options: ["", "Critical", "High", "Medium", "Low"] }],
     ["rec", "Assessor recommendation", { fixed: true, cls: "ref-col" }], ["response", "Response", { options: RESPONSES, label: "Response" }],
-    ["fix", "Planned action", { area: true, placeholder: "Action, or acceptance rationale" }], ["owner", "Owner"], ["date", "Target date", { type: "date" }], ["status", "Status", { options: ["Open", "Closed"] }], ["verified", "Verification", { area: true }]];
-  return [h("h2", {}, "Plan of Action and Milestones (POA&M)"), h("p", { class: "sub" }, "One row for every finding in the VAR you received and every weakness on your answer key. For each, choose a response and write your own plan: the assessors' recommendation is there for reference, not to copy. Rows you accept also go in Accepted risks. Closed rows say how the fix was verified."),
-    h("div", { class: "tools" }, h("button", { class: "primary", onclick: importFindings }, "Import the VAR findings"), h("span", { class: "hintline" }, "Uses the findings file the assessing team sent you.")),
+    ["fix", "Planned action", { area: true, placeholder: "Your fix, or why you're accepting the risk" }], ["owner", "Owner"], ["date", "Target date", { type: "date" }], ["status", "Status", { options: ["Open", "Closed"] }], ["verified", "Verification", { area: true }]];
+  return [h("h2", {}, "Plan of Action and Milestones (POA&M)"), h("p", { class: "sub" }, "Add a row for every finding in the VAR you received and every weakness on your answer key. For each one, choose a response and write your own plan. The assessors' recommendation is there for reference, not to copy. Any risk you accept also goes in Accepted risks, and any row you close should say how the fix was verified."),
+    h("div", { class: "tools" }, h("button", { class: "primary", onclick: importFindings }, "Import the VAR findings"), h("span", { class: "hintline" }, "This uses the findings file the assessing team sent you.")),
     rowsTable(s.poam, cols, { label: "POA&M", addLabel: "Add row", blank: () => ({ pid: "P-" + String(s.poam.length + 1).padStart(2, "0"), weakness: "", source: "", severity: "", rec: "", response: "", fix: "", owner: "", date: "", status: "Open", verified: "" }) })];
 }
 async function importFindings() {
   const f = await pickFile(".cyberhub-findings,application/json"); if (!f) return;
   let x; try { x = JSON.parse(await f.text()); } catch { return toast("That file couldn't be read.", true); }
-  if (x.format !== "cyberhub-findings") return toast("That isn't a findings file. Ask the assessing team for the file from Send findings to the client.", true);
+  if (x.format !== "cyberhub-findings") return toast("This isn't a findings file. Ask the assessing team to send you the file from Send findings to the client.", true);
   await snapshot("Before importing VAR findings");
   const s = S(); let n = 0;
   for (const fd of x.findings || []) {
@@ -130,11 +130,11 @@ async function importFindings() {
     s.poam.push({ pid: "P-" + String(s.poam.length + 1).padStart(2, "0"), weakness: `${fd.title} (${(fd.hosts || []).join(", ")})`, source: src, severity: fd.severity || "", rec: fd.fix || "", response: "", fix: "", owner: "", date: "", status: "Open", verified: "" });
     n++;
   }
-  commit(); renderAll(); toast(n ? `Added ${n} row${n === 1 ? "" : "s"} from ${x.from || "the assessors"}'s VAR. Choose a response and write your plan for each.` : "Those findings are already in your POA&M.");
+  commit(); renderAll(); toast(n ? `Added ${n} row${n === 1 ? "" : "s"} from ${x.from || "the assessors"}'s VAR. Choose a response and write your plan for each one.` : "Those findings are already in your POA&M.");
 }
 function sspHistory() {
-  return [h("h2", {}, "Assessment history"), h("p", { class: "sub" }, "Every scan and assessment of your system, with its result."),
-    rowsTable(S().history, [["date", "Date", { type: "date", w: "140px" }], ["activity", "Activity", { area: true }], ["by", "Performed by"], ["result", "Result", { area: true, placeholder: "Findings by severity; closed and open" }]],
+  return [h("h2", {}, "Assessment history"), h("p", { class: "sub" }, "List every scan and assessment of your system, with its result."),
+    rowsTable(S().history, [["date", "Date", { type: "date", w: "140px" }], ["activity", "Activity", { area: true }], ["by", "Performed by"], ["result", "Result", { area: true, placeholder: "Findings by severity, open and closed" }]],
       { addLabel: "Add activity", blank: () => ({ id: newId("a"), date: "", activity: "", by: "", result: "" }) })];
 }
 // The owner is picked from the Team Log roster, so the name is typed once, and signs with one click.
@@ -143,7 +143,7 @@ function sspApproval() {
   if (a.owner && !names.includes(a.owner)) names.unshift(a.owner);   // a name from before the roster changed
   const sign = (on) => { a.signature = on ? a.owner : ""; a.date = on ? today() : ""; commit(); renderAll(); };
   const signed = a.signature && a.signature === a.owner && a.date;
-  return [h("h2", {}, "Approval"), h("p", { class: "sub" }, "By signing, the system owner confirms this plan describes the system as built and accepts the risks in it."),
+  return [h("h2", {}, "Approval"), h("p", { class: "sub" }, "By signing, the system owner confirms that this plan describes the system as it was built and accepts the risks in it."),
     h("div", { class: "card" },
       names.length ? h("div", { class: "grid2" },
         field("System owner", a, "owner", { req: true, options: [["", "Choose a team member"], ...names.map((n) => [n, n])], onchange: () => { if (a.signature && a.signature !== a.owner) { a.signature = ""; a.date = ""; } commit(); renderAll(); } }),
@@ -162,7 +162,7 @@ function sspMissing() {
 }
 function sspReview() {
   const m = sspMissing();
-  return [h("h2", {}, "Review and export"), h("p", { class: "sub" }, "Export the PDF and submit it by its due date in Canvas."),
+  return [h("h2", {}, "Review and export"), h("p", { class: "sub" }, "Export the PDF and submit it in Canvas by the due date."),
     m.length ? h("div", { class: "note warn" }, h("b", {}, "Still missing"), h("ul", { class: "missing-list" }, m.map(([k, t]) => h("li", {}, h("a", { href: "#", onclick: (e) => { e.preventDefault(); state.ssp = k; renderAll(); } }, t)))))
       : h("p", { class: "note ok" }, "Every section is filled in."),
     h("div", { class: "tools" }, h("button", { class: "primary", onclick: () => exportDoc("ssp") }, "Export SSP as PDF"))];

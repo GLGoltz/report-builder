@@ -389,12 +389,12 @@ const RESETS = [
 
 // Deliverables that are their own document, keyed "hub-n".
 const SEPARATE = {
-  "00-1": ["cover", "Your cover page and team agreement, at the front of this log. They export with Cyber Hub 00."],
-  "11-2": ["none", "Don't put the answer key in this app or anywhere the other team might see it. Submit it privately to the instructor."],
-  "12-5": ["var", "The VAR is its own document, in the VAR tab. Submit it separately and give the client a copy."],
-  "13-2": ["ssp", "The SSP is its own document, in the SSP tab. Submit it separately."],
+  "00-1": ["cover", "Your cover page and team agreement are at the front of this log. They're included when you export Cyber Hub 00."],
+  "11-2": ["none", "Do not put your answer key in the Report Builder or anywhere the other team might see it. Submit it privately to your instructor."],
+  "12-5": ["var", "Your VAR is a separate document. Write it in the VAR tab, submit it on its own, and give your client a copy."],
+  "13-2": ["ssp", "Your SSP is a separate document. Write it in the SSP tab and submit it on its own."],
   "14-1": ["link", "Slides link."],
-  "15-3": ["restore", "Your restoration record is above, in this section, with the instructor's sign-off. It exports with Cyber Hub 15."],
+  "15-3": ["restore", "Your restoration record and the instructor's sign-off are above. They're included when you export Cyber Hub 15."],
 };
 
 const CHECKPOINT_05 = [
@@ -410,11 +410,11 @@ const CONTROLS = [
   ["SC-7", "Boundary protection", "Public-facing systems are separated from internal systems.", "Describe the DMZ, the guest network and the port forwards (VIPs)."],
   ["SC-8", "Transmission confidentiality", "Logins and sensitive data are encrypted in transit.", "Which management and file transfer protocols are on and off?"],
   ["CM-2", "Baseline configuration", "A known-good configuration is recorded and can be restored.", "Where are the firewall backup and the switch's startup configuration kept?"],
-  ["CM-7", "Least functionality", "Only needed ports and services are enabled.", "Unused switch ports, disabled services, anything removed after the assessment."],
+  ["CM-7", "Least functionality", "Only needed ports and services are enabled.", "Which switch ports and services are turned off, and what did you remove after the assessment?"],
   ["AU-2", "Event logging", "Security-relevant events are logged.", "Which firewall policies log traffic, and where would you look during an incident?"],
-  ["RA-5", "Vulnerability scanning", "Systems are scanned for weaknesses and results are acted on.", "Your scanner, the baseline scan, the outside assessment and the re-scan."],
-  ["SI-2", "Flaw remediation", "Known weaknesses are fixed and the fixes are verified.", "What you fixed after the VAR and how the re-scan proved it."],
-  ["CP-9", "System backup", "Data and configurations can be recovered after a failure.", "The NAS RAID level and what it protects against, plus configuration backups."],
+  ["RA-5", "Vulnerability scanning", "Systems are scanned for weaknesses and results are acted on.", "Describe your scanner, your baseline scan, the outside assessment and your re-scan."],
+  ["SI-2", "Flaw remediation", "Known weaknesses are fixed and the fixes are verified.", "What did you fix after the VAR, and how did the re-scan prove it?"],
+  ["CP-9", "System backup", "Data and configurations can be recovered after a failure.", "Which RAID level does the NAS use, and what does it protect against? Where are your configuration backups kept?"],
   ["PE-3", "Physical access control", "Physical access to equipment is controlled.", "Who can reach the rack and its ports? Link to your physical security briefing."],
 ];
 const CONTROL_STATUS = ["Implemented", "Partial", "Planned", "Accepted risk"];
@@ -612,11 +612,11 @@ function download(name, text, type = "application/json") {
 async function backupNow() {
   download(fileBase() + ".cyberhub", teamFileJSON());
   await markBackedUp("download");
-  toast("Team file downloaded. Put it in your team's Drive folder.");
+  toast("Your team file has been downloaded. Upload it to your team's Google Drive folder.");
 }
 function parseTeamFile(text) {
-  let x; try { x = JSON.parse(text); } catch { throw new Error("That file isn't a Report Builder team file."); }
-  if (x.format !== FILE_FORMAT) throw new Error(x.format === "cyberhub-findings" ? "That's a findings file. Import it from the SSP's POA&M step." : "That file isn't a Report Builder team file.");
+  let x; try { x = JSON.parse(text); } catch { throw new Error("This file isn't a Report Builder team file."); }
+  if (x.format !== FILE_FORMAT) throw new Error(x.format === "cyberhub-findings" ? "This is a findings file. You can import it in the SSP tab, on the POA&M step." : "This file isn't a Report Builder team file.");
   return { doc: normalize(x.doc), images: x.images || {}, savedAt: x.savedAt || 0, savedBy: x.savedBy || "" };
 }
 async function loadTeamFile(f) {
@@ -635,8 +635,8 @@ async function setupBackup() {
       types: [{ description: "Report Builder team file", accept: { "application/json": [".cyberhub"] } }] });
     await kvSet("backupHandle", backupHandle).catch(() => {});
     backupState = "on"; await writeBackup(true);
-    toast("Automatic backup is on. The app keeps that file up to date.");
-  } catch (e) { if (e.name !== "AbortError") toast(e.name === "SecurityError" ? "Backup can't be set up inside another page. Open glgoltz.github.io/report-builder on its own." : "Backup couldn't be set up: " + e.message, true); }
+    toast("Automatic backup is on. Your backup file will update as you work.");
+  } catch (e) { if (e.name !== "AbortError") toast(e.name === "SecurityError" ? "Automatic backup won't work inside another page. Open glgoltz.github.io/report-builder in its own tab to set it up." : "Backup couldn't be set up: " + e.message, true); }
   renderSaveBar();
 }
 async function resumeBackup() {
@@ -668,7 +668,7 @@ async function restoreBackupHandle() {
 const LOGO_MAX = 40000;   // the diagram's limit: its share link carries the logo
 window.rbDiagram = {
   rack() { return rackNum(); },
-  gotoCover() { state.tab = "log"; state.log = "cover"; renderAll(); toast("Add your logo here. It appears on the diagram by itself."); },
+  gotoCover() { state.tab = "log"; state.log = "cover"; renderAll(); toast("Add your logo here and it will show up on your diagram."); },
   // A team that hasn't drawn anything yet still gets its company name and logo on the diagram.
   load() { const d = doc.diagram ? JSON.parse(JSON.stringify(doc.diagram)) : { v: 2, devices: [], links: [], meta: {} };
     d.meta = { ...(d.meta || {}), company: doc.meta.company || "" }; if (doc.meta.logo) d.meta.logo = doc.meta.logo; else delete d.meta.logo; return d; },
@@ -758,7 +758,7 @@ function readLogoX(file, raw = false) {
         let d = c.toDataURL("image/webp", q); if (!d.startsWith("data:image/webp")) d = c.toDataURL("image/png");
         if (d.length <= LOGO_MAX) return res({ data: d, changed });
       }
-      rej(new Error("That logo is too detailed to shrink. Try a simpler PNG."));
+      rej(new Error("This logo has too much detail to shrink down. Try a simpler PNG."));
     };
     im.onerror = () => { URL.revokeObjectURL(url); rej(new Error("That image couldn't be read.")); };
     im.src = url;
@@ -969,7 +969,7 @@ function logCover() {
     rowsTable(c.roster, [["name", "Name", { w: "45%", oninput: later }], ["email", "Email", { type: "email" }]], { addLabel: "Add member", onchange: () => renderAll() }),
     h("h3", {}, "Team agreement"),
     h("div", { class: "card" },
-      field("Communication channels", c, "chat", { req: true, placeholder: "For example, a group chat and email", hint: "Two methods, so a message still gets through if one is down." }),
+      field("Communication channels", c, "chat", { req: true, placeholder: "For example, a group chat and email", hint: "List two ways to reach each other in case one doesn't work." }),
       field("Absence policy", a, "missed", { area: true, req: true }),
       signs),
   ];
@@ -981,7 +981,7 @@ function signBlock() {
   const a = doc.log.agreement; a.signatures = a.signatures || {};
   const names = members();
   const head = h("label", {}, "Signatures", h("span", { class: "req" }, " *"));
-  if (!names.length) return h("div", { class: "field" }, head, h("p", { class: "note" }, "A signature line appears here for each name on the roster above."));
+  if (!names.length) return h("div", { class: "field" }, head, h("p", { class: "note" }, "Add your team to the roster above, and a signature line will show up here for each person."));
   const box = h("div", { class: "signs" });
   const draw = () => box.replaceChildren(...names.map((n) => {
     const s = a.signatures[n] || (a.signatures[n] = { sig: "", date: "" });
@@ -999,7 +999,7 @@ function logoWell() {
   let last = null;   // the file just uploaded, so the team can keep it exactly as it was
   const use = async (f, raw) => {
     try { const r = await readLogoX(f, raw); doc.meta.logo = r.data; last = r.changed && !raw ? f : null; commit(); draw(); reloadDiagram();
-      if (last) toast("Logo added. The app trimmed the empty margin and removed the plain background."); }
+      if (last) toast("Your logo has been added. Extra space and the plain background were removed."); }
     catch (e) { toast(e.message, true); }
   };
   const draw = () => box.replaceChildren(
@@ -1014,7 +1014,7 @@ function logoWell() {
 function logHub(l) {
   const d = hubData(l.num);
   const out = [h("h2", {}, `Cyber Hub ${l.num}: ${l.title}`),
-    h("p", { class: "sub" }, "One session entry per lab worked on this Cyber Hub.")];
+    h("p", { class: "sub" }, "Add an entry for each session your team works on this Cyber Hub.")];
   out.push(h("h3", {}, "Sessions"),
     rowsTable(d.sessions, [["date", "Date", { type: "date", w: "150px" }], ["who", "Contributions", { area: true, placeholder: "Name: task" }]],
       { addLabel: "Add session", blank: () => ({ date: today(), who: "" }) }));
@@ -1035,9 +1035,9 @@ function logHub(l) {
       field("Scope", r, "scope", { wide: true, placeholder: "Agreed subnets and addresses" }),
       field("Session", r, "session", { placeholder: "Date and time window" }), field("Agreed by", r, "agreed", { placeholder: "One name per team" })));
   }
-  if (!NO_TICKETS.includes(l.num)) out.push(h("h3", {}, "Troubleshooting tickets"), h("p", { class: "sub" }, "One ticket per problem, following the method on Reference: Troubleshooting. Log every hypothesis, including the ones ruled out."), problemList(d.problems, l.num));
+  if (!NO_TICKETS.includes(l.num)) out.push(h("h3", {}, "Troubleshooting tickets"), h("p", { class: "sub" }, "Open a ticket for each problem you run into, and follow the method on Reference: Troubleshooting. Log every hypothesis you test, including the ones that turn out to be wrong."), problemList(d.problems, l.num));
   if (!d.shots) d.shots = [];
-  out.push(h("h3", {}, "Additional evidence"), h("p", { class: "sub" }, "Screenshots and notes beyond the deliverables."),
+  out.push(h("h3", {}, "Additional evidence"), h("p", { class: "sub" }, "Add any screenshots or notes that go beyond the deliverables."),
     imageWell(d.shots, { prompt: "Add a screenshot", label: "Additional evidence" }), field("", d, "notes", { area: true, placeholder: "Notes" }));
   if (l.questions.length) {
     out.push(h("h3", {}, "Before you continue"), h("div", { class: "card" }, l.questions.map((q, i) => h("div", { class: "qa" },
@@ -1053,7 +1053,7 @@ function logHub(l) {
       h("div", { class: "in" },
         h("p", {}, x.instr),
         x.checks.length ? h("ul", { class: "checks" }, x.checks.map(([k, v]) => h("li", {}, h("b", {}, k + ": "), v))) : null,
-        sep ? (sep[0] === "link" ? field("Slides link", dv, "link", { placeholder: "https://docs.google.com/presentation/…", hint: "Share the slides with the instructor (Viewer) first." }) : h("p", { class: "note" + (sep[0] === "none" ? " warn" : "") }, sep[1]))
+        sep ? (sep[0] === "link" ? field("Slides link", dv, "link", { placeholder: "https://docs.google.com/presentation/…", hint: "Share your slides with your instructor as a Viewer first." }) : h("p", { class: "note" + (sep[0] === "none" ? " warn" : "") }, sep[1]))
             : [imageWell(dv.images, { prompt: x.kind === "Photo" ? "Add the photo" : "Add the screenshot", label: x.title })])));
   }
   out.push(h("div", { class: "tools" }, h("button", { class: "primary", onclick: () => exportDoc("log-hub", l.num) }, `Export Cyber Hub ${l.num} as PDF`)));
@@ -1085,7 +1085,7 @@ function workLog(p, redraw) {
       field("Test", e, "test", { area: true, rows: 2, placeholder: "Command or check" }),
       field("Result", e, "result", { area: true, rows: 2, placeholder: "Output or observation" }))));
   return h("div", { class: "wlog" }, h("label", {}, "Work log"),
-    rows.length ? rows : h("p", { class: "hintline" }, "No entries yet. Add one for each hypothesis you test. Keep the ones you rule out."),
+    rows.length ? rows : h("p", { class: "hintline" }, "No entries yet. Add one for each hypothesis you test, and keep the ones you rule out."),
     h("button", { class: "small", onclick: () => { log.push({ date: today(), hypothesis: "", test: "", result: "", outcome: "Untested" }); commit(); redraw(); } }, "+ Add entry"));
 }
 function problemList(list, num) {
@@ -1204,16 +1204,16 @@ function restoreSection() {
     };
     pw.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
     signBox.replaceChildren(
-      done ? h("p", {}, "Record complete. The instructor checks the rack and the drawer, then signs here.")
-           : h("p", { class: "note" }, "Complete every row first. The instructor checks the rack and the drawer before signing."),
+      done ? h("p", {}, "Your record is complete. Your instructor will check the rack and the drawer, then sign here.")
+           : h("p", { class: "note" }, "Complete every row first. Your instructor will check the rack and the drawer before signing."),
       h("div", { class: "grid2" }, h("div", { class: "field" }, h("label", { for: "so-name" }, "Instructor"), name), h("div", { class: "field" }, h("label", { for: "so-pw" }, "Password"), pw)),
       h("div", { class: "tools" }, h("button", { class: "primary", disabled: done ? null : "", onclick: go }, "Sign off")), msg);
   }
   drawSign();
   return [h("h3", {}, "Reset record"),
-    h("p", { class: "sub" }, "Tick each device once it is reset and verified, and record the proof."), resetTable,
+    h("p", { class: "sub" }, "Check off each device once it's been reset and verified, and record your proof."), resetTable,
     h("h3", {}, "Utility drawer"),
-    h("p", { class: "sub" }, "Tick each item as it goes back in the drawer. Note anything missing or damaged."), drawerTable,
+    h("p", { class: "sub" }, "Check off each item as it goes back in the drawer, and note anything that's missing or damaged."), drawerTable,
     h("h3", {}, "Instructor sign-off"), signBox];
 }
 function checkDialog(r) {
@@ -1225,10 +1225,10 @@ function checkDialog(r) {
     if (!key) { out.textContent = "That password isn't right."; return; }
     const ok = (await makeCode(key, restoreCanon(r, r.sign))) === r.sign.code;
     out.className = ok ? "note" : "note warn";
-    out.textContent = ok ? `Genuine. ${r.sign.by} signed this record on ${fmtDate(r.sign.date)}, and nothing has changed since.` : "Not genuine. Either the code wasn't made with the instructor password, or the record changed after signing.";
+    out.textContent = ok ? `Genuine. ${r.sign.by} signed this record on ${fmtDate(r.sign.date)}, and nothing has changed since.` : "Not genuine. Either this code wasn't made with the instructor password, or the record was changed after it was signed.";
   };
   pw.addEventListener("keydown", (e) => { if (e.key === "Enter") run(); });
-  ask("Check a sign-off", [h("p", {}, "For instructors. Type the instructor password to confirm this sign-off code was made by an instructor for this exact record."), pw, out],
+  ask("Check a sign-off", [h("p", {}, "For instructors only. Enter the instructor password to confirm that an instructor signed off on this exact record."), pw, out],
     [["Close"], ["Check", run, "primary", true]]);
 }
 function fmtDate(d) { return d ? new Date(d + "T12:00").toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : ""; }
@@ -1298,9 +1298,9 @@ function varCover() {
       h("div", { class: "field" }, h("label", {}, "Prepared by (your company)"), h("div", {}, doc.meta.company || h("span", { class: "hintline" }, "Set it on the Team Log cover."))),
       h("div", { class: "field" }, h("label", {}, "Logo"), doc.meta.logo ? h("img", { src: doc.meta.logo, alt: "", style: "max-height:40px" }) : h("span", { class: "hintline" }, "Upload it on the Team Log cover.")),
       field("Client company", c, "client", { req: true }), field("Client's rack", c, "clientRack", { placeholder: "1 to 8", oninput: () => { fillScope(); commit(); } }),
-      field("Assessment dates", c, "dates", { placeholder: "Nov 16 to Nov 20, 2026" }), field("Report version", c, "version", { hint: "1.0 for the copy you give the client." }),
+      field("Assessment dates", c, "dates", { placeholder: "Nov 16 to Nov 20, 2026" }), field("Report version", c, "version", { hint: "Use 1.0 for the copy you give your client." }),
       field("Assessment team", c, "team", { wide: true, area: true, req: true, placeholder: "Name, role" }),
-      field("Client contact", c, "contact", { wide: true, placeholder: "Name", hint: "The client team member who agreed to the rules of engagement." }))];
+      field("Client contact", c, "contact", { wide: true, placeholder: "Name", hint: "The person on the client team who agreed to the rules of engagement." }))];
 }
 // The standard scope fills in from the client's rack: the same three targets every assessment covers.
 // A range the team typed themselves is left alone; only empty or earlier auto-filled ranges change.
@@ -1318,7 +1318,7 @@ function fillScope() {
 function varScope() {
   const v = V();
   fillScope();
-  return [h("h2", {}, "Scope and rules of engagement"), h("p", { class: "sub" }, "Exactly what you were allowed to test. The three standard targets fill in from the client's rack on the cover. Check them against the rules of engagement you agreed, and add anything else you agreed to test."),
+  return [h("h2", {}, "Scope and rules of engagement"), h("p", { class: "sub" }, "List exactly what you were allowed to test. The three standard targets are already filled in. Check them against the rules of engagement you agreed to, and add anything else you were allowed to test."),
     h("h3", {}, "In scope"),
     rowsTable(v.scope, [["target", "Target"], ["range", "Address or range", { cls: "mono", placeholder: "10.R.20.0/24" }], ["notes", "Notes"]], { addLabel: "Add target" }),
     h("h3", {}, "Out of scope"), field("", v, "outScope", { area: true, placeholder: "Excluded networks and systems" }),
@@ -1328,14 +1328,14 @@ function varScope() {
       field("Restrictions", v.roe, "restrictions", { wide: true, area: true, placeholder: "Prohibited activities" }))];
 }
 function varMethod() {
-  return [h("h2", {}, "Method"), h("p", { class: "sub" }, "What you did, in order, so another assessor could repeat it. Give the exact options you used."),
+  return [h("h2", {}, "Method"), h("p", { class: "sub" }, "List what you did, in order, so another assessor could repeat it. Include the exact options you used."),
     rowsTable(V().method, [["step", "Step", { w: "20%" }], ["tool", "Tool and settings", { area: true, placeholder: "nmap -sn 10.3.20.0/24" }], ["purpose", "Purpose", { area: true }]], { addLabel: "Add step" })];
 }
 
 // ---- hosts and Nmap import
 function varHosts() {
   const v = V();
-  return [h("h2", {}, "Hosts found"), h("p", { class: "sub" }, "Every live host from your internal and external views. Save each Nmap scan as XML by adding -oX to the command, for example nmap -sV -oX internal.xml 10.3.20.0/24, then import it here."),
+  return [h("h2", {}, "Hosts found"), h("p", { class: "sub" }, "List every live host you found from inside and outside the network. Save each Nmap scan as XML by adding -oX to the command, for example nmap -sV -oX internal.xml 10.3.20.0/24, then import it here."),
     h("div", { class: "tools" }, h("button", { class: "primary", onclick: importNmap }, "Import Nmap results")),
     rowsTable(v.hosts, [["ip", "Address", { cls: "mono", w: "130px" }], ["role", "Role"], ["ports", "Open ports", { cls: "mono" }],
       ["view", "View", { options: ["Internal", "External", "Both"], w: "110px" }], ["notes", "Notes", { area: true }]], { addLabel: "Add host", blank: () => ({ ip: "", role: "", ports: "", view: "Internal", notes: "" }) }),
@@ -1352,7 +1352,7 @@ async function importNmap() {
 }
 function parseNmap(text) {
   const x = new DOMParser().parseFromString(text, "application/xml");
-  if (x.querySelector("parsererror") || !x.querySelector("nmaprun")) throw new Error("That isn't an Nmap XML file. Run Nmap with -oX filename.xml.");
+  if (x.querySelector("parsererror") || !x.querySelector("nmaprun")) throw new Error("This isn't an Nmap XML file. Run Nmap again with -oX filename.xml.");
   const out = [];
   for (const hst of x.querySelectorAll("host")) {
     if (hst.querySelector("status")?.getAttribute("state") === "down") continue;
@@ -1390,13 +1390,13 @@ function varTriage() {
   const v = V(); const showLog = state.showLog;
   const list = v.triage.filter((t) => showLog || t.threat !== "Log");
   const hidden = v.triage.length - list.length;
-  return [h("h2", {}, "Triage"), h("p", { class: "sub" }, "Greenbone's raw results, grouped by test. Nothing here goes in the report until you decide: make it a finding, add it to one, or dismiss it with a reason. Download the report from Greenbone as XML: Scans, Reports, open your scan, then the download icon."),
+  return [h("h2", {}, "Triage"), h("p", { class: "sub" }, "These are Greenbone's raw results, grouped by test. Nothing here goes in your report until you decide what to do with it. You can make it a finding, add it to an existing finding, or dismiss it with a reason. To get the report, go to Scans, then Reports in Greenbone, open your scan, and download it as XML."),
     h("div", { class: "tools" }, h("button", { class: "primary", onclick: importGreenbone }, "Import Greenbone report"),
       hidden || showLog ? h("label", { class: "who", style: "margin-left:6px" }, h("input", { type: "checkbox", checked: showLog || null, style: "width:auto", onchange: (e) => { state.showLog = e.target.checked; renderAll(); } }), `Show informational (Log) results${hidden ? ` (${hidden})` : ""}`) : null),
     list.length ? h("div", { class: "flist" }, list.map((t) => h("button", { class: "frow" + (t.state === "new" ? "" : " dim"), "aria-current": String(state.sel === t.id), onclick: () => { state.sel = t.id; renderAll(); } },
       sevBadge(t.score || 0), h("span", { style: "min-width:0" }, h("span", { class: "t" }, t.name), h("span", { class: "m" }, `${t.hosts.join(", ")}${t.port ? " · " + t.port : ""}`)),
       h("span", { class: "pill " + (t.state === "new" ? "new" : "") }, t.state === "new" ? "To decide" : t.state === "dismissed" ? "Dismissed" : "In " + (V().findings.find((f) => f.id === t.finding) ? fid(V().findings.find((f) => f.id === t.finding)) : "a finding")))))
-      : h("p", { class: "empty" }, "No results yet. Import your Greenbone report, or skip this step and add findings by hand.")];
+      : h("p", { class: "empty" }, "No results yet. Import your Greenbone report, or skip this step and add your findings by hand.")];
 }
 function triagePanel(t) {
   const fs = V().findings;
@@ -1435,7 +1435,7 @@ async function importGreenbone() {
 }
 function parseGreenbone(text) {
   const x = new DOMParser().parseFromString(text, "application/xml");
-  if (x.querySelector("parsererror")) throw new Error("That file couldn't be read as XML. Download the report from Greenbone in the XML format.");
+  if (x.querySelector("parsererror")) throw new Error("This file couldn't be read. Download the report from Greenbone again in the XML format.");
   const results = x.querySelectorAll("results > result");
   if (!results.length) throw new Error("No results found. Download the report from Greenbone in the XML format, not PDF or CSV.");
   const kid = (el, sel) => el.querySelector(":scope > " + sel);
@@ -1466,7 +1466,7 @@ function promote(t) {
   for (const hst of t.hosts) if (!V().hosts.some((x) => x.ip === hst)) V().hosts.push({ ip: hst, role: "", ports: (t.port || "").replace(/\/tcp$/, ""), view: "Internal", notes: "Added from Greenbone" });
   V().findings.push(f); t.state = "promoted"; t.finding = f.id;
   commit(); state.var = "findings"; state.sel = f.id; renderAll();
-  toast("Finding created. Rewrite the title in plain language, score it and add your own evidence.");
+  toast("Your finding has been created. Rewrite the title in plain language, score it, and add your own evidence.");
 }
 function joinFinding(t, id) {
   const f = V().findings.find((x) => x.id === id); if (!f) return;
@@ -1481,7 +1481,7 @@ function blankFinding() {
 }
 function varFindings() {
   const v = V(), n = tally();
-  return [h("h2", {}, "Findings"), h("p", { class: "sub" }, "One card per weakness. IDs follow severity, most serious first, so they can change as you score. Pick a card to edit it."),
+  return [h("h2", {}, "Findings"), h("p", { class: "sub" }, "Add one card for each weakness. Findings are numbered by severity with the most serious first, so the numbers can change as you score them. Select a card to edit it."),
     h("div", { class: "tally" }, [["crit", "Critical"], ["high", "High"], ["med", "Medium"], ["low", "Low"]].map(([c, t]) => h("span", {}, h("i", { style: `background:var(--${c})` }), `${n[c]} ${t}`)),
       h("span", { style: "color:var(--muted)" }, "False positives don't count")),
     h("div", { class: "tools" }, h("button", { class: "primary", onclick: () => { const f = blankFinding(); v.findings.push(f); state.sel = f.id; commit(); renderAll(); setTimeout(() => $("f-title")?.focus(), 30); } }, "Add finding"),
@@ -1492,7 +1492,7 @@ function varFindings() {
         sevBadge(scoreOf(f)), h("span", { style: "min-width:0" }, h("span", { class: "t" }, `${fid(f)} ${f.title || "Untitled finding"}`),
           h("span", { class: "m" }, p.length ? "Missing: " + p.join(", ") : `${f.hosts.join(", ")} · ${viewName(f.view)}`)),
         h("span", { class: "pill " + f.status }, statusName(f.status)));
-    })) : h("p", { class: "empty" }, "No findings yet. Add one, or make them from your Greenbone results in Triage.")];
+    })) : h("p", { class: "empty" }, "No findings yet. Add one here, or create them from your Greenbone results in Triage.")];
 }
 function findingPanel(f) {
   const s = scoreOf(f), hostIps = [...new Set([...V().hosts.map((x) => x.ip), ...f.hosts])].filter(Boolean);
@@ -1501,11 +1501,11 @@ function findingPanel(f) {
   return [h("h2", {}, `Finding ${fid(f)}`, h("span", {},
       h("button", { class: "small ghost", onclick: () => ask("Delete this finding?", [h("p", {}, f.title || "Untitled finding")], [["Cancel"], ["Delete", async () => { await snapshot("Before deleting a finding"); V().findings = V().findings.filter((x) => x !== f); V().recs.forEach((r) => (r.findings = r.findings.filter((x) => x !== f.id))); V().triage.forEach((t) => { if (t.finding === f.id) { t.finding = null; t.state = "new"; } }); state.sel = null; commit(); renderAll(); }, "danger"]]) }, "Delete"),
       h("button", { class: "small ghost", onclick: () => { state.sel = null; renderAll(); } }, "Close"))),
-    field("Title", f, "title", { id: "f-title", req: true, placeholder: "Short title", hint: "Name the weakness, not the scanner's alert: \"Anonymous FTP login allowed\".", oninput: refreshList }),
+    field("Title", f, "title", { id: "f-title", req: true, placeholder: "Short title", hint: "Name the weakness, not the scanner's alert. For example, \"Anonymous FTP login allowed\".", oninput: refreshList }),
     h("div", { class: "field" }, h("label", {}, "Affected hosts"), hostIps.length ? h("div", { class: "chips" }, hostIps.map((ip) => {
       const host = V().hosts.find((x) => x.ip === ip);
       return h("button", { class: "chip", "aria-pressed": String(f.hosts.includes(ip)), onclick: () => { f.hosts = f.hosts.includes(ip) ? f.hosts.filter((x) => x !== ip) : [...f.hosts, ip]; commit(); renderAll(); } }, host?.role ? host.role + " " : "", h("code", {}, ip));
-    })) : h("p", { class: "hintline" }, "Add hosts in Hosts found first.")),
+    })) : h("p", { class: "hintline" }, "Add your hosts in Hosts found first.")),
     h("div", { class: "grid2" }, field("Port and protocol", f, "port", { placeholder: "TCP 21" }),
       h("div", { class: "field" }, h("label", {}, "View"), seg(VIEWS, f.view, (x) => { f.view = x; commit(); renderAll(); }))),
     h("div", { class: "field" }, h("label", {}, "Severity (CVSS 3.1 base score)"), h("div", { class: "cvss" },
@@ -1514,14 +1514,14 @@ function findingPanel(f) {
       f.ref && (f.ref.score || f.ref.vector) ? h("div", { class: "gbref" },
         h("div", { class: "gbrow" }, h("span", {}, `Greenbone score: ${(+f.ref.score || 0).toFixed(1)}`),
           f.ref.vector && parseVector(f.ref.vector) ? h("button", { class: "small", onclick: () => { f.v = parseVector(f.ref.vector); commit(); renderAll(); } }, "Start from Greenbone's vector") : null),
-        h("p", { class: "hintline" }, "Score it for this client's network: reachable from outside, and what is really at risk.")) : null)),
+        h("p", { class: "hintline" }, "Score it for this client's network. Think about whether it can be reached from outside, and what's really at risk.")) : null)),
     h("div", { class: "field" }, h("label", {}, "Validation"), seg(VALIDATION, f.status, (x) => { f.status = x; commit(); renderAll(); }),
-      f.status === "confirmed" && !f.confirm.trim() ? h("p", { class: "hintline", style: "color:var(--err)" }, "Say how you confirmed it below, or it can't count as confirmed.") : h("p", { class: "hintline" }, "Check the three most serious findings by hand, without changing anything on the target.")),
+      f.status === "confirmed" && !f.confirm.trim() ? h("p", { class: "hintline", style: "color:var(--err)" }, "Explain how you confirmed it below, or it can't count as confirmed.") : h("p", { class: "hintline" }, "Check your three most serious findings by hand, without changing anything on the target.")),
     field("Description", f, "what", { area: true, req: true, placeholder: "Plain-language description" }),
-    field("Impact", f, "why", { area: true, placeholder: "Attacker capability against this client" }),
-    field("Evidence", f, "evidence", { area: true, req: true, hint: "The scanner result, command or output, so the client can see it for themselves." }),
+    field("Impact", f, "why", { area: true, placeholder: "What an attacker could do to this client" }),
+    field("Evidence", f, "evidence", { area: true, req: true, hint: "Include the scanner result, command or output so your client can see it for themselves." }),
     h("div", { class: "field" }, h("label", {}, "Screenshots"), imageWell(f.images, { label: "Evidence screenshots" })),
-    field("Validation", f, "confirm", { area: true, placeholder: "Check performed, or why none was possible", oninput: refreshList }),
+    field("Validation", f, "confirm", { area: true, placeholder: "How you checked it, or why you couldn't", oninput: refreshList }),
     field("Remediation", f, "fix", { area: true, req: true, placeholder: "Specific steps for this client" })];
 }
 function refreshList() { const l = document.querySelector(".work .flist"); if (!l || state.tab !== "var" || state.var !== "findings") return; const w = $("work"); const y = w.scrollTop; w.replaceChildren(...varFindings().flat()); w.scrollTop = y; renderRail(); }
@@ -1531,7 +1531,7 @@ function varRecs() {
   const v = V(); const fs = sortedFindings().filter((f) => f.status !== "false-positive");
   const covered = new Set(v.recs.flatMap((r) => r.findings)); const left = fs.filter((f) => !covered.has(f.id));
   const move = (i, d) => { const j = i + d; if (j < 0 || j >= v.recs.length) return; [v.recs[i], v.recs[j]] = [v.recs[j], v.recs[i]]; commit(); renderAll(); };
-  return [h("h2", {}, "Fix priority"), h("p", { class: "sub" }, "The order you'd tell the client to fix things in. Group findings that share one fix, and put the most risk removed for the least effort first. The client builds its POA&M from this list in Cyber Hub 13."),
+  return [h("h2", {}, "Fix priority"), h("p", { class: "sub" }, "List the order you'd tell your client to fix things in. Group findings that share the same fix, and put the fixes that remove the most risk for the least effort first. Your client will build their POA&M from this list in Cyber Hub 13."),
     h("div", { class: "tools" }, left.length ? h("button", { class: "primary", onclick: () => { for (const f of left) v.recs.push({ id: newId("rec"), findings: [f.id], action: f.fix, effort: "Medium" }); commit(); renderAll(); } }, `Add ${left.length} finding${left.length === 1 ? "" : "s"} not yet covered`) : h("span", { class: "hintline" }, fs.length ? "Every finding is covered." : "Add findings first.")),
     v.recs.length ? h("div", { class: "flist" }, v.recs.map((r, i) => h("div", { class: "card", style: "margin:0" },
       h("div", { class: "tools", style: "justify-content:space-between" }, h("b", { style: "font:600 15px var(--mono);color:var(--navy)" }, "Priority " + (i + 1)),
@@ -1546,7 +1546,7 @@ function varRecs() {
 
 function varSummary() {
   const v = V(), n = tally(), top = v.recs.slice(0, 3);
-  return [h("h2", {}, "Executive summary"), h("p", { class: "sub" }, "Three to five sentences for the client's leaders: what you assessed, the overall risk, and what to fix first. Leave out tool names and port numbers."),
+  return [h("h2", {}, "Executive summary"), h("p", { class: "sub" }, "Write three to five sentences for your client's leadership. Cover what you assessed, the overall risk, and what to fix first. Leave out tool names and port numbers."),
     h("div", { class: "tally" }, [["crit", "Critical"], ["high", "High"], ["med", "Medium"], ["low", "Low"]].map(([c, t]) => h("span", {}, h("i", { style: `background:var(--${c})` }), `${n[c]} ${t}`))),
     field("", v, "summary", { area: true, rows: 6, req: true, aria: "Executive summary" }),
     h("h3", {}, "Top three priorities"), top.length ? h("ol", {}, top.map((r) => h("li", {}, r.action || h("span", { class: "hintline" }, "No action written yet")))) : h("p", { class: "hintline" }, "These come from Fix priority.")];
@@ -1571,7 +1571,7 @@ function varMissing() {
 }
 function varReview() {
   const m = varMissing();
-  return [h("h2", {}, "Review and export"), h("p", { class: "sub" }, "Export the PDF to submit in Canvas and give to the client. Then send the client your findings file, so they can import it into their POA&M."),
+  return [h("h2", {}, "Review and export"), h("p", { class: "sub" }, "Export the PDF, submit it in Canvas, and give a copy to your client. Then send your client the findings file so they can import it into their POA&M."),
     m.length ? h("div", { class: "note warn" }, h("b", {}, "Still missing"), h("ul", { class: "missing-list" }, m.map(([k, t, id]) => h("li", {}, h("a", { href: "#", onclick: (e) => { e.preventDefault(); state.var = k; state.sel = id || null; renderAll(); } }, t)))))
       : h("p", { class: "note ok" }, "Everything the template asks for is filled in."),
     h("div", { class: "tools" }, h("button", { class: "primary", onclick: () => exportDoc("var") }, "Export VAR as PDF"),
@@ -1584,7 +1584,7 @@ function sendFindings() {
       priority: v.recs.findIndex((r) => r.findings.includes(f.id)) + 1 || null })) };
   const name = ((doc.meta.company || "assessor") + "-findings-for-" + (v.cover.client || "client")).replace(/[^\w-]+/g, "-");
   download(name + ".cyberhub-findings", JSON.stringify(out, null, 1));
-  toast("Findings file downloaded. Share it with the client team with the PDF.");
+  toast("Your findings file has been downloaded. Share it with your client along with the PDF.");
 }
 
 // ------------------------------------------------------------------ SSP (Cyber Hub 13)
@@ -1627,7 +1627,7 @@ function sspIdent() {
   const i = S().ident;
   if (!i.name && doc.meta.company) i.name = `${doc.meta.company} network${doc.log.cover.rack ? ", Rack " + doc.log.cover.rack : ""}`;
   if (!i.location && doc.log.cover.rack) i.location = "CIS lab, Rack " + doc.log.cover.rack;
-  return [h("h2", {}, "System identification"), h("p", { class: "sub" }, "Describe only what is actually configured on your rack. An auditor should be able to check every sentence of this plan."),
+  return [h("h2", {}, "System identification"), h("p", { class: "sub" }, "Only describe what's actually configured on your rack. An auditor should be able to check every sentence in this plan."),
     h("div", { class: "card grid2" },
       field("System name", i, "name", { req: true }), field("Location", i, "location", { req: true }),
       field("Purpose", i, "purpose", { wide: true, area: true, req: true, placeholder: "Business function, one or two sentences" }),
@@ -1636,7 +1636,7 @@ function sspIdent() {
       field("Internet connection", i, "internet", { wide: true, area: true, req: true, placeholder: "Uplink, provider and isolation from the real internet" }))];
 }
 function sspDesc() {
-  return [h("h2", {}, "System description"), h("p", { class: "sub" }, "Two or three paragraphs: the main parts of the network, what each is for, and how traffic moves between them. Name the VLANs and which device routes each one."),
+  return [h("h2", {}, "System description"), h("p", { class: "sub" }, "In two or three paragraphs, describe the main parts of your network, what each one is for, and how traffic moves between them. Name your VLANs and which device routes each one."),
     field("", S(), "description", { area: true, rows: 12, aria: "System description" })];
 }
 function sspDiagram() {
@@ -1645,13 +1645,13 @@ function sspDiagram() {
   const draw = () => box.replaceChildren(
     s.diagram && images[s.diagram] ? h("figure", { class: "card", style: "margin:0 0 10px" }, h("img", { src: images[s.diagram], alt: "Network diagram", style: "max-width:100%;display:block" })) : h("p", { class: "empty" }, "No diagram yet."),
     h("div", { class: "tools" }, h("button", { class: "primary", onclick: async () => {
-        const png = await diagramPNG(); if (!png) return toast("Your diagram is empty. Fill it in on the Diagram tab first.", true);
+        const png = await diagramPNG(); if (!png) return toast("Your diagram is empty. Fill it in on the Diagram tab first, then come back.", true);
         const id = newId("img"); images[id] = png; try { await imgPut(id, png); } catch { saveFailed = true; }
-        s.diagram = id; commit(); draw(); renderRail(); toast("Added your current diagram. Do this again whenever you change it."); } }, s.diagram ? "Update to my current diagram" : "Add my diagram"),
+        s.diagram = id; commit(); draw(); renderRail(); toast("Your current diagram has been added. Update it again any time you make changes."); } }, s.diagram ? "Update to my current diagram" : "Add my diagram"),
       h("button", { onclick: async () => { const f = await pickFile("image/png,image/*"); if (!f) return; try { s.diagram = await addImageFull(f); commit(); draw(); renderRail(); } catch (e) { toast(e.message, true); } } }, "Upload an image instead"),
       s.diagram ? h("button", { class: "ghost", onclick: () => { s.diagram = ""; commit(); draw(); renderRail(); } }, "Remove") : null));
   draw();
-  return [h("h2", {}, "Network diagram"), h("p", { class: "sub" }, "Add my diagram takes a picture of your Diagram tab as it is now. Before you add it, check that every device has its address and hostname and every switch port shows its VLANs."), box];
+  return [h("h2", {}, "Network diagram"), h("p", { class: "sub" }, "Add my diagram takes a picture of your diagram as it is right now. Before you add it, make sure every device has its address and hostname, and every switch port shows its VLANs."), box];
 }
 // The diagram needs more pixels than a screenshot to stay readable when printed.
 async function addImageFull(file) {
@@ -1664,12 +1664,12 @@ async function addImageFull(file) {
 
 function sspInventory() {
   const s = S(), dg = readDiagram(), rows = diagramAddressing(dg);
-  return [h("h2", {}, "Hardware and software inventory"), h("p", { class: "sub" }, "Every device, including the virtual machines and the Pi, with its model, role and OS or firmware version."),
+  return [h("h2", {}, "Hardware and software inventory"), h("p", { class: "sub" }, "List every device, including the virtual machines and the Pi, with its model, role and OS or firmware version."),
     h("div", { class: "tools" },
       rows.length ? h("button", { onclick: () => { const have = new Set(s.inventory.map((r) => r.device)); const seen = new Set(); let n = 0;
         for (const r of rows) { if (have.has(r.device) || seen.has(r.device)) continue; seen.add(r.device); s.inventory.push({ device: r.device, model: "", role: "", address: r.address, os: "" }); n++; }
-        commit(); renderAll(); toast(n ? `Added ${n} device${n === 1 ? "" : "s"} from your diagram. Fill in model, role and OS.` : "Every device in your diagram is already listed."); } }, "Start from my diagram") : null,
-      h("span", { class: "hintline" }, rows.length ? "Uses the addresses on your Diagram tab." : "Fill in the Diagram tab first, then come back.")),
+        commit(); renderAll(); toast(n ? `Added ${n} device${n === 1 ? "" : "s"} from your diagram. Fill in the model, role and OS for each one.` : "Every device in your diagram is already listed."); } }, "Start from my diagram") : null,
+      h("span", { class: "hintline" }, rows.length ? "This uses the addresses from your diagram." : "Fill in your diagram first, then come back.")),
     rowsTable(s.inventory, [["device", "Device"], ["model", "Model"], ["role", "Role", { area: true }], ["address", "Address", { cls: "mono" }], ["os", "OS or firmware"]], { addLabel: "Add device" }),
     h("h3", {}, "Addressing table"),
     h("p", { class: "sub" }, s.addressingFrom ? `From your Diagram tab, ${s.addressingFrom}. It isn't edited here: fix the diagram, then update.` : "Copied from your Diagram tab, so the plan and the diagram can't disagree."),
@@ -1678,12 +1678,12 @@ function sspInventory() {
       h("tbody", {}, s.addressing.map((r) => h("tr", {}, [r.device, r.hostname, r.iface, r.vlan, r.address, r.mask, r.gateway].map((x, i) => h("td", { class: i >= 4 ? "mono" : "" }, h("span", { class: "fixed" }, x || ""))))))) ) : null];
 }
 function sspPorts() {
-  return [h("h2", {}, "Ports, protocols and services"), h("p", { class: "sub" }, "Every listening service in use. Anything without a reason belongs under CM-7 Least functionality."),
+  return [h("h2", {}, "Ports, protocols and services"), h("p", { class: "sub" }, "List every service that's listening on your network. If a service doesn't have a reason to be there, address it under CM-7 Least functionality."),
     rowsTable(S().ports, [["host", "Host", { cls: "mono" }], ["port", "Port and protocol", { placeholder: "TCP 80" }], ["service", "Service"], ["who", "Exposure", { area: true }], ["why", "Business need", { area: true }]], { addLabel: "Add service" })];
 }
 function sspControls() {
   const s = S();
-  return [h("h2", {}, "Security controls"), h("p", { class: "sub" }, "The control IDs come from NIST SP 800-53, the catalog federal systems use. For each one, describe how your rack meets it, then give its status."),
+  return [h("h2", {}, "Security controls"), h("p", { class: "sub" }, "These control IDs come from NIST SP 800-53, the catalog used for federal systems. For each one, describe how your rack meets it, then give its status."),
     CONTROLS.map(([id, name, req, guide]) => {
       if (!s.controls[id]) s.controls[id] = { how: "", status: "" };
       const c = s.controls[id];
@@ -1693,7 +1693,7 @@ function sspControls() {
     })];
 }
 function sspRisks() {
-  return [h("h2", {}, "Accepted risks"), h("p", { class: "sub" }, "Weaknesses you're choosing to keep, with the reason and what limits the damage. Keep the example row and add at least two of your own."),
+  return [h("h2", {}, "Accepted risks"), h("p", { class: "sub" }, "List the weaknesses you're choosing to keep, why you're keeping them, and what limits the damage. Keep the example row and add at least two of your own."),
     rowsTable(S().risks, [["risk", "Risk", { area: true }], ["why", "Justification", { area: true }], ["limits", "Mitigating factors", { area: true }], ["by", "Accepted by"], ["date", "Date", { type: "date", w: "140px" }]],
       { addLabel: "Add risk", blank: () => ({ id: newId("r"), risk: "", why: "", limits: "", by: "", date: "" }) })];
 }
@@ -1701,15 +1701,15 @@ function sspPoam() {
   const s = S();
   const cols = [["pid", "ID", { w: "60px" }], ["weakness", "Weakness", { area: true }], ["source", "Source"], ["severity", "Severity", { options: ["", "Critical", "High", "Medium", "Low"] }],
     ["rec", "Assessor recommendation", { fixed: true, cls: "ref-col" }], ["response", "Response", { options: RESPONSES, label: "Response" }],
-    ["fix", "Planned action", { area: true, placeholder: "Action, or acceptance rationale" }], ["owner", "Owner"], ["date", "Target date", { type: "date" }], ["status", "Status", { options: ["Open", "Closed"] }], ["verified", "Verification", { area: true }]];
-  return [h("h2", {}, "Plan of Action and Milestones (POA&M)"), h("p", { class: "sub" }, "One row for every finding in the VAR you received and every weakness on your answer key. For each, choose a response and write your own plan: the assessors' recommendation is there for reference, not to copy. Rows you accept also go in Accepted risks. Closed rows say how the fix was verified."),
-    h("div", { class: "tools" }, h("button", { class: "primary", onclick: importFindings }, "Import the VAR findings"), h("span", { class: "hintline" }, "Uses the findings file the assessing team sent you.")),
+    ["fix", "Planned action", { area: true, placeholder: "Your fix, or why you're accepting the risk" }], ["owner", "Owner"], ["date", "Target date", { type: "date" }], ["status", "Status", { options: ["Open", "Closed"] }], ["verified", "Verification", { area: true }]];
+  return [h("h2", {}, "Plan of Action and Milestones (POA&M)"), h("p", { class: "sub" }, "Add a row for every finding in the VAR you received and every weakness on your answer key. For each one, choose a response and write your own plan. The assessors' recommendation is there for reference, not to copy. Any risk you accept also goes in Accepted risks, and any row you close should say how the fix was verified."),
+    h("div", { class: "tools" }, h("button", { class: "primary", onclick: importFindings }, "Import the VAR findings"), h("span", { class: "hintline" }, "This uses the findings file the assessing team sent you.")),
     rowsTable(s.poam, cols, { label: "POA&M", addLabel: "Add row", blank: () => ({ pid: "P-" + String(s.poam.length + 1).padStart(2, "0"), weakness: "", source: "", severity: "", rec: "", response: "", fix: "", owner: "", date: "", status: "Open", verified: "" }) })];
 }
 async function importFindings() {
   const f = await pickFile(".cyberhub-findings,application/json"); if (!f) return;
   let x; try { x = JSON.parse(await f.text()); } catch { return toast("That file couldn't be read.", true); }
-  if (x.format !== "cyberhub-findings") return toast("That isn't a findings file. Ask the assessing team for the file from Send findings to the client.", true);
+  if (x.format !== "cyberhub-findings") return toast("This isn't a findings file. Ask the assessing team to send you the file from Send findings to the client.", true);
   await snapshot("Before importing VAR findings");
   const s = S(); let n = 0;
   for (const fd of x.findings || []) {
@@ -1719,11 +1719,11 @@ async function importFindings() {
     s.poam.push({ pid: "P-" + String(s.poam.length + 1).padStart(2, "0"), weakness: `${fd.title} (${(fd.hosts || []).join(", ")})`, source: src, severity: fd.severity || "", rec: fd.fix || "", response: "", fix: "", owner: "", date: "", status: "Open", verified: "" });
     n++;
   }
-  commit(); renderAll(); toast(n ? `Added ${n} row${n === 1 ? "" : "s"} from ${x.from || "the assessors"}'s VAR. Choose a response and write your plan for each.` : "Those findings are already in your POA&M.");
+  commit(); renderAll(); toast(n ? `Added ${n} row${n === 1 ? "" : "s"} from ${x.from || "the assessors"}'s VAR. Choose a response and write your plan for each one.` : "Those findings are already in your POA&M.");
 }
 function sspHistory() {
-  return [h("h2", {}, "Assessment history"), h("p", { class: "sub" }, "Every scan and assessment of your system, with its result."),
-    rowsTable(S().history, [["date", "Date", { type: "date", w: "140px" }], ["activity", "Activity", { area: true }], ["by", "Performed by"], ["result", "Result", { area: true, placeholder: "Findings by severity; closed and open" }]],
+  return [h("h2", {}, "Assessment history"), h("p", { class: "sub" }, "List every scan and assessment of your system, with its result."),
+    rowsTable(S().history, [["date", "Date", { type: "date", w: "140px" }], ["activity", "Activity", { area: true }], ["by", "Performed by"], ["result", "Result", { area: true, placeholder: "Findings by severity, open and closed" }]],
       { addLabel: "Add activity", blank: () => ({ id: newId("a"), date: "", activity: "", by: "", result: "" }) })];
 }
 // The owner is picked from the Team Log roster, so the name is typed once, and signs with one click.
@@ -1732,7 +1732,7 @@ function sspApproval() {
   if (a.owner && !names.includes(a.owner)) names.unshift(a.owner);   // a name from before the roster changed
   const sign = (on) => { a.signature = on ? a.owner : ""; a.date = on ? today() : ""; commit(); renderAll(); };
   const signed = a.signature && a.signature === a.owner && a.date;
-  return [h("h2", {}, "Approval"), h("p", { class: "sub" }, "By signing, the system owner confirms this plan describes the system as built and accepts the risks in it."),
+  return [h("h2", {}, "Approval"), h("p", { class: "sub" }, "By signing, the system owner confirms that this plan describes the system as it was built and accepts the risks in it."),
     h("div", { class: "card" },
       names.length ? h("div", { class: "grid2" },
         field("System owner", a, "owner", { req: true, options: [["", "Choose a team member"], ...names.map((n) => [n, n])], onchange: () => { if (a.signature && a.signature !== a.owner) { a.signature = ""; a.date = ""; } commit(); renderAll(); } }),
@@ -1751,7 +1751,7 @@ function sspMissing() {
 }
 function sspReview() {
   const m = sspMissing();
-  return [h("h2", {}, "Review and export"), h("p", { class: "sub" }, "Export the PDF and submit it by its due date in Canvas."),
+  return [h("h2", {}, "Review and export"), h("p", { class: "sub" }, "Export the PDF and submit it in Canvas by the due date."),
     m.length ? h("div", { class: "note warn" }, h("b", {}, "Still missing"), h("ul", { class: "missing-list" }, m.map(([k, t]) => h("li", {}, h("a", { href: "#", onclick: (e) => { e.preventDefault(); state.ssp = k; renderAll(); } }, t)))))
       : h("p", { class: "note ok" }, "Every section is filled in."),
     h("div", { class: "tools" }, h("button", { class: "primary", onclick: () => exportDoc("ssp") }, "Export SSP as PDF"))];
@@ -1904,7 +1904,7 @@ async function exportDoc(kind, arg) {
       setTimeout(() => { try { window.print(); } catch {} document.title = old; }, 50);
     });
   };
-  const tip = h("p", { class: "hintline" }, "In the print window, set Destination to Save as PDF. Turn off Headers and footers under More settings.");
+  const tip = h("p", { class: "hintline" }, "In the print window, set Destination to Save as PDF, then turn off Headers and footers under More settings.");
   if (missing.length) ask("Some parts are still empty", [h("p", {}, "You can export anyway. These will show as \"Not filled in\":"), h("ul", { class: "missing-list" }, missing.slice(0, 12).map((m) => h("li", {}, m)), missing.length > 12 ? h("li", {}, `and ${missing.length - 12} more`) : null), tip], [["Go back"], ["Export anyway", go, "primary"]]);
   else ask("Export as PDF", [h("p", {}, "Your browser's print window opens next."), tip], [["Cancel"], ["Continue", go, "primary"]]);
 }
@@ -1953,8 +1953,8 @@ function renderAll() {
 function renderSaveBar() {
   const bar = $("savebar"), s = $("saved"), b = $("backup");
   bar.classList.toggle("bad", saveFailed);
-  if (!db) s.textContent = "This browser can't save here. Use Save team file to keep your work.";
-  else if (saveFailed) s.textContent = "Couldn't save in this browser. Back up now so nothing is lost.";
+  if (!db) s.textContent = "This browser can't save your work. Use Save team file so you don't lose anything.";
+  else if (saveFailed) s.textContent = "Your work couldn't be saved in this browser. Back up now so you don't lose anything.";
   else s.textContent = doc.meta.updated ? `Saved in this browser ${fmtTime(doc.meta.updated).replace(/^.*?, /, "at ")}` : "Saves in this browser as you type.";
   const age = Date.now() - (lastBackup || sessionStart), edited = !!doc.meta.updated && dirtySinceBackup;
   if (backupState === "on") {
@@ -1962,7 +1962,7 @@ function renderSaveBar() {
   } else if (backupState === "paused") {
     b.replaceChildren(h("span", { class: "bkwarn" }, "Automatic backup is paused.", h("button", { class: "small", onclick: resumeBackup }, "Resume backups")));
   } else if (edited && (!lastBackup || age > 20 * 60e3)) {
-    const msg = lastBackup ? `Last backup ${ago(lastBackup)}. Save a new team file so nothing is lost.` : "Not backed up yet. Save a team file so a lost laptop can't lose your work.";
+    const msg = lastBackup ? `Last backup ${ago(lastBackup)}. Save a new team file so you don't lose anything.` : "You haven't backed up yet. Save a team file to keep your work safe.";
     b.replaceChildren(h("span", { class: "bkwarn" + (age > 60 * 60e3 ? " red" : "") }, msg, h("button", { class: "small", onclick: backupNow }, "Back up now")));
   } else {
     b.replaceChildren(h("span", { class: "bk ok" }, h("i"), lastBackup ? `Backed up ${ago(lastBackup)}` : "Nothing to back up yet"), lastBackup ? h("button", { class: "small", onclick: backupNow }, "Back up now") : null);
@@ -1987,7 +1987,7 @@ $("b-export").addEventListener("click", () => {
   if (state.tab === "var") return exportDoc("var");
   if (state.tab === "ssp") return exportDoc("ssp");
   const l = LABS.find((x) => x.num === state.log);
-  ask("Export the Team Log", [h("p", {}, "Each Cyber Hub page asks for that Cyber Hub's section. The final submission takes the whole log.")],
+  ask("Export the Team Log", [h("p", {}, "Each Cyber Hub page asks you to submit that Cyber Hub's section. For the final submission, you'll export the whole log.")],
     [["Cancel"], ["Whole log", () => exportDoc("log")], l ? [`Cyber Hub ${l.num}`, () => exportDoc("log-hub", l.num), "primary"] : ["Cyber Hub 00", () => exportDoc("log-hub", "00"), "primary"]]);
 });
 $("b-save").addEventListener("click", backupNow);
@@ -1996,7 +1996,7 @@ $("b-open").addEventListener("click", async () => {
   let x; try { x = parseTeamFile(await f.text()); } catch (e) { return toast(e.message, true); }
   const newer = doc.meta.updated > x.savedAt + 60e3 && imageRefs(doc).size + JSON.stringify(doc.log).length > 2000;
   ask("Open this team file?", [h("p", {}, `${f.name}, saved ${x.savedAt ? fmtTime(x.savedAt) : "at an unknown time"}${x.savedBy ? " by " + x.savedBy : ""}.`),
-    newer ? h("p", { class: "note warn" }, `This browser has work from ${fmtTime(doc.meta.updated)}, newer than the file. Opening the file replaces it. A copy stays in History.`) : h("p", {}, "It replaces what's in this browser. A copy of the current work stays in History.")],
+    newer ? h("p", { class: "note warn" }, `This browser has work from ${fmtTime(doc.meta.updated)}, which is newer than this file. Opening the file will replace it, but a copy will stay in History.`) : h("p", {}, "Opening a team file replaces the work in this browser. A copy of your current work will stay in History.")],
     [["Cancel"], ["Add it to mine instead", () => mergeFile(x)], ["Open it", () => loadTeamFile(x).then(() => toast("Team file opened.")), "primary"]]);
 });
 $("b-merge").addEventListener("click", async () => {
@@ -2006,10 +2006,10 @@ $("b-merge").addEventListener("click", async () => {
 $("b-history").addEventListener("click", showHistory);
 $("b-setup").addEventListener("click", () => {
   const framed = (() => { try { return window.self !== window.top; } catch { return true; } })();
-  if (framed) return ask("Open the app on its own page", [h("p", {}, "Automatic backup can't run inside another page, such as a preview. Open the Report Builder at its own address, then set it up there:"), h("p", {}, h("code", {}, "https://glgoltz.github.io/report-builder/"))], [["OK", null, "primary"]]);
-  if (!canAutoBackup()) return ask("Automatic backup isn't available here", [h("p", {}, "This browser can't write a backup file by itself. Chrome and Edge on a Windows, Mac or Chromebook laptop can; phones, tablets, Firefox, Safari and Brave can't."), h("p", {}, "Use Back up now in the save bar at the end of each session, and upload the file to your team's Google Drive folder.")], [["OK", null, "primary"]]);
-  ask("Set up automatic backup", [h("p", {}, "Pick where the backup file goes. The app rewrites that one file every few minutes while you work, and when you leave the page."),
-    h("p", {}, "If this laptop has Google Drive for desktop, pick your team's Drive folder and the backup reaches Drive by itself. Otherwise pick Documents, and upload the file to Drive at the end of the session.")],
+  if (framed) return ask("Open the app on its own page", [h("p", {}, "Automatic backup won't work inside another page, such as a preview. Open the Report Builder at its own address and set it up there:"), h("p", {}, h("code", {}, "https://glgoltz.github.io/report-builder/"))], [["OK", null, "primary"]]);
+  if (!canAutoBackup()) return ask("Automatic backup isn't available here", [h("p", {}, "This browser can't save a backup file on its own. Automatic backup works in Chrome and Edge on Windows, Mac and Chromebook laptops. It doesn't work on phones, tablets, Firefox, Safari or Brave."), h("p", {}, "Use Back up now in the save bar at the end of each session, and upload the file to your team's Google Drive folder.")], [["OK", null, "primary"]]);
+  ask("Set up automatic backup", [h("p", {}, "Choose where to keep your backup file. It will update every few minutes while you work, and again when you leave the page."),
+    h("p", {}, "If this laptop has Google Drive for desktop, choose your team's Drive folder and the backup will sync on its own. Otherwise, choose Documents and upload the file to Drive at the end of each session.")],
     [["Cancel"], ["Choose the file", setupBackup, "primary"]]);
 });
 // ---- welcome: shown once per browser (and again when WELCOME_V changes), and from the menu
@@ -2019,19 +2019,19 @@ const callout = (kind, title, ...kids) => h("div", { class: "callout " + kind, r
 function welcomeBody() {
   const sec = (t, ...kids) => h("div", { class: "wsec" }, h("h3", {}, t), ...kids);
   return [
-    h("p", { class: "wlead" }, "This is where your team keeps its whole project: the Team Log, your network diagram, and the two reports you write for a client. You fill in the forms; the app lays out every PDF you submit."),
-    sec("Why it works this way", h("p", {}, "Security teams don't format reports by hand. Assessors fill in finding cards in a reporting platform, compliance teams answer control by control, and the tool produces the document. You'll work the same way.")),
+    h("p", { class: "wlead" }, "This is where your team keeps its whole project: the Team Log, your network diagram, and the two reports you'll write for a client. You fill in the forms, and the Report Builder formats every PDF you submit."),
+    sec("Why it works this way", h("p", {}, "Security teams don't format reports by hand. Assessors fill in their findings in a reporting platform, compliance teams work through each control, and the software produces the final document. You'll work the same way.")),
     sec("What's in each tab", h("ul", {},
-      h("li", {}, h("b", {}, "Team Log: "), "your cover, signed team agreement, and a section for every Cyber Hub: sessions, commands, troubleshooting tickets, answers and deliverables. It's your team's record as much as something you hand in."),
-      h("li", {}, h("b", {}, "Diagram: "), "the network you've built, updated whenever a page says so, with the addressing plan for your rack beside it. Every Cyber Hub export includes it."),
-      h("li", {}, h("b", {}, "VAR: "), "the vulnerability assessment you write about another team's rack in Cyber Hub 12."),
-      h("li", {}, h("b", {}, "SSP: "), "your own system security plan, in Cyber Hub 13."))),
+      h("li", {}, h("b", {}, "Team Log: "), "your cover page, signed team agreement, and a section for each Cyber Hub with your sessions, commands, troubleshooting tickets, answers and deliverables. It's your team's record, not just something you hand in."),
+      h("li", {}, h("b", {}, "Diagram: "), "a drawing of the network you've built. Each Cyber Hub page tells you when to update it, and it's included in every export."),
+      h("li", {}, h("b", {}, "VAR: "), "the vulnerability assessment report you'll write about another team's rack in Cyber Hub 12."),
+      h("li", {}, h("b", {}, "SSP: "), "the system security plan you'll write for your own rack in Cyber Hub 13."))),
     callout("caution", "Saving your work", h("ul", {},
       h("li", {}, "Your work saves as you type, but only in this browser on this laptop."),
-      h("li", {}, h("b", {}, "Back up at the end of every session: "), "Save and export, then Save team file. Put the file in your team's Google Drive folder. That file is your real copy."),
-      h("li", {}, "At the start of a session on a different laptop, open the newest team file with Open team file."),
-      h("li", {}, "In Chrome or Edge, Set up automatic backup keeps a file up to date for you. A red warning at the top means you haven't backed up."),
-      h("li", {}, "One person types each session. Teammates can draft on their own laptops and the typist adds their work with Add from a teammate's file."))),
+      h("li", {}, h("b", {}, "Back up at the end of every session: "), "Choose Save and export, then Save team file, and upload the file to your team's Google Drive folder. That file is your real copy."),
+      h("li", {}, "If you're starting a session on a different laptop, use Open team file to open your newest team file."),
+      h("li", {}, "In Chrome or Edge, you can use Set up automatic backup to keep a backup file up to date for you. If you see a red warning at the top, you haven't backed up."),
+      h("li", {}, "One person types for the team each session. Teammates can draft on their own laptops, and the typist can bring their work in with Add from a teammate's file."))),
     callout("danger", "Handle it like real client work", h("p", {}, "Your VAR describes how to break into another team's network. Share it only with that team's members, never with \"anyone with the link\".")),
   ];
 }
@@ -2045,8 +2045,8 @@ $("b-help").addEventListener("click", () => showWelcome(false));
 // ---- history
 async function showHistory() {
   let list = []; try { list = (await historyList()).sort((a, b) => b.at - a.at); } catch {}
-  if (!list.length) return ask("History", [h("p", {}, "No saved versions yet. The app keeps one every few minutes while you work.")], [["OK", null, "primary"]]);
-  ask("History", [h("p", {}, "Restoring replaces the current work. The current work is saved in History first, so you can come back."),
+  if (!list.length) return ask("History", [h("p", {}, "No saved versions yet. A new version is saved every few minutes while you work.")], [["OK", null, "primary"]]);
+  ask("History", [h("p", {}, "Restoring a version replaces your current work. Your current work is saved in History first, so you can always go back to it."),
     h("ul", { class: "hist" }, list.slice(0, 120).map((x) => h("li", {}, h("span", {}, h("b", {}, fmtTime(x.at)), " · ", x.label, x.by ? " · " + x.by : ""),
       h("button", { class: "small", onclick: async () => { closeModal(); await snapshot("Before restoring"); try { doc = normalize(JSON.parse(x.json)); commit(); await save(); renderAll(); toast("Restored the version from " + fmtTime(x.at) + "."); } catch { toast("That version couldn't be restored.", true); } } }, "Restore"))))],
   [["Close"]]);

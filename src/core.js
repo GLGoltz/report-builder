@@ -175,11 +175,11 @@ function download(name, text, type = "application/json") {
 async function backupNow() {
   download(fileBase() + ".cyberhub", teamFileJSON());
   await markBackedUp("download");
-  toast("Team file downloaded. Put it in your team's Drive folder.");
+  toast("Your team file has been downloaded. Upload it to your team's Google Drive folder.");
 }
 function parseTeamFile(text) {
-  let x; try { x = JSON.parse(text); } catch { throw new Error("That file isn't a Report Builder team file."); }
-  if (x.format !== FILE_FORMAT) throw new Error(x.format === "cyberhub-findings" ? "That's a findings file. Import it from the SSP's POA&M step." : "That file isn't a Report Builder team file.");
+  let x; try { x = JSON.parse(text); } catch { throw new Error("This file isn't a Report Builder team file."); }
+  if (x.format !== FILE_FORMAT) throw new Error(x.format === "cyberhub-findings" ? "This is a findings file. You can import it in the SSP tab, on the POA&M step." : "This file isn't a Report Builder team file.");
   return { doc: normalize(x.doc), images: x.images || {}, savedAt: x.savedAt || 0, savedBy: x.savedBy || "" };
 }
 async function loadTeamFile(f) {
@@ -198,8 +198,8 @@ async function setupBackup() {
       types: [{ description: "Report Builder team file", accept: { "application/json": [".cyberhub"] } }] });
     await kvSet("backupHandle", backupHandle).catch(() => {});
     backupState = "on"; await writeBackup(true);
-    toast("Automatic backup is on. The app keeps that file up to date.");
-  } catch (e) { if (e.name !== "AbortError") toast(e.name === "SecurityError" ? "Backup can't be set up inside another page. Open glgoltz.github.io/report-builder on its own." : "Backup couldn't be set up: " + e.message, true); }
+    toast("Automatic backup is on. Your backup file will update as you work.");
+  } catch (e) { if (e.name !== "AbortError") toast(e.name === "SecurityError" ? "Automatic backup won't work inside another page. Open glgoltz.github.io/report-builder in its own tab to set it up." : "Backup couldn't be set up: " + e.message, true); }
   renderSaveBar();
 }
 async function resumeBackup() {
@@ -231,7 +231,7 @@ async function restoreBackupHandle() {
 const LOGO_MAX = 40000;   // the diagram's limit: its share link carries the logo
 window.rbDiagram = {
   rack() { return rackNum(); },
-  gotoCover() { state.tab = "log"; state.log = "cover"; renderAll(); toast("Add your logo here. It appears on the diagram by itself."); },
+  gotoCover() { state.tab = "log"; state.log = "cover"; renderAll(); toast("Add your logo here and it will show up on your diagram."); },
   // A team that hasn't drawn anything yet still gets its company name and logo on the diagram.
   load() { const d = doc.diagram ? JSON.parse(JSON.stringify(doc.diagram)) : { v: 2, devices: [], links: [], meta: {} };
     d.meta = { ...(d.meta || {}), company: doc.meta.company || "" }; if (doc.meta.logo) d.meta.logo = doc.meta.logo; else delete d.meta.logo; return d; },
@@ -321,7 +321,7 @@ function readLogoX(file, raw = false) {
         let d = c.toDataURL("image/webp", q); if (!d.startsWith("data:image/webp")) d = c.toDataURL("image/png");
         if (d.length <= LOGO_MAX) return res({ data: d, changed });
       }
-      rej(new Error("That logo is too detailed to shrink. Try a simpler PNG."));
+      rej(new Error("This logo has too much detail to shrink down. Try a simpler PNG."));
     };
     im.onerror = () => { URL.revokeObjectURL(url); rej(new Error("That image couldn't be read.")); };
     im.src = url;

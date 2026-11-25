@@ -136,11 +136,11 @@ function commit() {
 }
 function save() {
   if (HOST) { try { saveFailed = !HOST.save(JSON.parse(JSON.stringify(doc))); } catch { saveFailed = true; } }
-  else { $("saved").textContent = "You're viewing a shared diagram. Changes here aren't saved anywhere."; return; }
+  else { $("saved").textContent = "You're viewing a shared diagram. Any changes you make here won't be saved."; return; }
   const s = $("saved");
   s.classList.toggle("warn", saveFailed);
   // If the browser refuses (storage blocked or full), the share link still holds everything: offer it right here.
-  if (saveFailed) s.textContent = "Couldn't save. Use Back up now in the Report Builder's save bar.";
+  if (saveFailed) s.textContent = "Your diagram couldn't be saved. Use Back up now at the top of the Report Builder.";
   else s.textContent = "Saved with your team file at " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 function updateButtons() {
@@ -635,7 +635,7 @@ function unplug(key) {
   doc.links = doc.links.filter((l) => !gone.includes(l));
   if (sel?.type === "link" && gone.some((l) => l.id === sel.id)) sel = null;
   commit(); renderSvg(); renderPanel();
-  toast(gone.length > 1 ? "Cables removed. Undo brings them back." : "Cable removed. Undo brings it back.");
+  toast(gone.length > 1 ? "Cables removed. Use Undo to bring them back." : "Cable removed. Use Undo to bring it back.");
 }
 svg.addEventListener("click", (e) => { const u = e.target.closest("[data-unplug]"); if (u) unplug(u.dataset.unplug); });
 svg.addEventListener("keydown", (e) => { const u = e.target.closest?.("[data-unplug]"); if (u && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); unplug(u.dataset.unplug); } });
@@ -714,7 +714,7 @@ function addLink(a, b) {
   doc.links.push(l); freshLink = l.id; clearTimeout(freshT); freshT = setTimeout(() => { freshLink = null; }, 900);
   commit(); select({ type: "link", id: l.id });
   const needPort = (e) => portsFor(dev(e.device)).length && !e.port;
-  toast(gone.length ? "Replaced the old cable. Undo brings it back." : needPort(a) || needPort(b) ? "Cable recorded. Choose the port it uses." : "Cable recorded.");
+  toast(gone.length ? "The old cable was replaced. Use Undo to bring it back." : needPort(a) || needPort(b) ? "Cable added. Choose the port it plugs into." : "Cable recorded.");
 }
 function setPort(l, end, port) {
   end.port = port;
@@ -806,7 +806,7 @@ function editor(d) {
     out.push(field("Hostname", inp(d, "hostname", { ph: "hostname", label: "Hostname" })), addrRow(d), field("Gateway", inp(d, "gateway", { kind: "ip", ph: "a.b.c.d", label: "Gateway" })));
     if (d.kind === "vm") out.push(field("VLAN tag", inp(d, "vlanTag", { kind: "num", ph: "none", label: "VLAN tag" })));
     out.push(chk(d, "dhcp", "Gets its address by DHCP"));
-    if (d.kind === "hypervisor") out.push(h("p", { class: "muted" }, "Select a virtual machine inside the hypervisor to fill in its settings."));
+    if (d.kind === "hypervisor") out.push(h("p", { class: "muted" }, "Select a virtual machine inside the hypervisor to enter its settings."));
   }
   if (d.kind === "isp") out.push(addrRow(d));
   if (d.kind === "switch" || d.kind === "firewall") out.push(field("Hostname", inp(d, "hostname", { ph: "hostname", label: "Hostname" })));
@@ -854,26 +854,26 @@ function portSelect(l, end) {
 function linkEditor(l) {
   const A = dev(l.a.device), B = dev(l.b.device);
   return [field(A.name, portSelect(l, l.a)), field(B.name, portSelect(l, l.b)),
-    h("p", { class: "muted" }, "Switch port settings are entered on the switch. Choosing a port that already has a cable replaces that cable.")];
+    h("p", { class: "muted" }, "Enter switch port settings on the switch itself. If you choose a port that already has a cable, the new cable will replace it.")];
 }
 function help() {
   ask("How to use the Network Diagram", [
-    h("p", {}, "Your team records the network it has built on the rack. Each Cyber Hub page ends with an “Update your network diagram” box that says what to record from that lab."),
+    h("p", {}, "Use this diagram to record the network your team has built on the rack. Each Cyber Hub page ends with an “Update your network diagram” box that tells you what to add from that lab."),
     sec("Record a cable"),
-    h("p", {}, "Drag from a labeled port, such as a switch port or a firewall interface, and drop it on the device at the other end. Dropping on a port records that port. A port that already has a cable gets the new one instead; Undo brings the old one back."),
+    h("p", {}, "Drag from a labeled port, such as a switch port or a firewall interface, and drop it on the device at the other end. If you drop it on a specific port, that port is recorded too. If a port already has a cable, the new one replaces it, and you can use Undo to bring the old one back."),
     sec("Enter settings"),
-    h("p", {}, "Select a device to fill in its settings, or a virtual machine inside the hypervisor. The Addressing table tab lists every interface and cable you have entered, beside the addressing plan for your rack, and the SSP copies it for you."),
+    h("p", {}, "Select a device, or a virtual machine inside the hypervisor, to enter its settings. The Addressing table tab lists every interface and cable you've entered next to the addressing plan for your rack."),
     sec("See your VLANs"),
-    h("p", {}, "Each VLAN gets its own color the first time it appears on a switch port, a VLAN interface or a VM tag. Ports, cables, VMs and devices take the color of their VLAN, and a trunk cable is striped with every VLAN it carries. Point at a VLAN in the legend to fade out everything outside it."),
+    h("p", {}, "Each VLAN gets its own color the first time you use it. Ports, cables, VMs and devices are colored by their VLAN, and trunk cables are striped with every VLAN they carry. Hover over a VLAN in the legend to highlight everything on it."),
     sec("Remove a cable"),
-    h("p", {}, "Select the small × on a port that has a cable, or select the cable and choose Delete cable. Undo brings it back."),
+    h("p", {}, "Select the small × on a port that has a cable, or select the cable and choose Delete cable. You can use Undo to bring it back."),
     sec("Your logo"),
-    h("p", {}, HOST ? "Your logo comes from the Team Log cover. Add or change it there and it shows here and on every report." : "Select Upload logo in the top corner of the diagram and choose a PNG or JPG. Your logo replaces the placeholder and appears in Export PNG. Select it again to change or remove it. The app shrinks it so the share link stays short."),
+    h("p", {}, HOST ? "You can add or change your logo on the Team Log cover." : "Select Upload logo in the top corner of the diagram and choose a PNG or JPG. Select your logo again to change or remove it."),
     sec("Save and share"),
-    h("p", {}, "The diagram saves with your team file, like the rest of the Report Builder. Each Cyber Hub's PDF export includes it, and the SSP adds it for you. Copy share link gives a view-only link, if your instructor asks for one."),
+    h("p", {}, "Your diagram saves with the rest of your team file and is included in every Cyber Hub export. If your instructor asks for a link, use Copy share link to make a view-only copy."),
     sec("The addressing plan"),
-    h("p", {}, "The Addressing table's Planned column is the plan for your rack, from the rack number on the Team Log cover. Anything you enter that differs from it is marked in amber. The drawing and your exports show only what you entered."),
-    h("p", { class: "muted" }, "Matching the plan isn't the same as working. Test on the rack."),
+    h("p", {}, "The Planned column in the Addressing table shows the addressing plan for your rack. Anything you enter that doesn't match the plan is marked in amber. Your diagram and exports only show what you entered."),
+    h("p", { class: "muted" }, "Matching the plan doesn't mean it works. Always test on the rack."),
   ], [["Close"]]);
 }
 
@@ -1016,17 +1016,17 @@ function renderTable() {
       flagged(r.ip, r.diff.ip), flagged(r.mask, r.diff.mask), flagged(r.gw, r.diff.gw)], (r) => r.d.id, "addr");
   const nd = A.reduce((n, r) => n + Object.keys(r.diff).length, 0);
   const planNote = !HOST ? null
-    : !rk ? h("p", { class: "plannote" }, "The Planned column shows the plan's patterns. Add your rack number on the Team Log cover and it fills in for your rack.")
-    : nd ? h("p", { class: "plannote warn" }, `${nd} ${nd === 1 ? "entry differs" : "entries differ"} from the plan, marked in amber. Either the rack or your diagram is wrong: check the device, then fix whichever is out of step.`)
-    : h("p", { class: "plannote" }, "Everything you've entered matches the plan. That isn't the same as working: test it on the rack.");
+    : !rk ? h("p", { class: "plannote" }, "Add your rack number on the Team Log cover to see the plan for your rack.")
+    : nd ? h("p", { class: "plannote warn" }, `${nd} ${nd === 1 ? "entry differs" : "entries differ"} from the plan and marked in amber. Either the rack or your diagram is wrong, so check the device and fix whichever one is off.`)
+    : h("p", { class: "plannote" }, "Everything you've entered matches the plan. That doesn't mean it works, so test it on the rack.");
   const ct = C.length ? tableEl("Connections", ["Device", "Port", "Connects to", "Port", "Mode", "VLANs"], C,
     (r, first) => [r.A.name, dash(r.pa), r.B.name, dash(r.pb), dash(r.mode), dash(r.vlans)], (r) => r.A.id + r.pa, "conn")
     : h("p", { class: "muted" }, "No cables recorded yet.");
   const head = (title, note, t) => h("div", { class: "thead" }, h("div", {}, h("h2", {}, title), h("p", { class: "muted" }, note)),
     t.tagName === "TABLE" ? h("button", { class: "small", onclick: () => copyTable(t) }, "Copy table") : null);
   tableView.replaceChildren(
-    head("Addressing table", "Every interface: the plan for your rack beside what you entered. Select a row to edit that device.", at), planNote, at,
-    head("Connections", "Every cable, with the switch port's mode and VLANs.", ct), ct);
+    head("Addressing table", "Every interface you've entered, next to the plan for your rack. Select a row to edit that device.", at), planNote, at,
+    head("Connections", "Every cable you've recorded, with each switch port's mode and VLANs.", ct), ct);
   tableView.scrollTop = top;
 }
 let view = "canvas";
@@ -1083,7 +1083,7 @@ async function shareURL() { return location.origin + location.pathname.replace(/
 async function share() {
   const url = await shareURL();
   sharedJSON = snapshot(); updateButtons();
-  try { await navigator.clipboard.writeText(url); toast("Share link copied. Anyone with it can view this version of your diagram."); }
+  try { await navigator.clipboard.writeText(url); toast("Share link copied. Anyone with this link can view this version of your diagram."); }
   catch {
     ask("Copy your share link", [h("p", {}, "Select the link and copy it."), h("textarea", { readonly: true, value: url, onfocus: (e) => e.target.select() })], [["Done"]]);
     setTimeout(() => $("m-body").querySelector("textarea")?.select(), 0);
@@ -1118,7 +1118,7 @@ async function exportPng() {
   try {
     const c = await renderPng(); const blob = await new Promise((r) => c.toBlob(r, "image/png"));
     download(blob, fileBase() + ".png"); toast("PNG downloaded.");
-  } catch { toast("This browser couldn't make the PNG. Try Print, then Save as PDF."); }
+  } catch { toast("This browser couldn't create the PNG. Try Print, then Save as PDF instead."); }
 }
 // Used by the Report Builder: the diagram as an image for the PDFs and the SSP, the share link, and a reload.
 window.rbPNG = async () => { const c = await renderPng(); return c.toDataURL("image/png"); };
@@ -1158,7 +1158,7 @@ $("logofile").addEventListener("change", async (e) => {
   let d = null;
   try { d = await readLogo(f); } catch {}
   if (!d) { toast("That file couldn't be used as a logo. Try a PNG or JPG image."); return; }
-  doc.meta.logo = d; commit(); renderAll(); toast("Logo added. It shows on your reports too.");
+  doc.meta.logo = d; commit(); renderAll(); toast("Your logo has been added.");
 });
 const more = $("more");
 $("b-more").onclick = (e) => { e.stopPropagation(); more.hidden = !more.hidden; $("b-more").setAttribute("aria-expanded", !more.hidden); };
@@ -1168,11 +1168,11 @@ $("b-open").onclick = () => $("file").click();
 $("file").onchange = async (e) => {
   const f = e.target.files[0]; e.target.value = "";
   if (!f) return;
-  try { const o = JSON.parse(await f.text()); normalize(o); ask("Open " + f.name + "?", [h("p", {}, "This replaces the diagram on screen. Copy its share link first if you want to keep it.")], [["Cancel"], ["Open", () => load(o, "Opened " + f.name)]]); }
+  try { const o = JSON.parse(await f.text()); normalize(o); ask("Open " + f.name + "?", [h("p", {}, "This will replace the diagram on screen. If you want to keep it, copy its share link first.")], [["Cancel"], ["Open", () => load(o, "Opened " + f.name)]]); }
   catch { toast("That file isn't a diagram backup."); }
 };
 $("b-print").onclick = () => { setView("canvas"); setTimeout(() => print(), 50); };
-$("b-reset").onclick = () => ask("Reset the diagram?", [h("p", {}, "This clears every cable and setting."), h("p", { class: "muted" }, "You can undo this, and the Report Builder's History keeps earlier versions.")],
+$("b-reset").onclick = () => ask("Reset the diagram?", [h("p", {}, "This will clear every cable and setting."), h("p", { class: "muted" }, "You can undo this, and earlier versions are kept in History.")],
   [["Cancel"], ["Reset", () => { const co = doc.meta.company, lg = doc.meta.logo; doc = blankDoc(); doc.meta.company = co; if (lg) doc.meta.logo = lg; sel = null; sharedJSON = null; commit(); renderAll(); }, "danger"]]);
 $("company").addEventListener("input", (e) => { doc.meta.company = e.target.value; });
 $("company").addEventListener("change", commit);
@@ -1201,7 +1201,7 @@ async function start() {
       if (differs && hasContent(local)) {
         doc = local; renderAll(); commit();
         ask("Which diagram do you want?", [h("p", {}, "This browser already holds a different diagram" + (local.meta.company ? ` (${local.meta.company})` : "") + "."),
-          h("p", {}, "Opening the link replaces it. If you need the one in this browser, cancel and copy its share link first.")],
+          h("p", {}, "Opening the link will replace it. If you want to keep the one in this browser, cancel and copy its share link first.")],
           [["Keep this browser's diagram", () => { sharedJSON = null; updateButtons(); }], ["Open the link", () => { load(linked, "Opened the shared diagram."); sharedJSON = snapshot(); updateButtons(); }]]);
         return;
       }

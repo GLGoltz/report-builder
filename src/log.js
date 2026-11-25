@@ -49,7 +49,7 @@ function logCover() {
     rowsTable(c.roster, [["name", "Name", { w: "45%", oninput: later }], ["email", "Email", { type: "email" }]], { addLabel: "Add member", onchange: () => renderAll() }),
     h("h3", {}, "Team agreement"),
     h("div", { class: "card" },
-      field("Communication channels", c, "chat", { req: true, placeholder: "For example, a group chat and email", hint: "Two methods, so a message still gets through if one is down." }),
+      field("Communication channels", c, "chat", { req: true, placeholder: "For example, a group chat and email", hint: "List two ways to reach each other in case one doesn't work." }),
       field("Absence policy", a, "missed", { area: true, req: true }),
       signs),
   ];
@@ -61,7 +61,7 @@ function signBlock() {
   const a = doc.log.agreement; a.signatures = a.signatures || {};
   const names = members();
   const head = h("label", {}, "Signatures", h("span", { class: "req" }, " *"));
-  if (!names.length) return h("div", { class: "field" }, head, h("p", { class: "note" }, "A signature line appears here for each name on the roster above."));
+  if (!names.length) return h("div", { class: "field" }, head, h("p", { class: "note" }, "Add your team to the roster above, and a signature line will show up here for each person."));
   const box = h("div", { class: "signs" });
   const draw = () => box.replaceChildren(...names.map((n) => {
     const s = a.signatures[n] || (a.signatures[n] = { sig: "", date: "" });
@@ -79,7 +79,7 @@ function logoWell() {
   let last = null;   // the file just uploaded, so the team can keep it exactly as it was
   const use = async (f, raw) => {
     try { const r = await readLogoX(f, raw); doc.meta.logo = r.data; last = r.changed && !raw ? f : null; commit(); draw(); reloadDiagram();
-      if (last) toast("Logo added. The app trimmed the empty margin and removed the plain background."); }
+      if (last) toast("Your logo has been added. Extra space and the plain background were removed."); }
     catch (e) { toast(e.message, true); }
   };
   const draw = () => box.replaceChildren(
@@ -94,7 +94,7 @@ function logoWell() {
 function logHub(l) {
   const d = hubData(l.num);
   const out = [h("h2", {}, `Cyber Hub ${l.num}: ${l.title}`),
-    h("p", { class: "sub" }, "One session entry per lab worked on this Cyber Hub.")];
+    h("p", { class: "sub" }, "Add an entry for each session your team works on this Cyber Hub.")];
   out.push(h("h3", {}, "Sessions"),
     rowsTable(d.sessions, [["date", "Date", { type: "date", w: "150px" }], ["who", "Contributions", { area: true, placeholder: "Name: task" }]],
       { addLabel: "Add session", blank: () => ({ date: today(), who: "" }) }));
@@ -115,9 +115,9 @@ function logHub(l) {
       field("Scope", r, "scope", { wide: true, placeholder: "Agreed subnets and addresses" }),
       field("Session", r, "session", { placeholder: "Date and time window" }), field("Agreed by", r, "agreed", { placeholder: "One name per team" })));
   }
-  if (!NO_TICKETS.includes(l.num)) out.push(h("h3", {}, "Troubleshooting tickets"), h("p", { class: "sub" }, "One ticket per problem, following the method on Reference: Troubleshooting. Log every hypothesis, including the ones ruled out."), problemList(d.problems, l.num));
+  if (!NO_TICKETS.includes(l.num)) out.push(h("h3", {}, "Troubleshooting tickets"), h("p", { class: "sub" }, "Open a ticket for each problem you run into, and follow the method on Reference: Troubleshooting. Log every hypothesis you test, including the ones that turn out to be wrong."), problemList(d.problems, l.num));
   if (!d.shots) d.shots = [];
-  out.push(h("h3", {}, "Additional evidence"), h("p", { class: "sub" }, "Screenshots and notes beyond the deliverables."),
+  out.push(h("h3", {}, "Additional evidence"), h("p", { class: "sub" }, "Add any screenshots or notes that go beyond the deliverables."),
     imageWell(d.shots, { prompt: "Add a screenshot", label: "Additional evidence" }), field("", d, "notes", { area: true, placeholder: "Notes" }));
   if (l.questions.length) {
     out.push(h("h3", {}, "Before you continue"), h("div", { class: "card" }, l.questions.map((q, i) => h("div", { class: "qa" },
@@ -133,7 +133,7 @@ function logHub(l) {
       h("div", { class: "in" },
         h("p", {}, x.instr),
         x.checks.length ? h("ul", { class: "checks" }, x.checks.map(([k, v]) => h("li", {}, h("b", {}, k + ": "), v))) : null,
-        sep ? (sep[0] === "link" ? field("Slides link", dv, "link", { placeholder: "https://docs.google.com/presentation/…", hint: "Share the slides with the instructor (Viewer) first." }) : h("p", { class: "note" + (sep[0] === "none" ? " warn" : "") }, sep[1]))
+        sep ? (sep[0] === "link" ? field("Slides link", dv, "link", { placeholder: "https://docs.google.com/presentation/…", hint: "Share your slides with your instructor as a Viewer first." }) : h("p", { class: "note" + (sep[0] === "none" ? " warn" : "") }, sep[1]))
             : [imageWell(dv.images, { prompt: x.kind === "Photo" ? "Add the photo" : "Add the screenshot", label: x.title })])));
   }
   out.push(h("div", { class: "tools" }, h("button", { class: "primary", onclick: () => exportDoc("log-hub", l.num) }, `Export Cyber Hub ${l.num} as PDF`)));
@@ -165,7 +165,7 @@ function workLog(p, redraw) {
       field("Test", e, "test", { area: true, rows: 2, placeholder: "Command or check" }),
       field("Result", e, "result", { area: true, rows: 2, placeholder: "Output or observation" }))));
   return h("div", { class: "wlog" }, h("label", {}, "Work log"),
-    rows.length ? rows : h("p", { class: "hintline" }, "No entries yet. Add one for each hypothesis you test. Keep the ones you rule out."),
+    rows.length ? rows : h("p", { class: "hintline" }, "No entries yet. Add one for each hypothesis you test, and keep the ones you rule out."),
     h("button", { class: "small", onclick: () => { log.push({ date: today(), hypothesis: "", test: "", result: "", outcome: "Untested" }); commit(); redraw(); } }, "+ Add entry"));
 }
 function problemList(list, num) {
