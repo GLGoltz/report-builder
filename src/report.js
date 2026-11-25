@@ -20,7 +20,7 @@ function logCoverHTML() {
   const sg = a.signatures || {};
   return coverPage("Team Log", doc.meta.company || "Team Log", "", [["Rack", c.rack], ["Semester", c.semester], ["Team", c.roster.map((x) => x.name.trim()).filter(Boolean).join(", ")]], "Team Log")
     + `<h1 class="s">Team</h1>${tbl(["Team member", "Email"], c.roster.filter((x) => x.name || x.email).map((x) => [x.name, x.email]))}`
-    + `<h2 class="s">Team agreement</h2>${form([["Communication channels", c.chat], ["Absence policy", a.missed]])}`
+    + `<h2 class="s">Team agreement</h2>${form([["Primary channel", c.chat], ["Backup channel", c.chatBackup], ["Absence policy", a.missed]])}`
     + tbl(["Team member", "Signature", "Date"], c.roster.map((x) => x.name.trim()).filter(Boolean).map((n) => [n, sg[n]?.date ? { html: `<span class="sig">${esc(sg[n].sig)}</span>` } : "", sg[n]?.date || ""]));
 }
 function restoreHTML() {

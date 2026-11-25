@@ -49,7 +49,9 @@ function logCover() {
     rowsTable(c.roster, [["name", "Name", { w: "45%", oninput: later }], ["email", "Email", { type: "email" }]], { addLabel: "Add member", onchange: () => renderAll() }),
     h("h3", {}, "Team agreement"),
     h("div", { class: "card" },
-      field("Communication channels", c, "chat", { req: true, placeholder: "For example, a group chat and email", hint: "List two ways to reach each other in case one doesn't work." }),
+      h("div", { class: "grid2" },
+        field("Primary channel", c, "chat", { req: true, placeholder: "For example, a Discord server" }),
+        field("Backup channel", c, "chatBackup", { req: true, placeholder: "For example, a group text" })),
       field("Absence policy", a, "missed", { area: true, req: true }),
       signs),
   ];

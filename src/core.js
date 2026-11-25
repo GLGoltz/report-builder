@@ -15,7 +15,7 @@ function blankDoc() {
     meta: { company: "", tagline: "", logo: "", updated: 0, savedBy: "" },
     diagram: null,      // the Diagram tab's document (src/diagram), saved here so it travels in the team file
     log: {
-      cover: { rack: "", semester: "", diagramLink: "", chat: "", roster: [{ name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }] },
+      cover: { rack: "", semester: "", diagramLink: "", chat: "", chatBackup: "", roster: [{ name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }, { name: "", email: "" }] },
       agreement: { missed: "", signatures: {} },   // signatures: roster name -> { sig, date }
       hubs: {},
     },
