@@ -62,9 +62,6 @@ table.topo td{white-space:nowrap}
 table.topo .blank{color:#cbd5e1}
 .list{flex:1;min-width:0;overflow:auto;padding:16px 20px}
 .panel{width:380px;flex:none;border-left:1px solid var(--border);background:#fff;overflow:auto;padding:20px 20px 24px;position:relative}
-.panel[hidden]{display:none}
-.pclose{position:absolute;top:12px;right:12px;width:32px;height:32px;padding:0;border-radius:8px;font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center}
-.panel h2{padding-right:40px}
 .panel h2,.list h2{font-size:16px;color:var(--navy);margin:0 0 4px}
 .panel .kind{font-size:12px;color:var(--muted);margin:0 0 12px}
 .panel p,.list p{margin:0 0 10px;line-height:1.5}
@@ -264,7 +261,7 @@ table.topo td{position:relative}
   </div>
   <div id="v-table" class="tableview" hidden></div>
  </section>
- <aside class="panel" id="panel" aria-label="Editor" hidden></aside>
+ <aside class="panel" id="panel" aria-label="Editor"></aside>
 </main>
 <div class="toast" id="toast" role="status" hidden></div>
 <div class="modal" id="modal" hidden><div class="card" role="dialog" aria-modal="true" aria-labelledby="m-title"><h2 id="m-title"></h2><div id="m-body"></div><div class="m-acts" id="m-acts"></div></div></div>
@@ -1151,12 +1148,13 @@ function renderPanel() {
   const top = panel.scrollTop;
   const s = findSel();
   const kids = [];
-  // The editor only takes room while something is selected; the drawing has the full width otherwise.
-  const open = !!s;
-  if (panel.hidden === open) { panel.hidden = !open; document.body.classList.toggle("panel-open", open); }
-  if (!s) { panel.replaceChildren(); return; }
-  kids.push(h("button", { class: "pclose", "aria-label": "Close the editor (Esc)", title: "Close (Esc)", onclick: () => select(null) }, "×"));
-  if (sel.type === "dev") {
+  // The panel always shows. With nothing selected it says how to get started; the drawing scales to fit beside it.
+  if (!s) {
+    kids.push(h("h2", {}, "Your network diagram"),
+      h("p", {}, "Use this diagram to record the network your team has built on the rack. Each Cyber Hub page tells you what to add."),
+      h("p", {}, "Select a device to enter its settings. To add a cable, drag from a labeled port to the device at the other end."),
+      h("p", {}, h("a", { href: "#", onclick: (e) => { e.preventDefault(); help(); } }, "How to use the network diagram")));
+  } else if (sel.type === "dev") {
     kids.push(h("h2", {}, s.name), h("p", { class: "kind" }, s.kind === "vm" ? "Virtual machine on the hypervisor" : KINDS[s.kind]));
     kids.push(...editor(s));
   } else {

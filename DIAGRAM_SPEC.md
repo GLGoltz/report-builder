@@ -91,8 +91,8 @@ format hint for something that isn't an address. A format hint is not an answer.
   fixed devices. The switch is drawn with its ports XG1 to XG12 and OOB, each showing the mode and VLANs entered; the
   firewall shows its interfaces as tabs on its edges. Cables plug into the recorded port and are routed at right
   angles. To record a cable, drag from a port, an interface tab or the dot on top of a device to the other end.
-  Click a device or cable to edit it in a side panel. The panel opens only while something is selected and closes
-  with its × button or Esc, so the drawing gets the full width the rest of the time.
+  Click a device or cable to edit it in the side panel, which is always shown. With nothing selected it says how to
+  get started. Esc clears the selection. The drawing scales to fit the space beside the panel.
 - **Grid layout.** The drawing sits on a five-column grid (240-unit columns, 40-unit gaps, 40-unit margins): the
   provider and firewall span two columns, the Internet and guest laptops sit in the fourth, the logo, key and VLAN
   list in the fifth, the switch spans all five, and each host takes one column. Rows are 64 units apart. The SVG

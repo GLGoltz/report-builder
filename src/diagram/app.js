@@ -881,12 +881,13 @@ function renderPanel() {
   const top = panel.scrollTop;
   const s = findSel();
   const kids = [];
-  // The editor only takes room while something is selected; the drawing has the full width otherwise.
-  const open = !!s;
-  if (panel.hidden === open) { panel.hidden = !open; document.body.classList.toggle("panel-open", open); }
-  if (!s) { panel.replaceChildren(); return; }
-  kids.push(h("button", { class: "pclose", "aria-label": "Close the editor (Esc)", title: "Close (Esc)", onclick: () => select(null) }, "×"));
-  if (sel.type === "dev") {
+  // The panel always shows. With nothing selected it says how to get started; the drawing scales to fit beside it.
+  if (!s) {
+    kids.push(h("h2", {}, "Your network diagram"),
+      h("p", {}, "Use this diagram to record the network your team has built on the rack. Each Cyber Hub page tells you what to add."),
+      h("p", {}, "Select a device to enter its settings. To add a cable, drag from a labeled port to the device at the other end."),
+      h("p", {}, h("a", { href: "#", onclick: (e) => { e.preventDefault(); help(); } }, "How to use the network diagram")));
+  } else if (sel.type === "dev") {
     kids.push(h("h2", {}, s.name), h("p", { class: "kind" }, s.kind === "vm" ? "Virtual machine on the hypervisor" : KINDS[s.kind]));
     kids.push(...editor(s));
   } else {
