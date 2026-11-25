@@ -63,7 +63,7 @@ const full = () => {
       }
       // 2. no × covered: test the point under each ×'s centre
       for (const u of svg.querySelectorAll('.unplug')) {
-        const r = u.querySelector('circle').getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2;
+        u.scrollIntoView({ block: 'center' }); const r = u.querySelector('circle').getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2;
         const top = document.elementFromPoint(x, y);
         if (!top || !u.contains(top)) bad.push(`× for ${u.getAttribute('data-unplug')} is covered by ${top?.getAttribute('class') || top?.tagName}`);
       }
@@ -76,10 +76,11 @@ const full = () => {
       return bad;
     });
     out.push([label, issues]);
+    if (process.env.SHOT) { await f.evaluate(() => window.scrollTo(0, 0)); await (await f.$('svg')).screenshot({ path: process.env.SHOT + '/full-' + (logo ? 'logo' : 'plain') + '.png' }); }
     
     // the table view
     await f.click('#t-table'); await p.waitForTimeout(300);
-    const tbl = await f.evaluate(() => [...document.querySelectorAll('.tableview *')].filter((e) => e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflowX !== 'visible' && getComputedStyle(e).overflowX !== 'auto').map((e) => e.tagName + '.' + e.className));
+    const tbl = await f.evaluate(() => [...document.querySelectorAll('.tableview *')].filter((e) => !e.classList.contains('sr') && e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflowX !== 'visible' && getComputedStyle(e).overflowX !== 'auto').map((e) => e.tagName + '.' + e.className));
     out.push([label + ' table overflow', tbl]);
 
     await p.close();

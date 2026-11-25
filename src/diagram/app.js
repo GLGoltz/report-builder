@@ -249,8 +249,13 @@ function valueLines(d) {
 
 // Geometry
 const VM_H = 42, PORT_W = 60, PORT_H = 54, PITCH = 66, OOB_GAP = 16, TAB_W = 64, TAB_H = 22;
-const SW_TEXT_W = 270, SW_W = 20 + 12 * PITCH + OOB_GAP + PORT_W + 26 + SW_TEXT_W;
-const HOST_W = 260, HOST_PITCH = 290, FW_W = 400, SIDE_W = 260;
+// Everything sits on one grid: five columns 240 wide with 40 between them, inside a 40 margin. The provider and
+// firewall span two columns, the two laptops beside them sit in the fourth, the hints, legend and logo in the fifth,
+// the switch spans all five, and each host takes one column, so every gap in the drawing is the same.
+const M = 40, COL = 240, GAP = 40, CPITCH = COL + GAP, CW = 5 * COL + 4 * GAP;
+const colX = (i) => M + i * CPITCH;
+const SW_W = CW, SW_TEXT_W = SW_W - (20 + 12 * PITCH + OOB_GAP + PORT_W + 26);
+const HOST_W = COL, HOST_PITCH = CPITCH, FW_W = 2 * COL + GAP, SIDE_W = COL;
 const HOSTS = ["hv", "nas", "admin", "pi", "lap"];
 function boxSize(d) {
   const lines = valueLines(d).length;
@@ -295,15 +300,16 @@ function tabRect(d, name) {
 const ROOM = { isp: 80, firewall: 66 + 4 * 19, switch: 46 + 7 * 19 };
 const roomOf = (d) => Math.max(boxSize(d).h, ROOM[d.kind] || 0);
 const LANES = 6;   // cable lanes kept free between the switch and the hosts
+const ROW_GAP = 80;   // the same vertical gap between the provider, the firewall and the switch
 function layout() {
-  const SWX = 60, put = (id, x, y) => { const d = dev(id); if (d) { d.x = x; d.y = y; } };
-  const isp = dev("isp"), fw = dev("fw"), sw = dev("sw");
-  put("isp", SWX - 12, 30);
-  put("fw", SWX - 12, isp.y + roomOf(isp) + 80);
-  const besides = (id, ref) => { const d = dev(id); d.x = ref.x + boxSize(ref).w + 190; d.y = ref.y + (boxSize(ref).h - boxSize(d).h) / 2; };
+  const put = (id, x, y) => { const d = dev(id); if (d) { d.x = x; d.y = y; } };
+  const isp = dev("isp"), fw = dev("fw");
+  put("isp", colX(0), 36);
+  put("fw", colX(0), isp.y + roomOf(isp) + ROW_GAP);
+  const besides = (id, ref) => { const d = dev(id); d.x = colX(3); d.y = ref.y + (boxSize(ref).h - boxSize(d).h) / 2; };
   besides("isplap", isp); besides("guest", fw);
-  put("sw", SWX, fw.y + roomOf(fw) + 90);
-  HOSTS.forEach((id, i) => put(id, SWX + i * HOST_PITCH, 0));
+  put("sw", colX(0), fw.y + roomOf(fw) + ROW_GAP);
+  HOSTS.forEach((id, i) => put(id, colX(i), 0));
   routeAll();
 }
 
@@ -434,7 +440,7 @@ function routeAll() {
   }
   svg.setAttribute("viewBox", `0 0 ${VB.w} ${VB.h}`);
 }
-const SWX_END = () => Math.max(60 + SW_W + 40, 60 + HOSTS.length * HOST_PITCH + 20, dev("guest").x + SIDE_W + 300);
+const SWX_END = () => M + CW + M;
 function pathOf(pts) {
   let d = `M${pts[0].x},${pts[0].y}`;
   for (let i = 1; i < pts.length - 1; i++) {
@@ -463,7 +469,7 @@ function plug(g, a, wifi) {
 
 function drawInto(root, ui) {
   layout();
-  const lw = 200, lh = 110, lx = VB.w - lw - 20, ly = 16;
+  const lw = COL, lh = 110, lx = colX(4), ly = 36;
   if (doc.meta.logo) {
     const g = el("g", ui ? { "data-logo": "1", class: "logo-slot", tabindex: 0, role: "button", "aria-label": "Company logo. Select to change or remove it." } : {}, root);
     el("image", { href: doc.meta.logo, x: lx, y: ly, width: lw, height: lh, preserveAspectRatio: "xMaxYMin meet", class: "d-logo" }, g);
@@ -582,7 +588,8 @@ function unplugBtn(g, cx, cy, devId, port, label) {
 function drawLegend(root, ui) {
   const vs = vlansInUse();
   if (!vs.length) return;
-  const x = dev("isplap").x + SIDE_W + 70, y0 = hasContent() ? 92 : 170, step = vs.length > 9 ? 17 : 21;
+  // Under the logo, in the fifth column, below the one-line hint.
+  const x = colX(4), y0 = 36 + 110 + 64, step = vs.length > 9 ? 17 : 21;
   const g = el("g", { class: "legend" }, root);
   text(g, x, y0, "d-legh", "VLANs", "start");
   vs.forEach((v, i) => {
@@ -596,12 +603,11 @@ function renderSvg() {
   svg.replaceChildren();
   drawInto(svg, true);
   if (view === "table") renderTable();
-  const gx = dev("isplap").x + SIDE_W + 70;
-  const tips = hasContent() ? ["Solid line: cable.  Dashed line: Wi-Fi."]
-    : ["Solid line: cable.  Dashed line: Wi-Fi.", "", "To record a cable, drag from a labeled port", "to the device at the other end.",
-      "Select a device to enter its settings."];
+  const gx = colX(4);
+  const tips = hasContent() ? ["Solid: cable.  Dashed: Wi-Fi."]
+    : ["Solid: cable.  Dashed: Wi-Fi.", "", "Drag from a labeled port to", "another device to add a cable.", "", "Select a device to enter", "its settings."];
   const g = el("g", {}, svg);
-  tips.forEach((s, i) => text(g, gx, 56 + i * 22, "ghint", s));
+  tips.forEach((s, i) => text(g, gx, 36 + 110 + 30 + i * 22, "ghint", s));
 }
 
 // ------------------------------------------------------------------ canvas interaction
@@ -875,12 +881,12 @@ function renderPanel() {
   const top = panel.scrollTop;
   const s = findSel();
   const kids = [];
-  if (!s) {
-    kids.push(h("h2", {}, "Your network diagram"),
-      h("p", {}, "Record what your team has built on the rack. Each Cyber Hub page says what to add."),
-      h("p", {}, "Select a device to enter its settings. To record a cable, drag from a labeled port to the device at the other end."),
-      h("p", {}, h("a", { href: "#", onclick: (e) => { e.preventDefault(); help(); } }, "How to use the Network Diagram")));
-  } else if (sel.type === "dev") {
+  // The editor only takes room while something is selected; the drawing has the full width otherwise.
+  const open = !!s;
+  if (panel.hidden === open) { panel.hidden = !open; document.body.classList.toggle("panel-open", open); }
+  if (!s) { panel.replaceChildren(); return; }
+  kids.push(h("button", { class: "pclose", "aria-label": "Close the editor (Esc)", title: "Close (Esc)", onclick: () => select(null) }, "×"));
+  if (sel.type === "dev") {
     kids.push(h("h2", {}, s.name), h("p", { class: "kind" }, s.kind === "vm" ? "Virtual machine on the hypervisor" : KINDS[s.kind]));
     kids.push(...editor(s));
   } else {
