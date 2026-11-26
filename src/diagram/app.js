@@ -161,7 +161,7 @@ function select(s) { sel = s; renderSvg(); renderPanel(); }
 // ------------------------------------------------------------------ VLAN colors
 // Each VLAN number gets the next free color the first time it appears and keeps it, so colors never shuffle as
 // a team adds VLANs. Colors are only ever derived from what the team entered.
-const VPAL = ["#0d9488", "#ea580c", "#7c3aed", "#db2777", "#ca8a04", "#16a34a", "#0891b2", "#dc2626", "#4f46e5", "#92400e", "#65a30d", "#475569"];
+const VPAL = ["#2563eb", "#ea580c", "#7c3aed", "#db2777", "#ca8a04", "#16a34a", "#0891b2", "#dc2626", "#4f46e5", "#92400e", "#65a30d", "#475569"];
 const vnum = (v) => { const s = String(v ?? "").trim(); return /^\d{1,4}$/.test(s) && +s >= 1 && +s <= 4094 ? String(+s) : ""; };
 function portVlans(p) {
   if (!p || p.shutdown) return [];
@@ -1098,7 +1098,7 @@ async function renderPng() {
   const out = document.createElementNS(NS, "svg");
   out.setAttribute("xmlns", NS); out.setAttribute("width", W); out.setAttribute("height", H); out.setAttribute("viewBox", `0 0 ${W} ${H}`);
   const css = [...document.styleSheets].flatMap((s) => { try { return [...s.cssRules]; } catch { return []; } })
-    .map((r) => r.cssText).filter((t) => /^\.(d-|port\.)/.test(t)).join("\n").replace(/var\(--navy\)/g, "#003366");
+    .map((r) => r.cssText).filter((t) => /^\.(d-|port\.)/.test(t)).join("\n").replace(/var\(--navy\)/g, "#0f172a");
   el("style", {}, out).textContent = css;
   el("rect", { width: W, height: H, fill: "#ffffff" }, out);
   text(out, 30, 34, "d-title", (doc.meta.company || "Company") + " network diagram");
