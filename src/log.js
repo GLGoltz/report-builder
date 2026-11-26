@@ -119,20 +119,21 @@ function logHub(l) {
   }
   if (!NO_TICKETS.includes(l.num)) out.push(h("h3", {}, "Troubleshooting tickets"), h("p", { class: "sub" }, "Open a ticket for each problem you run into, and follow the method on Reference: Troubleshooting. Log every hypothesis you test, including the ones that turn out to be wrong."), problemList(d.problems, l.num));
   if (!d.shots) d.shots = [];
-  out.push(h("h3", {}, "Additional evidence"), h("p", { class: "sub" }, "Add any screenshots or notes that go beyond the deliverables."),
+  out.push(h("h3", {}, "Additional evidence"), h("p", { class: "sub" }, "Add any screenshots or notes that go beyond the required evidence."),
     imageWell(d.shots, { prompt: "Add a screenshot", label: "Additional evidence" }), field("", d, "notes", { area: true, placeholder: "Notes" }));
   if (l.questions.length) {
     out.push(h("h3", {}, "Before you continue"), h("div", { class: "card" }, l.questions.map((q, i) => h("div", { class: "qa" },
       h("p", { class: "q" }, q), field("", d.answers, String(i), { area: true, placeholder: "Answer", aria: "Answer: " + q })))));
   }
-  out.push(h("h3", {}, "Deliverables"));
+  out.push(h("h3", {}, "Evidence"));
   for (const x of l.deliverables) {
     const sep = SEPARATE[`${l.num}-${x.n}`];
     if (!d.deliv[x.n]) d.deliv[x.n] = { images: [], note: "", link: "" };
     const dv = d.deliv[x.n];
     out.push(h("div", { class: "deliv" },
-      h("header", {}, h("b", {}, `Deliverable ${x.n}: ${x.title}`), h("span", {}, x.kind)),
+      h("header", {}, h("b", {}, h("span", { class: "evn" }, "Evidence " + String(x.n).padStart(2, "0")), x.title), h("span", {}, x.role)),
       h("div", { class: "in" },
+        h("p", { class: "kind" }, x.kind),
         h("p", {}, x.instr),
         x.checks.length ? h("ul", { class: "checks" }, x.checks.map(([k, v]) => h("li", {}, h("b", {}, k + ": "), v))) : null,
         sep ? (sep[0] === "link" ? field("Slides link", dv, "link", { placeholder: "https://docs.google.com/presentation/…", hint: "Share your slides with your instructor as a Viewer first." }) : h("p", { class: "note" + (sep[0] === "none" ? " warn" : "") }, sep[1]))

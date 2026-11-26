@@ -111,7 +111,7 @@ function welcomeBody() {
     h("p", { class: "wlead" }, "This is where your team keeps its whole project: the Team Log, your network diagram, and the two reports you'll write for a client. You fill in the forms, and the Report Builder formats every PDF you submit."),
     sec("Why it works this way", h("p", {}, "Security teams don't format reports by hand. Assessors fill in their findings in a reporting platform, compliance teams work through each control, and the software produces the final document. You'll work the same way.")),
     sec("What's in each tab", h("ul", {},
-      h("li", {}, h("b", {}, "Team Log: "), "your cover page, signed team agreement, and a section for each Cyber Hub with your sessions, commands, troubleshooting tickets, answers and deliverables. It's your team's record, not just something you hand in."),
+      h("li", {}, h("b", {}, "Team Log: "), "your cover page, signed team agreement, and a section for each Cyber Hub with your sessions, commands, troubleshooting tickets, answers and evidence. It's your team's record, not just something you hand in."),
       h("li", {}, h("b", {}, "Diagram: "), "a drawing of the network you've built. Each Cyber Hub page tells you when to update it, and it's included in every export."),
       h("li", {}, h("b", {}, "VAR: "), "the vulnerability assessment report you'll write about another team's rack in Cyber Hub 12."),
       h("li", {}, h("b", {}, "SSP: "), "the system security plan you'll write for your own rack in Cyber Hub 13."))),

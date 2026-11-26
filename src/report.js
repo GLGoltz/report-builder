@@ -43,13 +43,13 @@ function hubHTML(l) {
   if (!NO_TICKETS.includes(l.num)) s += `<h2 class="s">Troubleshooting tickets</h2>` + (d.problems.length ? d.problems.map((x, i) => `<div class="card"><div class="ch"><b>Ticket ${ticketId(l.num, i)}</b><span class="tag">${x.status === "resolved" ? "Resolved" : "Open"}</span></div>${form([["Issue", x.broke]])}<p class="lbl">Work log</p>${tbl(["#", "Date", "Hypothesis", "Test", "Result", "Outcome"], ticketLog(x).map((e, j) => [String(j + 1), e.date, e.hypothesis, e.test, e.result, e.outcome || "Untested"]), "worklog")}${form([["Resolution", x.fixed], ["Verification", x.verify]])}${(x.images || []).map((id) => img(id, "")).join("")}</div>`).join("") : `<p class="blank">No tickets.</p>`);
   if ((d.shots || []).length || (d.notes || "").trim()) s += `<h2 class="s">Additional evidence</h2>${(d.notes || "").trim() ? `<p>${esc(d.notes)}</p>` : ""}${(d.shots || []).map((id) => img(id, "")).join("")}`;
   if (l.questions.length) s += `<h2 class="s">Before you continue</h2>` + l.questions.map((q, i) => `<p><b>${esc(q)}</b></p><p>${T(d.answers[i])}</p>`).join("");
-  if (l.deliverables.length) s += `<h2 class="s">Deliverables</h2>`;
+  if (l.deliverables.length) s += `<h2 class="s">Evidence</h2>`;
   for (const x of l.deliverables) {
     const sep = SEPARATE[`${l.num}-${x.n}`], dv = d.deliv[x.n] || { images: [], note: "", link: "" };
     let body;
     if (sep) body = sep[0] === "link" ? `<p>${T(dv.link)}</p>` : `<p class="blank">${esc(sep[1])}</p>`;
-    else body = dv.images.length ? dv.images.map((id, i) => img(id, `Cyber Hub ${l.num}, deliverable ${x.n}${dv.images.length > 1 ? ` (${i + 1})` : ""}`)).join("") : `<p class="blank">No ${x.kind.toLowerCase()} added yet.</p>`;
-    s += `<div class="card"><div class="ch"><b>Deliverable ${x.n}: ${esc(x.title)}</b><span class="tag">${esc(x.kind)}</span></div><div class="cb">${body}</div></div>`;
+    else body = dv.images.length ? dv.images.map((id, i) => img(id, `Cyber Hub ${l.num}, evidence ${x.n}${dv.images.length > 1 ? ` (${i + 1})` : ""}`)).join("") : `<p class="blank">No ${x.kind.toLowerCase()} added yet.</p>`;
+    s += `<div class="card"><div class="ch"><b><span class="evn">Evidence ${String(x.n).padStart(2, "0")}</span>${esc(x.title)}</b><span class="tag">${esc(x.role)}</span></div><div class="cb">${body}</div></div>`;
   }
   return s;
 }
@@ -125,7 +125,7 @@ async function exportDoc(kind, arg) {
     const d = doc.log.hubs[l.num];
     if (!d || !d.sessions.length) missing.push("A session entry");
     l.questions.forEach((q, i) => { if (!(d?.answers[i] || "").trim()) missing.push("An answer to: " + q.slice(0, 70) + (q.length > 70 ? "…" : "")); });
-    l.deliverables.forEach((x) => { if (!SEPARATE[`${l.num}-${x.n}`] && !(d?.deliv[x.n]?.images || []).length) missing.push(`Deliverable ${x.n}: ${x.title}`); });
+    l.deliverables.forEach((x) => { if (!SEPARATE[`${l.num}-${x.n}`] && !(d?.deliv[x.n]?.images || []).length) missing.push(`Evidence ${x.n}: ${x.title}`); });
   } else if (kind === "log") {
     title = `${co} Team Log`;
     html = logCoverHTML() + diagramHTML("The diagram as of this export.") + LABS.map(hubHTML).join("");
