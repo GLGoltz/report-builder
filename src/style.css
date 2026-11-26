@@ -1,5 +1,5 @@
 /* Report Builder. Same shell and palette as the Network Diagram app: top bar, section rail, work area, editor panel. Light only. */
-:root{--navy:#0f172a;--navy2:#1e293b;--accent:#0f766e;--accent2:#115e59;--tint:#e6f4f1;--tintline:#99d5cb;--ink:#0f172a;--body:#334155;--muted:#64748b;--border:#cbd5e1;--hair:#e2e8f0;--page:#f8fafc;--card:#fff;--soft:#f1f5f9;
+:root{--navy:#0f172a;--navy2:#1e293b;--accent:#0f766e;--accent2:#115e59;--teal:#0f766e;--teal-light:#5eead4;--tint:#e6f4f1;--tintline:#99d5cb;--ink:#0f172a;--body:#334155;--muted:#64748b;--border:#cbd5e1;--hair:#e2e8f0;--page:#f8fafc;--card:#fff;--soft:#f1f5f9;
  --sel:#0f766e;--ok:#15803d;--okbg:#f0fdf4;--warn:#b45309;--warnbg:#fffbeb;--err:#b91c1c;--errbg:#fef2f2;
  --crit:#7f1d1d;--high:#b91c1c;--med:#b45309;--low:#1d4ed8;--none:#64748b;
  --mono:Consolas,Menlo,Monaco,"Courier New",monospace;--sans:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color-scheme:light}
